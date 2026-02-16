@@ -1017,39 +1017,39 @@ function LevelsCarousel() {
           {/* Arrows — desktop only */}
           {!isMobile && (
             <>
-              <Button
-                onClick={() => {
-                  if (api) {
-                    const currentIndex = api.selectedScrollSnap()
-                    const targetIndex = Math.max(0, currentIndex - 1)
-                    api.scrollTo(targetIndex)
-                  }
-                }}
-                className="!left-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
-                variant="outline"
-                size="icon"
-                disabled={!api || !canScrollPrev}
-              >
-                <IconChevronLeft className="h-4 w-4 m-0" strokeWidth={1.5} />
-                <span className="sr-only">Previous slide</span>
-              </Button>
-              <Button
-                onClick={() => {
-                  if (api) {
-                    const currentIndex = api.selectedScrollSnap()
-                    const slideCount = api.scrollSnapList().length
-                    const targetIndex = Math.min(slideCount - 1, currentIndex + 1)
-                    api.scrollTo(targetIndex)
-                  }
-                }}
-                className="!right-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
-                variant="outline"
-                size="icon"
-                disabled={!api || !canScrollNext}
-              >
-                <IconChevronRight className="h-4 w-4 m-0" strokeWidth={1.5} />
-                <span className="sr-only">Next slide</span>
-              </Button>
+          <Button
+            onClick={() => {
+              if (api) {
+                const currentIndex = api.selectedScrollSnap()
+                const targetIndex = Math.max(0, currentIndex - 1)
+                api.scrollTo(targetIndex)
+              }
+            }}
+            className="!left-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
+            variant="outline"
+            size="icon"
+            disabled={!api || !canScrollPrev}
+          >
+            <IconChevronLeft className="h-4 w-4 m-0" strokeWidth={1.5} />
+            <span className="sr-only">Previous slide</span>
+          </Button>
+          <Button
+            onClick={() => {
+              if (api) {
+                const currentIndex = api.selectedScrollSnap()
+                const slideCount = api.scrollSnapList().length
+                const targetIndex = Math.min(slideCount - 1, currentIndex + 1)
+                api.scrollTo(targetIndex)
+              }
+            }}
+            className="!right-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
+            variant="outline"
+            size="icon"
+            disabled={!api || !canScrollNext}
+          >
+            <IconChevronRight className="h-4 w-4 m-0" strokeWidth={1.5} />
+            <span className="sr-only">Next slide</span>
+          </Button>
             </>
           )}
         </Carousel>
@@ -1280,7 +1280,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1297,20 +1297,20 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
             ].map((banner, index) => (
               <CarouselItem key={index} className={`${index === 0 ? 'pl-0' : 'pl-2 md:pl-4'} basis-auto flex-shrink-0`}>
                 <Card className="border-0 relative overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity rounded-small" style={{ width: '340px', height: '164px' }}>
-                  <Image
+                <Image
                     src={banner.src}
                     alt={banner.alt}
                     width={340}
                     height={164}
                     className="object-cover w-full h-full"
-                    unoptimized
+                  unoptimized
                   />
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
         {/* Cash Races Title with Back Button */}
         <div className="flex items-center gap-4 mb-6">
@@ -1551,7 +1551,7 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1579,9 +1579,9 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* Promos Section */}
@@ -1825,7 +1825,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1853,9 +1853,9 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* My Bonus Section */}
@@ -1896,7 +1896,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
           {/* Sports Tab Content */}
           {activeTab === 'Sports' && (
             <>
-              {/* Filters */}
+          {/* Filters */}
               {isMobile ? (
             /* Mobile: ADD FILTER bar */
             <Popover>
@@ -2044,7 +2044,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
 
           {/* Mobile: Card-based list */}
           {isMobile ? (
-            <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
               {/* Header row */}
               <div className="flex items-center px-4 py-3 border-b border-white/10">
                 <span className="flex-1 text-sm font-medium text-white/60">Code</span>
@@ -2111,112 +2111,112 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
             <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
               <div className="overflow-x-auto">
                 <Table className="table-fixed min-w-[540px]">
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id} className="hover:bg-transparent border-white/10">
-                        {headerGroup.headers.map((header) => {
-                          return (
-                            <TableHead
-                              key={header.id}
-                              style={{ width: `${header.getSize()}px` }}
-                              className="h-11 text-white/60 text-xs font-normal">
-                              {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                                <div
-                                  className={cn(
-                                    header.column.getCanSort() &&
-                                      "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
-                                  )}
-                                  onClick={header.column.getToggleSortingHandler()}
-                                  onKeyDown={(e) => {
-                                    if (
-                                      header.column.getCanSort() &&
-                                      (e.key === "Enter" || e.key === " ")
-                                    ) {
-                                      e.preventDefault();
-                                      header.column.getToggleSortingHandler()?.(e);
-                                    }
-                                  }}
-                                  tabIndex={header.column.getCanSort() ? 0 : undefined}>
-                                  {flexRender(header.column.columnDef.header, header.getContext())}
-                                  {{
-                                    asc: (
-                                      <ChevronUpIcon
-                                        className="shrink-0 opacity-60 text-white"
-                                        size={16}
-                                        aria-hidden="true"
-                                      />
-                                    ),
-                                    desc: (
-                                      <ChevronDownIcon
-                                        className="shrink-0 opacity-60 text-white"
-                                        size={16}
-                                        aria-hidden="true"
-                                      />
-                                    )
-                                  }[header.column.getIsSorted() as string] ?? null}
-                                </div>
-                              ) : (
-                                flexRender(header.column.columnDef.header, header.getContext())
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent border-white/10">
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead
+                          key={header.id}
+                          style={{ width: `${header.getSize()}px` }}
+                          className="h-11 text-white/60 text-xs font-normal">
+                          {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                            <div
+                              className={cn(
+                                header.column.getCanSort() &&
+                                  "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
                               )}
-                            </TableHead>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <React.Fragment key={row.id}>
-                          <TableRow className="border-white/10 hover:bg-white/5">
-                            {row.getVisibleCells().map((cell) => {
-                              // Skip rendering the actions cell in the main row
-                              if (cell.column.id === "actions") {
-                                return null
-                              }
-                              return (
-                                <TableCell key={cell.id}>
-                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                              )
-                            })}
-                            <TableCell className="w-[60px]">
-                              <button
-                                onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
-                                className="flex items-center justify-center w-full h-full"
-                              >
-                                <IconChevronDown 
-                                  className={cn(
-                                    "w-4 h-4 text-white/70 transition-transform",
-                                    expandedRow === row.id && "rotate-180"
-                                  )} 
-                                />
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                          {expandedRow === row.id && (
-                            <TableRow className="border-white/10">
-                              <TableCell colSpan={columns.length} className="py-4 bg-white/5">
-                                <div className="space-y-2 pl-4">
-                                  <div className="text-sm text-white/70">
-                                    <strong className="text-white">Bonus Details:</strong> Additional information about this bonus will appear here.
-                                  </div>
-                                </div>
-                              </TableCell>
-                            </TableRow>
+                              onClick={header.column.getToggleSortingHandler()}
+                              onKeyDown={(e) => {
+                                if (
+                                  header.column.getCanSort() &&
+                                  (e.key === "Enter" || e.key === " ")
+                                ) {
+                                  e.preventDefault();
+                                  header.column.getToggleSortingHandler()?.(e);
+                                }
+                              }}
+                              tabIndex={header.column.getCanSort() ? 0 : undefined}>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {{
+                                asc: (
+                                  <ChevronUpIcon
+                                    className="shrink-0 opacity-60 text-white"
+                                    size={16}
+                                    aria-hidden="true"
+                                  />
+                                ),
+                                desc: (
+                                  <ChevronDownIcon
+                                    className="shrink-0 opacity-60 text-white"
+                                    size={16}
+                                    aria-hidden="true"
+                                  />
+                                )
+                              }[header.column.getIsSorted() as string] ?? null}
+                            </div>
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
                           )}
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className="h-24 text-center text-white/70">
-                          No results.
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <React.Fragment key={row.id}>
+                      <TableRow className="border-white/10 hover:bg-white/5">
+                        {row.getVisibleCells().map((cell) => {
+                          // Skip rendering the actions cell in the main row
+                          if (cell.column.id === "actions") {
+                            return null
+                          }
+                          return (
+                            <TableCell key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          )
+                        })}
+                        <TableCell className="w-[60px]">
+                          <button
+                            onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
+                            className="flex items-center justify-center w-full h-full"
+                          >
+                            <IconChevronDown 
+                              className={cn(
+                                "w-4 h-4 text-white/70 transition-transform",
+                                expandedRow === row.id && "rotate-180"
+                              )} 
+                            />
+                          </button>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      {expandedRow === row.id && (
+                        <TableRow className="border-white/10">
+                          <TableCell colSpan={columns.length} className="py-4 bg-white/5">
+                            <div className="space-y-2 pl-4">
+                              <div className="text-sm text-white/70">
+                                <strong className="text-white">Bonus Details:</strong> Additional information about this bonus will appear here.
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center text-white/70">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
             </div>
           )}
             </>
@@ -2671,9 +2671,9 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
                   </div>
                 </CardContent>
               </Card>
-              </div>
+            </div>
               <div className="flex flex-col md:flex-row gap-3">
-                <TotalRewardsCard />
+          <TotalRewardsCard />
                 <div className="flex-1 min-w-0">
                   <StreakCounter />
                 </div>
@@ -5756,18 +5756,18 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   }, 0) + parlayPotentialWin
 
   // ── Betslip state hoisted to parent so it survives view re-renders ──
-  const currencySymbol = '$'
+    const currencySymbol = '$'
   const [bsIsScrolled, setBsIsScrolled] = useState(false)
-  const [nudgeKey, setNudgeKey] = useState(0)
+    const [nudgeKey, setNudgeKey] = useState(0)
   const bsScrollContainerRef = useRef<HTMLDivElement>(null)
-  const previousBetsLengthRef = useRef(bets.length)
-  const [localStakes, setLocalStakes] = useState<Record<string, string>>({})
-  const [localParlayStake, setLocalParlayStake] = useState<string>('')
+    const previousBetsLengthRef = useRef(bets.length)
+    const [localStakes, setLocalStakes] = useState<Record<string, string>>({})
+    const [localParlayStake, setLocalParlayStake] = useState<string>('')
   const [numpadTarget, _setNumpadTarget] = useState<string | null>(null)
   const numpadTargetRef = useRef<string | null>(null)
   const setNumpadTarget = (val: string | null) => { numpadTargetRef.current = val; _setNumpadTarget(val) }
-  const inputRefs = useRef<Record<string, HTMLInputElement>>({})
-  const focusedInputRef = useRef<string | null>(null)
+    const inputRefs = useRef<Record<string, HTMLInputElement>>({})
+    const focusedInputRef = useRef<string | null>(null)
 
   // ── Betslip numpad handlers (parent scope so they survive re-renders) ──
   const handleNumpadDigit = useCallback((digit: string) => {
@@ -5842,11 +5842,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
     const container = bsScrollContainerRef.current
     if (!container) return
     const handleScroll = () => setBsIsScrolled(container.scrollTop > 0)
-    container.addEventListener('scroll', handleScroll)
-    return () => container.removeEventListener('scroll', handleScroll)
+      container.addEventListener('scroll', handleScroll)
+      return () => container.removeEventListener('scroll', handleScroll)
   }, [betslipOpen])
 
-  useEffect(() => {
+    useEffect(() => {
     if (!isMobile || !numpadTarget) return
     const container = bsScrollContainerRef.current
     if (!container) return
@@ -5866,14 +5866,14 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
     return () => clearTimeout(timer)
   }, [isMobile, numpadTarget])
 
-  useEffect(() => {
-    const prevLength = previousBetsLengthRef.current
-    const newLength = bets.length
+    useEffect(() => {
+      const prevLength = previousBetsLengthRef.current
+      const newLength = bets.length
     if (newLength > prevLength && betslipMinimized && !isMobile) {
       setNudgeKey(prev => prev + 1)
     }
-    previousBetsLengthRef.current = newLength
-  }, [bets.length, betslipMinimized, isMobile])
+      previousBetsLengthRef.current = newLength
+    }, [bets.length, betslipMinimized, isMobile])
 
   // Betslip Views — pure render function (called directly, NOT as <Component/>)
   const renderBetslipDefault = () => {
@@ -5967,7 +5967,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               }}
               className="text-[10px] font-semibold uppercase tracking-wide text-black/60 hover:text-black/80 flex items-center gap-1 px-2.5 py-1 rounded-md border border-black/20 hover:border-black/30 transition-colors"
             >
-              <IconChevronDown className="w-3 h-3" />
+                  <IconChevronDown className="w-3 h-3" />
                   MINIMIZE
                   </button>
                 )}
@@ -6007,7 +6007,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               minHeight: 0,
               overflowY: 'auto', 
               overflowX: 'hidden', 
-              WebkitOverflowScrolling: 'touch',
+              WebkitOverflowScrolling: 'touch', 
               touchAction: 'pan-y',
               overscrollBehavior: 'auto',
             }}
@@ -6190,11 +6190,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         </>
                       ) : (
                         <>
-                          <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">{bet.selection}</div>
-                          <div className="text-[10px] text-black/50 mb-0.5 leading-tight">{bet.marketTitle}</div>
-                          {event && (
+                      <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">{bet.selection}</div>
+                      <div className="text-[10px] text-black/50 mb-0.5 leading-tight">{bet.marketTitle}</div>
+                      {event && (
                             <>
-                              <div className="text-[10px] text-black/40 truncate leading-tight">{event.team1} v {event.team2}</div>
+                        <div className="text-[10px] text-black/40 truncate leading-tight">{event.team1} v {event.team2}</div>
                               {('isLive' in event) && (event as any).isLive && liveScores[bet.eventId] && (
                                 <div className="flex items-center gap-1.5 mt-1">
                                   <div className="flex items-center gap-0.5 bg-red-500/10 border border-red-500/20 rounded px-1 py-[1px]">
@@ -6252,9 +6252,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             onFocus={(e) => {
                               if (isMobile) {
                                 setNumpadTarget(bet.id)
-                                if (localStakes[bet.id] === undefined) {
-                                  setLocalStakes(prev => ({ ...prev, [bet.id]: bet.stake === 0 ? '' : bet.stake.toString() }))
-                                }
+                              if (localStakes[bet.id] === undefined) {
+                                setLocalStakes(prev => ({ ...prev, [bet.id]: bet.stake === 0 ? '' : bet.stake.toString() }))
+                              }
                                 e.target.blur()
                                 return
                               }
@@ -6303,7 +6303,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         To Win {currencySymbol}{toWin.toFixed(2)}
                       </div>
                     </div>
-                    </div>
+                  </div>
                   </motion.div>
                 )
               })}
@@ -6488,7 +6488,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
             onDone={handleNumpadDone}
             onQuickAmount={handleQuickAmount}
           />
-        )}
+                )}
 
       </div>
     )
@@ -7303,7 +7303,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                     Export Excel
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
+              </DropdownMenu>
+            </div>
           </div>
           
           {/* Onboarding state when no favorites (or no leagues with events) */}
@@ -10879,12 +10880,12 @@ function NavTestPageContent() {
               const startTime = performance.now()
               const animate = (now: number) => {
                 const elapsed = now - startTime
-                const progress = Math.min(elapsed / duration, 1)
+            const progress = Math.min(elapsed / duration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3)
                 setDisplayBalance(+(start + (end - start) * eased).toFixed(2))
                 if (progress < 1) requestAnimationFrame(animate)
-              }
-              requestAnimationFrame(animate)
+          }
+          requestAnimationFrame(animate)
               return currentDisplay
             })
             return newBal
