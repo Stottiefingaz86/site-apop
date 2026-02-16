@@ -1361,7 +1361,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
                     <motion.div
                       layoutId="activeRaceTab"
                       className="absolute inset-0 rounded-2xl -z-10"
-                      style={{ backgroundColor: brandPrimary }}
+                      style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                       initial={false}
                       transition={{
                         type: "spring",
@@ -1600,7 +1600,7 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                       <motion.div
                         layoutId="activePromosTab"
                         className="absolute inset-0 rounded-2xl -z-10"
-                        style={{ backgroundColor: brandPrimary }}
+                        style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                         initial={false}
                         transition={{
                           type: "spring",
@@ -1630,7 +1630,7 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                   <Button 
                     variant="ghost" 
                     className="w-full bg-red-500 hover:bg-red-600 text-white"
-                    style={{ backgroundColor: brandPrimary }}
+                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                   >
                     MORE INFO
                   </Button>
@@ -1874,7 +1874,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
                       <motion.div
                         layoutId="activeBonusTab"
                         className="absolute inset-0 rounded-2xl -z-10"
-                        style={{ backgroundColor: brandPrimary }}
+                        style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                         initial={false}
                         transition={{
                           type: "spring",
@@ -2519,7 +2519,7 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
                           "data-[active=true]:text-white data-[active=true]:font-medium",
                           "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
                         )}
-                        style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                        style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                       >
                         <Icon strokeWidth={1.5} className="w-5 h-5" />
                         <span className="flex-1">{item.label}</span>
@@ -2575,7 +2575,7 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
                       <motion.div
                         layoutId="activeVipMobileTab"
                         className="absolute inset-0 rounded-2xl -z-10"
-                        style={{ backgroundColor: brandPrimary }}
+                        style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                         initial={false}
                         transition={{
                           type: "spring",
@@ -4890,7 +4890,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 "data-[active=true]:text-white data-[active=true]:font-medium",
                                 "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5",
                               )}
-                              style={item.active ? { backgroundColor: brandPrimary } : undefined}
+                              style={item.active ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                             >
                               <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", item.active ? "bg-white/20" : "bg-white/10")}>
                                 {typeof item.icon === 'string' ? <img src={item.icon} alt={item.label} className="w-4 h-4 object-contain" style={(item.label === 'Same Game Parlays' || (item.label === 'My Feed' && item.active)) ? { filter: 'brightness(0) invert(1)' } : undefined} /> : IconComp ? <IconComp strokeWidth={1.5} className="w-4 h-4" /> : null}
@@ -5006,7 +5006,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                     "data-[active=true]:text-white data-[active=true]:font-medium",
                                     "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
                                   )}
-                                  style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                                  style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                                 >
                                   {typeof sport.icon === 'string' ? <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" /> : IconComp ? <IconComp strokeWidth={1.5} className="w-5 h-5" /> : null}
                                   <span className="flex items-center gap-1.5">{sport.label}{loadingItem === sport.label && <IconLoader2 className="w-3 h-3 animate-spin" />}</span>
@@ -5125,7 +5125,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                   "data-[active=true]:text-white data-[active=true]:font-medium",
                                   "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
                                 )}
-                                style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                                style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                               >
                                 {typeof sport.icon === 'string' ? <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" /> : IconComp ? <IconComp strokeWidth={1.5} className="w-5 h-5" /> : null}
                                 <span className="flex items-center gap-1.5">{sport.label}{loadingItem === sport.label && <IconLoader2 className="w-3 h-3 animate-spin" />}</span>
@@ -5764,7 +5764,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             <motion.div
                               layoutId="activeSportsTab"
                               className="absolute inset-0 rounded-2xl -z-10"
-                              style={{ backgroundColor: brandPrimary }}
+                              style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                               initial={false}
                               transition={{
                                 type: "spring",
@@ -6164,7 +6164,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                                         onMouseEnter={(e) => {
                                           if (!isSelected) {
-                                            e.currentTarget.style.backgroundColor = brandPrimary
+                                            e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                                           }
                                         }}
                                         onMouseLeave={(e) => {
@@ -6461,9 +6461,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                     ? "border-transparent text-white" 
                                     : "bg-white/10 border-white/20 text-white"
                                 )}
-                                style={bets.some(b => b.eventId === boost.id + 90000) ? { backgroundColor: brandPrimary } : undefined}
+                                style={bets.some(b => b.eventId === boost.id + 90000) ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                       onMouseEnter={(e) => {
-                        if (!bets.some(b => b.eventId === boost.id + 90000)) e.currentTarget.style.backgroundColor = brandPrimary
+                        if (!bets.some(b => b.eventId === boost.id + 90000)) e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                       }}
                       onMouseLeave={(e) => {
                         if (!bets.some(b => b.eventId === boost.id + 90000)) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
@@ -6603,7 +6603,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               ? "border-transparent text-white" 
                               : "bg-white/10 hover:bg-white/20 border-transparent text-white"
                           )}
-                          style={bets.some(b => b.eventId === parlay.id + 80000) ? { backgroundColor: brandPrimary } : undefined}
+                          style={bets.some(b => b.eventId === parlay.id + 80000) ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                         >
                           <span className="text-xs font-bold text-white leading-none">{parlay.combinedOdds}</span>
                         </button>
@@ -6928,7 +6928,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                         onMouseEnter={(e) => {
                                           if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = brandPrimary
+                          e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                                           }
                         }}
                         onMouseLeave={(e) => {
@@ -7295,7 +7295,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             )}
                             onMouseEnter={(e) => {
                               if (!isBetSelected(event.id, 'Moneyline', event.team1Code)) {
-                                e.currentTarget.style.backgroundColor = brandPrimary
+                                e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -7324,7 +7324,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             )}
                             onMouseEnter={(e) => {
                               if (!isBetSelected(event.id, 'Moneyline', 'Tie')) {
-                                e.currentTarget.style.backgroundColor = brandPrimary
+                                e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -7353,7 +7353,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             )}
                             onMouseEnter={(e) => {
                               if (!isBetSelected(event.id, 'Moneyline', event.team2Code)) {
-                                e.currentTarget.style.backgroundColor = brandPrimary
+                                e.currentTarget.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -8847,8 +8847,8 @@ function NavTestPageContent() {
   }
   
   // Use brand colors instead of design tokens with safe fallbacks
-  const brandPrimary = (currentBrand?.primaryColor) || '#ee3536'
-  const brandPrimaryHover = (currentBrand?.primaryHover) || '#dc2a2f'
+  const brandPrimary = 'var(--ds-primary, #ee3536)'
+  const brandPrimaryHover = 'var(--ds-primary-hover, #dc2a2f)'
 
   // Remove blur effect from content items - rely only on sub-nav's backdrop-blur for glass effect
   // The backdrop-blur on the sub-nav will naturally blur content behind it
@@ -8920,11 +8920,13 @@ function NavTestPageContent() {
 
   return (
     <div 
+      data-page-bg
       className="w-full bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white font-figtree overflow-x-hidden min-h-screen transition-colors duration-300" 
       style={{ 
         width: '100%', 
         maxWidth: '100vw', 
         boxSizing: 'border-box',
+        backgroundColor: 'var(--ds-page-bg, #1a1a1a)',
         '--brand-primary': brandPrimary,
         '--brand-primary-hover': brandPrimaryHover,
       } as React.CSSProperties}
@@ -8995,6 +8997,7 @@ function NavTestPageContent() {
 
       {/* Header - Sticky at top, always visible - Always grey in both themes */}
       <motion.header 
+        data-nav-header
         className={cn(
           "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed left-0 right-0",
           isMobile ? "px-3" : "px-6",
@@ -9010,6 +9013,7 @@ function NavTestPageContent() {
           duration: 0.3
         } : {}}
         style={{ 
+          backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
           pointerEvents: 'auto',
           top: isMobile ? (quickLinksOpen ? 40 : 0) : 0,
           zIndex: 101,
@@ -9075,12 +9079,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         showSports 
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: showSports ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: showSports ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       onClick={(e) => {
                         e.preventDefault()
@@ -9126,12 +9130,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         !showSports && !showVipRewards && activeSubNav !== 'Live'
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav !== 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && activeSubNav !== 'Live' ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       data-active={!showSports && !showVipRewards && activeSubNav !== 'Live'}
                       onClick={(e) => {
@@ -9158,12 +9162,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         !showSports && !showVipRewards && activeSubNav === 'Live'
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav === 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && activeSubNav === 'Live' ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       data-active={!showSports && !showVipRewards && activeSubNav === 'Live'}
                       onClick={(e) => {
@@ -9215,7 +9219,7 @@ function NavTestPageContent() {
                       data-active={showVipRewards}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: showVipRewards ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: showVipRewards ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                     >
                       VIP Rewards
@@ -9318,7 +9322,7 @@ function NavTestPageContent() {
                 "bg-white/5 hover:bg-white/10",
                 "active:bg-gray-500/20",
                 accountDrawerOpen && "text-white",
-                accountDrawerOpen && { backgroundColor: brandPrimary },
+                accountDrawerOpen && { backgroundColor: 'var(--ds-primary, #ee3536)' },
                 isMobile ? "gap-1 px-1.5 py-1" : "gap-1.5 px-2 py-1"
               )}
               style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
@@ -9621,7 +9625,7 @@ function NavTestPageContent() {
                           isActive ? "w-8 opacity-100" : "w-0 opacity-0",
                           isMobile ? "bottom-0" : "-bottom-2"
                         )}
-                        style={isActive ? { backgroundColor: brandPrimary || '#ee3536' } : {}}
+                        style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : {}}
                       />
                     </button>
                   )
@@ -10365,7 +10369,7 @@ function NavTestPageContent() {
                                 <TooltipTrigger asChild>
                                   <SidebarMenuButton
                                     isActive={isActive}
-                                    style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                                    style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                                     className={cn(
                                       "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
                                       "data-[active=true]:text-white data-[active=true]:font-medium",
@@ -10666,7 +10670,7 @@ function NavTestPageContent() {
                               <motion.div
                                 layoutId="activeTab"
                                 className="absolute inset-0 rounded-2xl -z-10"
-                                style={{ backgroundColor: brandPrimary }}
+                                style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                                 initial={false}
                                 transition={{
                                   type: "spring",
@@ -11508,7 +11512,7 @@ function NavTestPageContent() {
                                           />
                                         )}
                                         {/* Red Betting Range Tag */}
-                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                           $350 - $500
                                         </div>
                                         {/* Game Title */}
@@ -11598,7 +11602,7 @@ function NavTestPageContent() {
                                           />
                                         )}
                                         {/* Red Betting Range Tag */}
-                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                           {bettingRange}
                                         </div>
                                         {/* Game Title */}
@@ -11670,7 +11674,7 @@ function NavTestPageContent() {
                                     />
                                   )}
                                   {/* Red Betting Range Tag */}
-                                  <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                  <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                     $350 - $500
                                   </div>
                                   {/* Game Title */}
@@ -11721,7 +11725,7 @@ function NavTestPageContent() {
                                         />
                                       )}
                                       {/* Red Betting Range Tag */}
-                                      <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                      <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                         {bettingRange}
                                       </div>
                                       {/* Game Title */}
@@ -11804,7 +11808,7 @@ function NavTestPageContent() {
                                           />
                                         )}
                                         {/* Red Betting Range Tag */}
-                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                        <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                           $25 - $100
                                         </div>
                                         {/* Provider & Info */}
@@ -12231,7 +12235,7 @@ function NavTestPageContent() {
                                           '--hover-bg': `${brandPrimary}33`,
                                         } as React.CSSProperties}
                                         onMouseEnter={(e) => {
-                                          e.currentTarget.style.backgroundColor = `${brandPrimary}33`
+                                          e.currentTarget.style.backgroundColor = `${getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'}33`
                                         }}
                                         onMouseLeave={(e) => {
                                           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
@@ -12256,7 +12260,7 @@ function NavTestPageContent() {
                                             sizes="160px"
                                           />
                                         )}
-                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `${brandPrimary}1A` }} />
+                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'color-mix(in srgb, var(--ds-primary, #ee3536) 10%, transparent)' }} />
                                       </div>
                                     </div>
                                   )
@@ -12907,7 +12911,7 @@ function NavTestPageContent() {
                                     </div>
                                   )}
                                   {(isPlinko || isSubtitle) && (
-                                    <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: brandPrimary }}>
+                                    <div className="absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
                                       $25-$100
                                     </div>
                                   )}
@@ -13530,7 +13534,7 @@ function ViewTab({
         <motion.div
           layoutId="active-view-tab"
           className="absolute inset-0 rounded-full"
-          style={{ backgroundColor: brandPrimary }}
+          style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
           transition={snappySpring}
         />
       )}

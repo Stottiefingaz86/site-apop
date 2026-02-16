@@ -298,7 +298,7 @@ const Sidebar = React.forwardRef<
             )}
             style={
               {
-                backgroundColor: '#2d2d2d',
+                backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)',
                 color: 'white',
                 maxWidth: '320px',
                 width: '320px',
@@ -323,7 +323,7 @@ const Sidebar = React.forwardRef<
               className="flex h-full w-full flex-col bg-[#2d2d2d] dark:bg-[#2d2d2d] overflow-y-auto text-white [&_*]:text-white [&_*]:text-inherit py-2"
               style={{
                 color: 'white',
-                backgroundColor: '#2d2d2d',
+                backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)',
                 visibility: 'visible',
                 opacity: 1,
                 display: 'flex',

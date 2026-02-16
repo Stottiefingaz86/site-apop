@@ -3,6 +3,7 @@ import { Figtree } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import GlobalChatWrapper from '@/components/chat/global-chat-wrapper'
 import GlobalBetslip from '@/components/betslip/global-betslip'
+import { DesignCustomizer } from '@/components/design-customizer'
 import './globals.css'
 
 const figtree = Figtree({
@@ -40,6 +41,7 @@ export default function RootLayout({
             {children}
           </GlobalChatWrapper>
           <GlobalBetslip />
+          <DesignCustomizer />
         </ThemeProvider>
       </body>
     </html>

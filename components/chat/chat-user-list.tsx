@@ -22,7 +22,7 @@ export default function ChatUserList({ onUserClick }: { onUserClick?: (user: Cha
   const offlineUsers = users.filter(u => !u.isOnline)
 
   return (
-    <div className="absolute inset-0 top-0 bg-[#222222] z-20 flex flex-col">
+    <div className="absolute inset-0 top-0 z-20 flex flex-col" style={{ backgroundColor: 'var(--ds-page-bg, #222222)' }}>
       <div className="px-3 py-2.5 border-b border-white/10">
         <h4 className="text-[13px] font-semibold text-white">Active Users ({onlineUsers.length})</h4>
       </div>

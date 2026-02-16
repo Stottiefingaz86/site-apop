@@ -6414,8 +6414,8 @@ function NavTestPageContent() {
   }
   
   // Use brand colors instead of design tokens with safe fallbacks
-  const brandPrimary = (currentBrand?.primaryColor) || '#ee3536'
-  const brandPrimaryHover = (currentBrand?.primaryHover) || '#dc2a2f'
+  const brandPrimary = 'var(--ds-primary, #ee3536)'
+  const brandPrimaryHover = 'var(--ds-primary-hover, #dc2a2f)'
 
   // Remove blur effect from content items - rely only on sub-nav's backdrop-blur for glass effect
   // The backdrop-blur on the sub-nav will naturally blur content behind it
@@ -6487,11 +6487,13 @@ function NavTestPageContent() {
 
   return (
     <div 
+      data-page-bg
       className="w-full bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white font-figtree overflow-x-hidden min-h-screen transition-colors duration-300" 
       style={{ 
         width: '100%', 
         maxWidth: '100vw', 
         boxSizing: 'border-box',
+        backgroundColor: 'var(--ds-page-bg, #1a1a1a)',
         '--brand-primary': brandPrimary,
         '--brand-primary-hover': brandPrimaryHover,
       } as React.CSSProperties}
@@ -6555,6 +6557,7 @@ function NavTestPageContent() {
 
       {/* Header - Sticky at top, always visible - Always grey in both themes */}
       <motion.header 
+        data-nav-header
         className={cn(
           "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed left-0 right-0",
           isMobile ? "px-3" : "px-6",
@@ -6570,6 +6573,7 @@ function NavTestPageContent() {
           duration: 0.3
         } : {}}
         style={{ 
+          backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
           pointerEvents: 'auto',
           top: isMobile ? (quickLinksOpen ? 40 : 0) : 0,
           zIndex: 101,
@@ -6637,12 +6641,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         showSports 
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: showSports ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: showSports ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       onClick={(e) => {
                         e.preventDefault()
@@ -6688,12 +6692,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         !showSports && !showVipRewards && activeSubNav !== 'Live'
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav !== 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && activeSubNav !== 'Live' ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       data-active={!showSports && !showVipRewards && activeSubNav !== 'Live'}
                       onClick={(e) => {
@@ -6721,12 +6725,12 @@ function NavTestPageContent() {
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
                         !showSports && !showVipRewards && activeSubNav === 'Live'
-                          ? "!bg-[#ee3536] !text-white" 
+                          ? "!text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav === 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && activeSubNav === 'Live' ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                       data-active={!showSports && !showVipRewards && activeSubNav === 'Live'}
                       onClick={(e) => {
@@ -6791,7 +6795,7 @@ function NavTestPageContent() {
                       data-active={showVipRewards}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: showVipRewards ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: showVipRewards ? 'var(--ds-primary, #ee3536)' : undefined
                       } as React.CSSProperties}
                     >
                       VIP Rewards

@@ -65,8 +65,8 @@ function DesktopChatPanel() {
           animate={{ x: 0 }}
           exit={{ x: 340 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed top-[64px] right-0 bottom-0 w-[340px] z-[200] border-l border-white/10 bg-[#222222] overflow-hidden"
-          style={{ pointerEvents: 'auto' }}
+          className="fixed top-[64px] right-0 bottom-0 w-[340px] z-[200] border-l border-white/10 overflow-hidden"
+          style={{ pointerEvents: 'auto', backgroundColor: 'var(--ds-page-bg, #222222)' }}
         >
           <div className="flex flex-col h-full w-[340px]">
             {/* Header */}
@@ -265,9 +265,10 @@ function MobileChatDrawer() {
               maxHeight: '92dvh',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',
               pointerEvents: 'auto',
+              backgroundColor: 'var(--ds-page-bg, #222222)',
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-x-0 bottom-0 z-[9999] bg-[#222222] rounded-t-[16px] border-t border-white/10 flex flex-col"
+            className="fixed inset-x-0 bottom-0 z-[9999] rounded-t-[16px] border-t border-white/10 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle — swipe down to close (only this area triggers drag) */}

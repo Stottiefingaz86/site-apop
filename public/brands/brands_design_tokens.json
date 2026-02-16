@@ -1,0 +1,104 @@
+{
+  "brands": [
+    {
+      "id": "betonline",
+      "name": "BetOnline",
+      "primary": "#ee3536",
+      "primaryHover": "#dc2a2f",
+      "navBg": "#2D2E2C",
+      "pageBg": "#1a1a1a",
+      "sidebarBg": "#2d2d2d",
+      "cardBg": "#2d2d2d",
+      "accentGreen": "#8ac500",
+      "logoSrc": null,
+      "products": {
+        "sports": true,
+        "liveBetting": true,
+        "casino": true,
+        "liveCasino": true,
+        "poker": true,
+        "vipRewards": true
+      }
+    },
+    {
+      "id": "wildcasino",
+      "name": "Wild Casino",
+      "primary": "#2faf16",
+      "primaryHover": "#23a109",
+      "navBg": "#0e160c",
+      "pageBg": "#051100",
+      "sidebarBg": "#121d0d",
+      "cardBg": "#0d150b",
+      "accentGreen": "#ffa800",
+      "logoSrc": "/brands/WildcasinoLogo.svg",
+      "products": {
+        "sports": false,
+        "liveBetting": false,
+        "casino": true,
+        "liveCasino": true,
+        "poker": false,
+        "vipRewards": true
+      }
+    },
+    {
+      "id": "superslots",
+      "name": "Super Slots",
+      "primary": "#ffdf00",
+      "primaryHover": "#fecc00",
+      "navBg": "#51005c",
+      "pageBg": "#180039",
+      "sidebarBg": "#3c115a",
+      "cardBg": "#5f2166",
+      "accentGreen": "#539cff",
+      "logoSrc": "/brands/superslots.svg",
+      "products": {
+        "sports": false,
+        "liveBetting": false,
+        "casino": true,
+        "liveCasino": true,
+        "poker": false,
+        "vipRewards": true
+      }
+    },
+    {
+      "id": "sportsbetting",
+      "name": "SportsBetting",
+      "primary": "#0096ff",
+      "primaryHover": "#0087f6",
+      "navBg": "#031679",
+      "pageBg": "#030d26",
+      "sidebarBg": "#031679",
+      "cardBg": "#020e4a",
+      "accentGreen": "#fdc100",
+      "logoSrc": "/brands/sportsbetting.svg",
+      "products": {
+        "sports": true,
+        "liveBetting": true,
+        "casino": true,
+        "liveCasino": true,
+        "poker": true,
+        "vipRewards": true
+      }
+    },
+    {
+      "id": "tigergaming",
+      "name": "Tiger Gaming",
+      "primary": "#f8991d",
+      "primaryHover": "#f48e1b",
+      "navBg": "#2d2e2c",
+      "pageBg": "#212121",
+      "sidebarBg": "#2d2e2c",
+      "cardBg": "#2d2e2c",
+      "accentGreen": "#28dfb3",
+      "logoSrc": "/brands/tigergaming.svg",
+      "products": {
+        "sports": true,
+        "liveBetting": true,
+        "casino": true,
+        "liveCasino": true,
+        "poker": true,
+        "vipRewards": false
+      }
+    }
+  ]
+}

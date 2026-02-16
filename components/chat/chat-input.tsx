@@ -49,7 +49,7 @@ export default function ChatInput() {
     <div className="relative">
       {/* Emoji Picker */}
       {showEmojiPicker && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 p-2 bg-[#1e1e1e] border border-white/10 rounded-lg shadow-xl z-10">
+        <div className="absolute bottom-full left-0 right-0 mb-1 p-2 border border-white/10 rounded-lg shadow-xl z-10" style={{ backgroundColor: 'var(--ds-page-bg, #1e1e1e)' }}>
           <div className="grid grid-cols-8 gap-1">
             {QUICK_EMOJIS.map((emoji) => (
               <button
@@ -66,7 +66,7 @@ export default function ChatInput() {
 
       {/* Input Area */}
       <div className={cn(
-        "flex items-center gap-1.5 px-2 py-1.5 bg-[#1a1a1a] border-t border-white/10 transition-colors",
+        "flex items-center gap-1.5 px-2 py-1.5 border-t border-white/10 transition-colors",
         isFocused && "border-t-[#ee3536]/50"
       )}>
         {/* Emoji button */}

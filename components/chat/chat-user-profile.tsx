@@ -124,10 +124,11 @@ export default function ChatUserProfile() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="relative w-full max-w-[380px] max-h-[85vh] overflow-y-auto bg-[#1c1c1c] border border-white/[0.08] rounded-2xl shadow-2xl"
+            className="relative w-full max-w-[380px] max-h-[85vh] overflow-y-auto border border-white/[0.08] rounded-2xl shadow-2xl"
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+              backgroundColor: 'var(--ds-page-bg, #1c1c1c)',
             }}
           >
             {/* Close button */}

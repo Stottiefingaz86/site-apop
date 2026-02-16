@@ -62,7 +62,7 @@ export default function ChatTipModal() {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeTipModal} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-sm bg-[#1c1c1c] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+      <div className="relative w-full max-w-sm border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-200" style={{ backgroundColor: 'var(--ds-page-bg, #1c1c1c)' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
