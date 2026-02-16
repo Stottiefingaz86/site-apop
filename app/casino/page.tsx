@@ -4,6 +4,7 @@ import { StreakCounter } from '@/components/vip/streak-counter'
 import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
+import { DottedGlowBackground } from '@/components/ui/dotted-glow-background'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } from 'react'
 import { useChatStore } from '@/lib/store/chatStore'
@@ -124,7 +125,7 @@ import {
   IconUsers,
   IconArrowsSort,
   IconRefresh
-, IconBrandTelegram, IconParachute, IconTargetArrow} from '@tabler/icons-react'
+, IconBrandTelegram, IconParachute, IconTargetArrow, IconBrandApple, IconBrandWindows, IconBrandAndroid, IconDeviceDesktop} from '@tabler/icons-react'
 import { colorTokenMap } from '@/lib/agent/designSystem'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { Button } from '@/components/ui/button'
@@ -2035,7 +2036,7 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -2063,9 +2064,9 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* Promos Section */}
@@ -2309,7 +2310,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -2337,9 +2338,9 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* My Bonus Section */}
@@ -6568,8 +6569,8 @@ function VipDrawerContent({
         {vipActiveTab === 'Cash Drop' && (
           <CashDropCode />
         )}
-      </div>
-    </div>
+                </div>
+                </div>
   )
 }
 
@@ -6854,6 +6855,550 @@ function TournamentCountdown({ endDate }: { endDate: Date }) {
       <NumberFlow value={h} format={{ minimumIntegerDigits: 2 }} /><span className="text-white/20 mx-0.5">:</span>
       <NumberFlow value={m} format={{ minimumIntegerDigits: 2 }} /><span className="text-white/20 mx-0.5">:</span>
       <NumberFlow value={s} format={{ minimumIntegerDigits: 2 }} />
+              </div>
+  )
+}
+
+// =====================================================
+// POKER LANDING PAGE COMPONENT
+// =====================================================
+function PokerLandingPage({ brandPrimary, quickLinksOpen }: { brandPrimary: string; quickLinksOpen?: boolean }) {
+  const isMobile = useIsMobile()
+  const { state: sidebarState } = useSidebar()
+  const [activeSidebarItem, setActiveSidebarItem] = useState('Poker Lobby')
+
+  // Top "PLAY NOW" feature items (like sports FEATURES)
+  const pokerPlayNow = [
+    { icon: IconPlayerPlay, label: 'Play Online' },
+    { icon: IconDownload, label: 'Download' },
+  ]
+
+  // Main POKER nav items
+  const pokerNavItems = [
+    { icon: IconCards, label: 'Poker Lobby' },
+    { icon: IconRocket, label: 'Getting Started' },
+    { icon: IconStar, label: 'Features' },
+    { icon: IconShield, label: 'Integrity' },
+    { icon: IconGift, label: 'Promos' },
+    { icon: IconHelpCircle, label: 'Help' },
+  ]
+
+  // Bottom section (like casino sidebar)
+  const pokerBottomItems = [
+    { icon: IconCrown, label: 'Loyalty Hub' },
+    { icon: IconBuilding, label: 'Banking' },
+    { icon: IconLifebuoy, label: 'Need Help' },
+  ]
+
+  const topFeatures = [
+    { title: 'All-In Cash Out', description: 'Purchase the equity of your hand at any point before the river and protect your winning hands.' },
+    { title: 'Throwables', description: 'Fun interactive way to express yourself at the tables. What happened in the hand and how did it make you feel.' },
+    { title: 'Straddle', description: 'Experience the thrill of bigger pots and gain a competitive edge by straddling in poker cash games. Try it now.' },
+    { title: 'Bomb Pot Discard', description: 'Welcome to the most exciting twist on Texas Hold\'em to date! Our new five-handed bomb pot discard game, designed for players who love big pots, bold plays.' },
+    { title: 'Heads-Up Display', description: 'Heads-Up Display (HUD) is an easy-to-use and helpful tool that displays on the poker table to give you key stats.' },
+    { title: 'Triple Threat Tournaments', description: 'Introducing Triple Threat Tournaments, where every game gives you three ways to cash-in bigtime!' },
+    { title: 'Mystery Bounty Tournaments', description: 'Welcome to Mystery Bounty Tournaments, where poker players get the chance to turn their opponents into treasure chests of cash prizes.' },
+    { title: 'Run It Multiple Times', description: 'All-in? Not sure of getting the win… Run it multiple times to split the remaining board across multiple outcomes!' },
+  ]
+
+  return (
+    <div className="flex w-full min-h-screen bg-[#1a1a1a]">
+      {/* Poker Sidebar — same pattern as sports */}
+      <Sidebar
+        collapsible="icon"
+        variant="sidebar"
+        className="!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d]"
+      >
+        <SidebarContent className="overflow-y-auto flex flex-col">
+          <TooltipProvider>
+            {/* PLAY NOW section — square icon style like sports FEATURES */}
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">PLAY NOW</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {pokerPlayNow.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = activeSidebarItem === item.label
+                    return (
+                      <SidebarMenuItem key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isActive}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setActiveSidebarItem(item.label)
+                              }}
+                              className={cn(
+                                "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                                "data-[active=true]:text-white data-[active=true]:font-medium",
+                                "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
+                              )}
+                              style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                            >
+                              <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", isActive ? "bg-white/20" : "bg-white/10")}>
+                                <Icon strokeWidth={1.5} className="w-4 h-4" />
+                              </div>
+                              <span>{item.label}</span>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          {sidebarState === 'collapsed' && (
+                            <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                              <p>{item.label}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <Separator className="bg-white/10 mx-2" />
+
+            {/* POKER nav items */}
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">POKER</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {pokerNavItems.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = activeSidebarItem === item.label
+                    return (
+                      <SidebarMenuItem key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isActive}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setActiveSidebarItem(item.label)
+                              }}
+                              className={cn(
+                                "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                                "data-[active=true]:text-white data-[active=true]:font-medium",
+                                "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
+                              )}
+                              style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                            >
+                              <Icon strokeWidth={1.5} className="w-5 h-5" />
+                              <span>{item.label}</span>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          {sidebarState === 'collapsed' && (
+                            <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                              <p>{item.label}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Spacer to push bottom items down */}
+            <div className="flex-1" />
+
+            <Separator className="bg-white/10 mx-2" />
+
+            {/* Bottom section — Loyalty Hub, Banking, Need Help (like casino) */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {pokerBottomItems.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = activeSidebarItem === item.label
+                    return (
+                      <SidebarMenuItem key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isActive}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setActiveSidebarItem(item.label)
+                              }}
+                              className={cn(
+                                "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                                "data-[active=true]:text-white data-[active=true]:font-medium",
+                                "data-[active=false]:text-white/70 hover:text-white hover:bg-white/5"
+                              )}
+                              style={isActive ? { backgroundColor: brandPrimary } : undefined}
+                            >
+                              <Icon strokeWidth={1.5} className="w-5 h-5" />
+                              <span>{item.label}</span>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          {sidebarState === 'collapsed' && (
+                            <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                              <p>{item.label}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </TooltipProvider>
+        </SidebarContent>
+      </Sidebar>
+
+      {/* Main Content */}
+      <SidebarInset className="bg-[#1a1a1a] text-white" style={{ width: 'auto', flex: '1 1 0%', minWidth: 0, maxWidth: '100%' }}>
+        <div className="flex flex-col">
+
+          {/* HERO */}
+          <section className="relative overflow-hidden px-4 md:px-6 pt-14 pb-14">
+            {/* Dotted Glow Background — faded with bottom fade-out */}
+            <DottedGlowBackground
+              className="pointer-events-none opacity-25"
+              opacity={0.5}
+              gap={11}
+              radius={1.5}
+              color="rgba(255,255,255,0.12)"
+              glowColor="rgba(238, 53, 54, 0.65)"
+              darkColor="rgba(255,255,255,0.14)"
+              darkGlowColor="rgba(238, 53, 54, 0.65)"
+              backgroundOpacity={0}
+              speedMin={0.3}
+              speedMax={1.6}
+              speedScale={1}
+            />
+            {/* Bottom fade overlay */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#1a1a1a] to-transparent z-[1] pointer-events-none" />
+            {/* Red glow line — full width */}
+            <div className="absolute top-0 left-0 right-0 z-[2] flex items-center justify-center pointer-events-none">
+              <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
+              <div className="absolute w-full h-[10px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent blur-sm" />
+              <div className="absolute w-full h-[24px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent blur-md" />
+              <div className="absolute w-3/4 h-[44px] bg-gradient-to-r from-transparent via-red-600/20 to-transparent blur-xl" />
+                </div>
+
+            <div className="relative z-10 max-w-5xl mx-auto text-center">
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
+                The BetOnline<br />Poker Platform
+              </h1>
+              <p className="text-sm md:text-base text-white/60 mb-6 max-w-lg mx-auto">
+                Play online or download the BetOnline poker app today,<br />available on IOS, PC, and Android.
+              </p>
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <Button className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small gap-2" style={{ backgroundColor: brandPrimary }}>
+                  <IconDownload className="w-4 h-4" strokeWidth={2} />
+                  DOWNLOAD &amp; PLAY
+                </Button>
+                <Button variant="outline" className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small border-white/20 bg-transparent hover:bg-white/5">
+                  PLAY ONLINE
+                </Button>
+                </div>
+
+              {/* Separator */}
+              <div className="w-full max-w-md mx-auto h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent mb-6" />
+
+              {/* Platform availability — compact, single row */}
+              <div className="flex items-center justify-center gap-2 md:gap-3 mt-6">
+                {[
+                  { icon: IconBrandApple, label: 'iOS', sublabel: 'APP STORE' },
+                  { icon: IconBrandWindows, label: 'Windows', sublabel: 'DESKTOP' },
+                  { icon: IconBrandAndroid, label: 'Android', sublabel: 'GOOGLE PLAY' },
+                  { icon: IconDeviceDesktop, label: 'Mac', sublabel: 'DESKTOP' },
+                ].map((platform, idx) => {
+                  const Icon = platform.icon
+                  return (
+                    <button key={idx} className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15 transition-all group">
+                      <Icon className="w-4 h-4 md:w-5 md:h-5 text-white/50 group-hover:text-white/80 transition-colors flex-shrink-0" strokeWidth={1.5} />
+                      <div className="text-left">
+                        <div className="text-[7px] md:text-[8px] text-white/35 uppercase tracking-wider leading-none">{platform.sublabel}</div>
+                        <div className="text-[10px] md:text-xs font-semibold text-white/80">{platform.label}</div>
+              </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+
+
+          {/* OUR TOP FEATURES — Carousel */}
+          <section className="py-10 bg-white/[0.02]">
+            <div className="px-4 md:px-6 text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Our Top Features</h2>
+              <p className="text-sm text-white/50 max-w-lg mx-auto">
+                Some of the features available. Play Now or Download our poker software to try them out.
+              </p>
+            </div>
+            <div className="w-full">
+              <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+                {!isMobile && (
+                  <>
+                    <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
+                    <CarouselNext className="!right-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
+                  </>
+                )}
+                <CarouselContent className="ml-4 md:ml-6 -mr-2 md:-mr-4">
+                  {topFeatures.map((feature, index) => (
+                    <CarouselItem key={index} className={`${index === 0 ? 'pl-0' : 'pl-3 md:pl-4'} basis-auto flex-shrink-0`}>
+                      <Card className="bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.06] transition-colors h-full w-[260px] md:w-[300px]">
+                        <CardContent className="p-5">
+                          <div className="w-full aspect-[4/3] rounded-lg bg-white/[0.06] flex items-center justify-center mb-4 overflow-hidden relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                            <svg className="w-10 h-10 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          </div>
+                          <h3 className="text-base font-semibold text-white mb-2 text-left">{feature.title}</h3>
+                          <p className="text-xs text-white/50 leading-relaxed text-left line-clamp-3">{feature.description}</p>
+            </CardContent>
+          </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </div>
+            <div className="text-center mt-8">
+              <Button className="text-white font-semibold text-sm px-10 py-3 h-11 rounded-small mx-auto" style={{ backgroundColor: brandPrimary }}>
+                FIND MORE
+              </Button>
+            </div>
+          </section>
+
+          {/* NEW TO BETONLINE POKER */}
+          <section className="px-4 md:px-6 py-10">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1 w-full md:w-auto aspect-[4/3] max-w-md rounded-xl bg-white/[0.06] flex items-center justify-center overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                  <svg className="w-12 h-12 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 italic">New to Betonline Poker ?</h2>
+                  <p className="text-sm text-white/60 mb-6 leading-relaxed">
+                    Find out how to register, how to transfer funds to your poker wallet, what games you can play here and what is the strongest hand at the tables.
+                  </p>
+                  <Button className="text-white font-semibold text-sm px-8 py-3 h-11 rounded-small" style={{ backgroundColor: brandPrimary }}>
+                    LEARN HOW TO PLAY
+                  </Button>
+                </div>
+              </div>
+      </div>
+          </section>
+
+          {/* FAIR & TRUSTWORTHY */}
+          <section className="px-4 md:px-6 py-10 bg-white/[0.02]">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
+                    Ensuring a Fair and Trustworthy Poker Experience
+                  </h2>
+                  <p className="text-sm text-white/60 mb-6 leading-relaxed">
+                    Poker tournaments offer varied experiences, from highly competitive Sunday majors with big prize pools to casual daily events perfect for beginners. Our advanced security systems ensure fair play at every table.
+                  </p>
+                  <Button className="text-white font-semibold text-sm px-8 py-3 h-11 rounded-small" style={{ backgroundColor: brandPrimary }}>
+                    MORE INFO
+                  </Button>
+                </div>
+                <div className="flex-1 w-full md:w-auto aspect-[4/3] max-w-sm rounded-xl bg-white/[0.06] flex items-center justify-center overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                  <svg className="w-12 h-12 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* KEEPING GAMES CLEAN */}
+          <section className="px-4 md:px-6 py-10">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1 w-full md:w-auto max-w-sm">
+                  <div className="aspect-square rounded-xl bg-white/[0.06] flex items-center justify-center overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                    <div className="relative flex flex-col items-center gap-2 text-white/20">
+                      <IconShield className="w-16 h-16" strokeWidth={1} />
+                      <IconCheck className="w-8 h-8 text-green-500/40" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 italic">Keeping the Games Clean and Fair</h2>
+                  <p className="text-sm text-white/60 mb-6 leading-relaxed">
+                    We use industry-leading anti-fraud technology and independent auditing to guarantee the integrity of every game. Your safety and trust are our top priorities.
+                  </p>
+                  <Button className="text-white font-semibold text-sm px-8 py-3 h-11 rounded-small" style={{ backgroundColor: brandPrimary }}>
+                    GETTING STARTED
+                  </Button>
+                </div>
+              </div>
+      </div>
+          </section>
+
+          {/* DOWNLOAD SECTION */}
+          <section className="px-4 md:px-6 py-10 bg-white/[0.02]">
+            <div className="max-w-5xl mx-auto text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Download Our Poker App</h2>
+              <p className="text-sm text-white/50 mb-8 max-w-lg mx-auto">
+                Available on all major platforms. Get the best poker experience on any device.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {[
+                  { icon: IconBrandApple, label: 'iOS', sublabel: 'App Store' },
+                  { icon: IconBrandWindows, label: 'Windows', sublabel: 'Desktop' },
+                  { icon: IconBrandAndroid, label: 'Android', sublabel: 'Google Play' },
+                  { icon: IconDeviceDesktop, label: 'Mac', sublabel: 'Desktop' },
+                ].map((platform, idx) => {
+                  const Icon = platform.icon
+                  return (
+                    <button key={idx} className="flex items-center gap-3 px-5 py-3 rounded-small bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/10 transition-all group">
+                      <Icon className="w-8 h-8 text-white/70 group-hover:text-white transition-colors" strokeWidth={1.5} />
+                      <div className="text-left">
+                        <div className="text-[10px] text-white/40 uppercase tracking-wide">{platform.sublabel}</div>
+                        <div className="text-sm font-semibold text-white">{platform.label}</div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* POKER FOOTER */}
+          <footer className="bg-[#2d2d2d] border-t border-white/10 text-white mt-0 relative z-0">
+            <div className="w-full px-6 py-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 mb-6">
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Quick Links</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Refer A Friend</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Rules</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Banking</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Affiliates</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Terms & Conditions</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Responsible Gaming</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Casino</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Play Casino</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Blackjack</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Baccarat</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Craps</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Roulette</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Keno</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Slots</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Video Poker</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Sports</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Sportsbook</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">NFL Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">NBA Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">MLB Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">NHL Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">NCAAB Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Super Bowl Betting Odds</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Boxing Betting Odds</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Poker</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Play Poker</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Download</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Texas Holdem</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Omaha Poker</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Racebook</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Horse Betting</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Kentucky Derby</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Preakness Stakes</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Belmont Stakes</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Breeders Cup</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Other</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Promos</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">News Room</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Why BetOnline</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">BetOnline Vs Competition</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">VIP Rewards</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Bet TV</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 text-sm">Support</h3>
+                  <ul className="space-y-1.5 text-xs text-white/70">
+                    <li><a href="#" className="hover:text-white transition-colors">Live Chat</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">Help Centre</a></li>
+                  </ul>
+                </div>
+              </div>
+              <Separator className="bg-white/10 mb-6" />
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-semibold text-base">A TRUSTED &amp; SAFE EXPERIENCE</h3>
+                  <IconShield className="w-4 h-4" />
+                </div>
+                <p className="text-xs text-white/70 mb-4 max-w-2xl">
+                  At BetOnline, our company&apos;s guiding principle is to establish long-lasting, positive relationships with our customers and within the online gaming community for over 25 years.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  {['Bitcoin', 'Ethereum', 'Litecoin', 'USDT', 'USDC', 'BitcoinCash', 'Dogecoin'].map((method) => (
+                    <PaymentLogo key={method} method={method} />
+                  ))}
+                  {['VISA', 'Mastercard', 'AMEX', 'Discover'].map((method) => (
+                    <PaymentLogo key={method} method={method} />
+                  ))}
+                  <SecurityBadge name="Responsible Gaming" iconPath="/banners/partners/responsible gaming.webp" />
+                  <SecurityBadge name="SSL Secure" iconPath="/logos/payment/ssl-secure.svg" />
+                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-red-500 border-2 border-white">
+                    <span className="text-[10px] font-bold text-white">18+</span>
+                  </div>
+                </div>
+              </div>
+              <Separator className="bg-white/10 mb-6" />
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-semibold text-sm">OFFICIAL PARTNERS</h3>
+                  <Separator orientation="vertical" className="h-5 bg-white/20" />
+                  <div className="flex items-center gap-3">
+                    {['laliga', 'lfa', 'matchroom', 'golden boy'].map((partner) => (
+                      <div key={partner} className="flex items-center justify-center h-7 opacity-80 hover:opacity-100 transition-opacity">
+                        <Image src={`/banners/partners/${partner}.svg`} alt={partner} width={70} height={28} className="object-contain" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/5 rounded-small"><IconBrandFacebook className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/5 rounded-small"><IconBrandInstagram className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/5 rounded-small"><IconBrandX className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/5 rounded-small"><IconBrandYoutube className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/5 rounded-small"><IconBrandTiktok className="w-4 h-4" /></Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-white/50 pt-2 border-t border-white/5">
+                <div>Copyright ©2024 BetOnline.ag. All rights reserved.</div>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      </SidebarInset>
     </div>
   )
 }
@@ -6946,11 +7491,12 @@ function NavTestPageContent() {
   const [selectedVendor, setSelectedVendor] = useState<string>('')
   const [showSports, setShowSports] = useState(false) // Always false for casino page
   const [showVipRewards, setShowVipRewards] = useState(false)
+  const [showPoker, setShowPoker] = useState(false)
   const [tournamentTab, setTournamentTab] = useState<'cash' | 'freeroll'>('cash')
   const [tournamentExpandedCard, setTournamentExpandedCard] = useState<number | null>(null)
   const [leaderboardTournament, setLeaderboardTournament] = useState<typeof cashTournamentsData[0] | null>(null)
   const [initialVipSidebarItem, setInitialVipSidebarItem] = useState<string | null>(null)
-  const [previousPageState, setPreviousPageState] = useState<{ showSports: boolean; showVipRewards: boolean; activeSubNav?: string } | null>(null)
+  const [previousPageState, setPreviousPageState] = useState<{ showSports: boolean; showVipRewards: boolean; showPoker?: boolean; activeSubNav?: string } | null>(null)
   const [sportsActiveTab, setSportsActiveTab] = useState('Events')
   
   // Carousel API states for Live Casino sections
@@ -7503,6 +8049,21 @@ function NavTestPageContent() {
     }
   }, [showVipRewards])
 
+  // Sync URL when Poker page is shown/hidden
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (showPoker) {
+      if (window.location.pathname !== '/poker') {
+        originalPathRef.current = window.location.pathname
+      }
+      window.history.replaceState(null, '', '/poker')
+    } else {
+      if (window.location.pathname === '/poker') {
+        window.history.replaceState(null, '', originalPathRef.current || '/casino')
+      }
+    }
+  }, [showPoker])
+
   const handleDepositDrawerOpenChange = React.useCallback((open: boolean) => {
     setDepositDrawerOpen(open)
     if (!open) {
@@ -7655,6 +8216,9 @@ function NavTestPageContent() {
       setLastScrollY(currentScrollY)
     }
 
+    // Trigger immediately on mount so quick links show when at top
+    handleScroll()
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMobile, lastScrollY])
@@ -7676,6 +8240,14 @@ function NavTestPageContent() {
     const vipParam = searchParams.get('vip')
     if (vipParam === 'true') {
       setShowVipRewards(true)
+    }
+    
+    // Check for poker query parameter to deep link to Poker
+    const pokerParam = searchParams.get('poker')
+    if (pokerParam === 'true') {
+      setShowPoker(true)
+      setShowSports(false)
+      setShowVipRewards(false)
     }
     
     // Check for tab query parameter to deep link to specific casino tab (e.g. Live Casino)
@@ -7760,7 +8332,7 @@ function NavTestPageContent() {
                   { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
                   { label: 'Live Casino', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
-                  { label: 'Poker', onClick: () => { window.location.href = '/poker'; setQuickLinksOpen(false); } },
+                  { label: 'Poker', onClick: () => { setShowPoker(true); setShowSports(false); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
@@ -7774,8 +8346,9 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
-                      (item.label === 'Casino' && !showSports && !showVipRewards) ||
+                      (item.label === 'Casino' && !showSports && !showVipRewards && !showPoker) ||
                       (item.label === 'Sports' && showSports) ||
+                      (item.label === 'Poker' && showPoker) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
                         ? "text-white"
                         : "text-white/70 hover:text-white"
@@ -7927,15 +8500,15 @@ function NavTestPageContent() {
                         "h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center",
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
-                        !showSports && !showVipRewards && activeSubNav !== 'Live'
+                        !showSports && !showVipRewards && !showPoker && activeSubNav !== 'Live'
                           ? "!bg-[#ee3536] !text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav !== 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && !showPoker && activeSubNav !== 'Live' ? (brandPrimary || '#ee3536') : undefined
                       } as React.CSSProperties}
-                      data-active={!showSports && !showVipRewards && activeSubNav !== 'Live'}
+                      data-active={!showSports && !showVipRewards && !showPoker && activeSubNav !== 'Live'}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -7943,6 +8516,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                         setShowSports(false)
                         setShowVipRewards(false)
+                        setShowPoker(false)
                           setTimeout(() => {
                             setIsPageTransitioning(false)
                           }, 200)
@@ -7960,15 +8534,15 @@ function NavTestPageContent() {
                         "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
-                        !showSports && !showVipRewards && activeSubNav === 'Live'
+                        !showSports && !showVipRewards && !showPoker && activeSubNav === 'Live'
                           ? "!bg-[#ee3536] !text-white" 
                           : "bg-transparent"
                       )}
                       style={{ 
                         pointerEvents: 'auto',
-                        backgroundColor: !showSports && !showVipRewards && activeSubNav === 'Live' ? (brandPrimary || '#ee3536') : undefined
+                        backgroundColor: !showSports && !showVipRewards && !showPoker && activeSubNav === 'Live' ? (brandPrimary || '#ee3536') : undefined
                       } as React.CSSProperties}
-                      data-active={!showSports && !showVipRewards && activeSubNav === 'Live'}
+                      data-active={!showSports && !showVipRewards && !showPoker && activeSubNav === 'Live'}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
@@ -7976,6 +8550,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                           setShowSports(false)
                           setShowVipRewards(false)
+                          setShowPoker(false)
                           setActiveSubNav('Live')
                           setShowAllGames(false)
                           setSelectedCategory('')
@@ -7997,13 +8572,27 @@ function NavTestPageContent() {
                       className={cn(
                         "h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center",
                         "hover:bg-white/5 hover:text-white transition-colors",
-                        "data-[active=true]:bg-white/10 data-[active=true]:text-white",
-                        "text-white/70 active:bg-white/10 cursor-pointer"
+                        "text-white/70 cursor-pointer",
+                        showPoker
+                          ? "!bg-[#ee3536] !text-white"
+                          : "bg-transparent"
                       )}
+                      style={{ 
+                        pointerEvents: 'auto',
+                        backgroundColor: showPoker ? (brandPrimary || '#ee3536') : undefined
+                      } as React.CSSProperties}
+                      data-active={showPoker}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        window.location.href = '/poker'
+                        setIsPageTransitioning(true)
+                        setTimeout(() => {
+                          setShowPoker(true)
+                          setShowSports(false)
+                          setShowVipRewards(false)
+                          setIsPageTransitioning(false)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }, 150)
                       }}
                     >
                       Poker
@@ -8025,6 +8614,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                           setShowVipRewards(true)
                           setShowSports(false)
+                          setShowPoker(false)
                           setIsPageTransitioning(false)
                         }, 200)
                       }}
@@ -8655,8 +9245,8 @@ function NavTestPageContent() {
 
         {/* Content area with sidebar and main content - starts below header */}
         <div className="flex relative" style={{ marginTop: '64px' }}>
-          {/* Sidebar using shadcn component - positioned under header - Hide on Sports and VIP Rewards */}
-          {!showSports && !showVipRewards && (
+          {/* Sidebar using shadcn component - positioned under header - Hide on Sports, VIP Rewards, and Poker */}
+          {!showSports && !showVipRewards && !showPoker && (
           <Sidebar 
             collapsible="icon"
             variant="sidebar"
@@ -8827,8 +9417,11 @@ function NavTestPageContent() {
                                         e.stopPropagation()
                                         setShowQuickLinksMenu(false)
                                         setOpenMobile(false)
-                                        window.location.href = '/poker'
+                                        setShowPoker(true)
+                                        setShowSports(false)
+                                        setShowVipRewards(false)
                                         setQuickLinksOpen(false)
+                                        window.scrollTo({ top: 0, behavior: 'smooth' })
                                       }}
                                     >
                                       Poker
@@ -9071,8 +9664,8 @@ function NavTestPageContent() {
               viewTransitionName: 'content-area'
             }}
           >
-            {/* Icon Tabs (Left) and Text Tabs (Right) - Fixed Sub Nav - Hide on Sports and VIP Rewards */}
-            {!showSports && !showVipRewards && (
+            {/* Icon Tabs (Left) and Text Tabs (Right) - Fixed Sub Nav - Hide on Sports, VIP Rewards, and Poker */}
+            {!showSports && !showVipRewards && !showPoker && (
             <motion.div 
               data-sub-nav
               className={cn(
@@ -9269,8 +9862,8 @@ function NavTestPageContent() {
             </motion.div>
             )}
             
-            {/* Spacer to account for fixed sub-nav height - Only show when not on Sports or VIP Rewards */}
-            {!showSports && !showVipRewards && (
+            {/* Spacer to account for fixed sub-nav height - Only show when not on Sports, VIP Rewards, or Poker */}
+            {!showSports && !showVipRewards && !showPoker && (
               <motion.div 
                 initial={false}
                 animate={isMobile ? {
@@ -9410,6 +10003,19 @@ function NavTestPageContent() {
                     previousPageState={previousPageState}
                     setPreviousPageState={setPreviousPageState}
                     setActiveSubNav={setActiveSubNav}
+                    quickLinksOpen={quickLinksOpen}
+                  />
+                </motion.div>
+              ) : showPoker ? (
+                <motion.div
+                  key="poker-page"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <PokerLandingPage 
+                    brandPrimary={brandPrimary || '#ee3536'}
                     quickLinksOpen={quickLinksOpen}
                   />
                 </motion.div>
@@ -12097,8 +12703,8 @@ function NavTestPageContent() {
             )}
             </AnimatePresence>
               
-              {/* Footer - responsive to sidebar state, hidden on VIP/Sports pages which have their own layouts */}
-              {!showVipRewards && !showSports && (
+              {/* Footer - responsive to sidebar state, hidden on VIP/Sports/Poker pages which have their own layouts */}
+              {!showVipRewards && !showSports && !showPoker && (
               <footer className="bg-[#2d2d2d] border-t border-white/10 text-white mt-12 relative z-0">
               <div className="w-full px-6 py-6">
                   {/* Quick Links Section - More compact */}
@@ -13424,8 +14030,8 @@ function NavTestPageContent() {
           }}
           isSearchActive={searchOverlayOpen}
           isFavoriteActive={activeIconTab === 'favorite' || selectedCategory === 'Favorites'}
-          showSearch={!showVipRewards}
-          showFavorites={!showVipRewards}
+          showSearch={!showVipRewards && !showPoker}
+          showFavorites={!showVipRewards && !showPoker}
             />
       )}
     </div>
