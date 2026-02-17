@@ -151,6 +151,7 @@ import {
   SidebarMenuSubButton,
   SidebarProvider,
   SidebarTrigger,
+  SidebarHeader,
   SidebarInset,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -2973,7 +2974,7 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
 
 // Sports Page Component
 function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimaryHover, onSearchClick, betslipOpen, setBetslipOpen, bets, setBets, setShowToast, setToastMessage, setToastAction, placedBets, setPlacedBets, myBetsAlertCount, setMyBetsAlertCount, betslipManuallyClosed, setBetslipManuallyClosed, activeSport, setActiveSport }: { activeTab: string; onTabChange: (tab: string) => void; onBack: () => void; brandPrimary: string; brandPrimaryHover: string; onSearchClick: () => void; betslipOpen: boolean; setBetslipOpen: (open: boolean) => void; bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>; setBets: (bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }> | ((prev: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>) => Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>)) => void; setShowToast: (show: boolean) => void; setToastMessage: (message: string) => void; setToastAction: (action: { label: string; onClick: () => void } | null) => void; placedBets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>; setPlacedBets: (bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }> | ((prev: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>) => Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>)) => void; myBetsAlertCount: number; setMyBetsAlertCount: (count: number | ((prev: number) => number)) => void; betslipManuallyClosed: boolean; setBetslipManuallyClosed: (closed: boolean) => void; activeSport: string; setActiveSport: (sport: string) => void }) {
-  const { state: sidebarState, toggleSidebar } = useSidebar()
+  const { state: sidebarState, toggleSidebar, setOpenMobile } = useSidebar()
   const isMobile = useIsMobile()
   const router = useRouter()
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
@@ -3095,6 +3096,16 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   }, [])
   const [eventOrderBy, setEventOrderBy] = useState<string>('Popularity')
   const [selectedLeague, setSelectedLeague] = useState<number>(1) // Default to Grand Slams (id: 1)
+
+  // Sportsbook settings state
+  const [sportsbookSettingsOpen, setSportsbookSettingsOpen] = useState(false)
+  const [oddsFormat, setOddsFormat] = useState<'American' | 'Fractional' | 'Decimal'>('American')
+  const [betslipOddsSetting, setBetslipOddsSetting] = useState<'dont_accept' | 'higher' | 'any'>('higher')
+  const [showBetConfirmation, setShowBetConfirmation] = useState(false)
+
+  // Mobile sidebar quick links
+  const [otherDropdownOpen, setOtherDropdownOpen] = useState(false)
+
   
   // Slots carousel state
   const [sportsSlotsCarouselApi, setSportsSlotsCarouselApi] = useState<CarouselApi>()
@@ -4824,48 +4835,195 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
       <Sidebar 
         collapsible="icon"
         variant="sidebar"
-        className="!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d]"
+        mobileOverlay
+        mobileNoDrag
+        mobileBg="#2d2d2d"
+        mobileOverlayClassName="!bg-black/30 !backdrop-blur-sm"
+        className="!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] !h-screen !top-0 !z-[102]"
       >
-        <SidebarContent className="overflow-y-auto">
-          <TooltipProvider>
-            {/* Settings Icon - Show when collapsed */}
-            {sidebarState === 'collapsed' && (
-              <div className="p-2 border-b border-white/10">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('Settings clicked')
-                      }}
-                      className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/5 cursor-pointer w-full"
-                    >
-                      <IconSettings className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
-                    <p>Settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-            
-          {/* Time + Odds Format - Hide when collapsed */}
-          {sidebarState !== 'collapsed' && (
-          <div className="p-2 border-b border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <select className="flex-1 bg-white/5 border border-white/10 rounded-small px-2 py-1.5 text-xs text-white/70">
-                <option>Starting in</option>
-              </select>
-              <select className="flex-1 bg-white/5 border border-white/10 rounded-small px-2 py-1.5 text-xs text-white/70">
-                <option>American</option>
-              </select>
+        {/* Sidebar Header — B lockup logo + close button (mobile only) */}
+        {isMobile && (
+        <SidebarHeader
+          className="px-4 h-14 flex items-center flex-shrink-0 overflow-hidden sticky top-0 z-20"
+          style={{
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            backgroundColor: 'rgba(45, 45, 45, 0.92)',
+          }}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            <motion.div
+              key="b-lockup-sports-mobile"
+              className="flex items-center justify-center"
+              initial={{ opacity: 0, y: 12, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 350, damping: 20, mass: 0.6, delay: 0.05 }}
+            >
+              <svg viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
+                <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
+              </svg>
+            </motion.div>
+            <button
+              onClick={() => setOpenMobile(false)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+            </button>
+          </div>
+        </SidebarHeader>
+        )}
+
+        {/* Quick Links — mobile only, below logo, sticky */}
+        {isMobile && (
+          <div 
+            className="sticky top-14 z-20 border-b border-white/5"
+            style={{
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              backgroundColor: 'rgba(45, 45, 45, 0.92)',
+            }}
+          >
+            <div 
+              className="flex items-center gap-0 scrollbar-hide w-full px-1"
+              style={{ overflowX: 'auto', overflowY: 'hidden', touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}
+            >
+              {[
+                { label: 'Home', page: 'home' as const },
+                { label: 'Sports', page: 'sports' as const },
+                { label: 'Live Betting', page: 'liveBetting' as const },
+                { label: 'Casino', page: 'casino' as const },
+                { label: 'Live Casino', page: 'liveCasino' as const },
+                { label: 'Poker', page: 'poker' as const },
+                { label: 'VIP Rewards', page: 'vipRewards' as const },
+              ].map((item) => {
+                const isCurrentPage = item.page === 'sports'
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      setOpenMobile(false)
+                      if (item.page === 'home') {
+                        router.push('/')
+                      } else if (item.page === 'sports') {
+                        // Already on sports
+                      } else if (item.page === 'liveBetting') {
+                        window.location.href = '/live-betting'
+                      } else if (item.page === 'casino') {
+                        router.push('/casino')
+                      } else if (item.page === 'liveCasino') {
+                        router.push('/casino?live=true')
+                      } else if (item.page === 'poker') {
+                        router.push('/casino?poker=true')
+                      } else if (item.page === 'vipRewards') {
+                        router.push('/casino?vip=true')
+                      }
+                    }}
+                    className={cn(
+                      "flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors relative",
+                      isCurrentPage 
+                        ? "text-white font-bold" 
+                        : "text-white/35 font-medium hover:text-white/60"
+                    )}
+                  >
+                    {item.label}
+                    {isCurrentPage && (
+                      <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }} />
+                    )}
+                  </button>
+                )
+              })}
+              {/* Other — inline dropdown toggle */}
+              <button 
+                onClick={() => setOtherDropdownOpen(!otherDropdownOpen)}
+                className="flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors relative text-white/35 font-medium hover:text-white/60 flex items-center gap-0.5"
+              >
+                Other
+                <IconChevronDown className={cn("w-3 h-3 transition-transform duration-200", otherDropdownOpen && "rotate-180")} />
+              </button>
             </div>
           </div>
-          )}
+        )}
+
+        {/* Expandable Other sub-items — outside sticky strip so it renders below */}
+        {isMobile && (
+          <AnimatePresence initial={false}>
+            {otherDropdownOpen && (
+              <motion.div
+                key="sports-other-dropdown"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="overflow-hidden border-b border-white/5"
+                style={{ backgroundColor: 'rgba(45, 45, 45, 0.95)' }}
+              >
+                <div className="flex items-center gap-0 px-1 py-1">
+                  {[
+                    { label: 'Esports', href: '/esports' },
+                    { label: 'Racebook', href: '/racebook' },
+                    { label: 'Contests', href: '/contests' },
+                    { label: 'Virtuals', href: '/virtuals' },
+                  ].map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setOpenMobile(false)}
+                      className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+
+        <SidebarContent className="overflow-y-auto">
+          <TooltipProvider>
+            {/* Settings */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton
+                          className={cn(
+                            "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                            "text-white/70 hover:text-white hover:bg-white/5",
+                            sportsbookSettingsOpen && "bg-white/5 text-white"
+                          )}
+                          onClick={() => {
+                            if (isMobile) {
+                              setOpenMobile(false)
+                              setTimeout(() => setSportsbookSettingsOpen(true), 300)
+                            } else {
+                              setSportsbookSettingsOpen(true)
+                            }
+                          }}
+                        >
+                          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
+                            <IconSettings strokeWidth={1.5} className="w-4 h-4" />
+                          </div>
+                          <span>Settings</span>
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                          <p>Settings</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+
             <SidebarGroup>
               <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">FEATURES</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -5185,6 +5343,103 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
           </TooltipProvider>
         </SidebarContent>
       </Sidebar>
+
+      {/* Settings Modal */}
+      {sportsbookSettingsOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[10002] flex items-center justify-center pt-[10px] md:pt-0" onClick={() => setSportsbookSettingsOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div 
+            className="relative w-[85vw] max-w-sm bg-[#2d2d2d] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <IconSettings strokeWidth={1.5} className="w-4 h-4 text-white/70" />
+                <span className="text-sm font-semibold text-white">Settings</span>
+              </div>
+              <button onClick={() => setSportsbookSettingsOpen(false)} className="p-1 rounded-md text-white/50 hover:text-white hover:bg-white/5 transition-colors">
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Odds Format */}
+            <div className="p-3 border-b border-white/10">
+              <p className="text-xs text-white/50 font-medium mb-2 uppercase tracking-wider">Odds Format</p>
+              <div className="space-y-0.5">
+                {(['American', 'Fractional', 'Decimal'] as const).map((format) => (
+                  <button
+                    key={format}
+                    onClick={() => setOddsFormat(format)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
+                      oddsFormat === format
+                        ? "text-white bg-white/5"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <span className="w-4 flex-shrink-0">
+                      {oddsFormat === format && <IconCheck className="w-3.5 h-3.5" />}
+                    </span>
+                    {format}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Betslip Settings */}
+            <div className="p-3 border-b border-white/10">
+              <p className="text-xs text-white/50 font-medium mb-2 uppercase tracking-wider">Betslip Settings</p>
+              <div className="space-y-0.5">
+                {([
+                  { value: 'dont_accept' as const, label: "Don't accept odds changes" },
+                  { value: 'higher' as const, label: 'Accept higher odds' },
+                  { value: 'any' as const, label: 'Accept any odds' },
+                ]).map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setBetslipOddsSetting(option.value)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
+                      betslipOddsSetting === option.value
+                        ? "text-white bg-white/5"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <span className="w-4 flex-shrink-0">
+                      {betslipOddsSetting === option.value && <IconCheck className="w-3.5 h-3.5" />}
+                    </span>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Show Confirmation Toggle */}
+            <div className="p-3">
+              <button
+                onClick={() => setShowBetConfirmation(!showBetConfirmation)}
+                className="w-full flex items-center justify-between py-1"
+              >
+                <div
+                  className={cn(
+                    "relative w-10 h-[22px] rounded-full transition-colors duration-200 flex-shrink-0",
+                    showBetConfirmation ? "bg-[var(--ds-primary,#ee3536)]" : "bg-white/20"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "absolute top-[3px] w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
+                      showBetConfirmation ? "translate-x-[22px]" : "translate-x-[3px]"
+                    )}
+                  />
+                </div>
+                <span className="text-sm text-white/70 ml-3">Show Confirmation</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       
       {/* Main Content */}
       <SidebarInset className="bg-[#1a1a1a] text-white overflow-x-hidden" style={{ width: 'auto', flex: '1 1 0%', minWidth: 0, maxWidth: '100%' }}>
@@ -9339,7 +9594,11 @@ function NavTestPageContent() {
                 {openMobile ? (
                   <IconX className="h-4 w-4" strokeWidth={1.5} />
                 ) : (
-                  <IconMenu2 className="h-4 w-4" strokeWidth={1.5} />
+                  <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
+                  </svg>
                 )}
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>
@@ -9358,7 +9617,11 @@ function NavTestPageContent() {
                 {sidebarOpen ? (
                   <IconX className="h-4 w-4" strokeWidth={1.5} />
                 ) : (
-                  <IconMenu2 className="h-4 w-4" strokeWidth={1.5} />
+                  <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
+                  </svg>
                 )}
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>

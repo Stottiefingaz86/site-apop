@@ -635,7 +635,7 @@ function scheduleNextMessage() {
         if (Math.random() < 0.3) {
           store.addMessage('sports', generateDaveMasonReaction())
         } else {
-          store.addMessage('sports', generateReactionMessage())
+        store.addMessage('sports', generateReactionMessage())
         }
       }, randomBetween(500, 2000))
     }

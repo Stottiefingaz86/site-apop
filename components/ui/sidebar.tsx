@@ -247,6 +247,10 @@ const Sidebar = React.forwardRef<
     side?: "left" | "right"
     variant?: "sidebar" | "floating" | "inset"
     collapsible?: "offcanvas" | "icon" | "none"
+    mobileOverlay?: boolean
+    mobileBg?: string
+    mobileOverlayClassName?: string
+    mobileNoDrag?: boolean
   }
 >(
   (
@@ -254,6 +258,10 @@ const Sidebar = React.forwardRef<
       side = "left",
       variant = "sidebar",
       collapsible = "offcanvas",
+      mobileOverlay = false,
+      mobileBg,
+      mobileOverlayClassName,
+      mobileNoDrag = false,
       className,
       children,
       ...props
@@ -286,19 +294,26 @@ const Sidebar = React.forwardRef<
           onOpenChange={setOpenMobile}
           direction="left"
           shouldScaleBackground={false}
+          modal={true}
+          {...(mobileNoDrag ? { dismissible: false, handleOnly: true } : {})}
         >
           <DrawerContent
             data-sidebar="sidebar"
             data-mobile="true"
+            showOverlay={mobileOverlay}
+            overlayClassName={mobileOverlayClassName}
+            onOverlayClick={mobileNoDrag ? () => setOpenMobile(false) : undefined}
+            noDrag={mobileNoDrag}
             className={cn(
               "w-[320px] sm:max-w-[320px] bg-[#2d2d2d] dark:bg-[#2d2d2d] border-r border-white/10 text-white p-0 [&>button]:hidden",
               "[&_*]:text-white [&_*]:text-inherit",
               "shadow-2xl",
+              mobileNoDrag && "!rounded-l-none !rounded-tr-2xl !rounded-br-none overflow-hidden",
               className
             )}
             style={
               {
-                backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)',
+                backgroundColor: mobileBg || 'var(--ds-sidebar-bg, #2d2d2d)',
                 color: 'white',
                 maxWidth: '320px',
                 width: '320px',
@@ -320,21 +335,23 @@ const Sidebar = React.forwardRef<
           >
             {/* Render children directly - same structure as desktop, no extra wrapper */}
             <div 
-              className="flex h-full w-full flex-col bg-[#2d2d2d] dark:bg-[#2d2d2d] overflow-y-auto text-white [&_*]:text-white [&_*]:text-inherit py-2"
+              className={cn(
+                "flex h-full w-full flex-col overflow-y-auto overflow-x-hidden text-white [&_*]:text-white [&_*]:text-inherit scrollbar-hide",
+                mobileNoDrag ? "pt-0 [&_[data-sidebar=content]]:overflow-visible [&_[data-sidebar=content]]:min-h-0" : "py-2"
+              )}
               style={{
                 color: 'white',
-                backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)',
+                backgroundColor: mobileBg || 'var(--ds-sidebar-bg, #2d2d2d)',
                 visibility: 'visible',
                 opacity: 1,
                 display: 'flex',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehavior: 'contain',
-                transform: 'translateZ(0)',
-                WebkitTransform: 'translateZ(0)',
-                paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0px))',
-                paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0px))',
+                paddingTop: mobileNoDrag ? '0px' : 'max(0.5rem, env(safe-area-inset-top, 0px))',
+                paddingBottom: mobileNoDrag ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'max(0.5rem, env(safe-area-inset-bottom, 0px))',
                 pointerEvents: 'auto',
-                overflow: 'visible',
+                overflowX: 'hidden',
+                overflowY: 'auto',
               }}
             >
               {children}

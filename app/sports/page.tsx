@@ -3325,7 +3325,7 @@ const EventMarketsCarousel = React.memo(function EventMarketsCarousel({ event, a
 
 // Sports Page Component
 function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimaryHover, onSearchClick, betslipOpen, setBetslipOpen, bets, setBets, setShowToast, setToastMessage, setToastAction, placedBets, setPlacedBets, myBetsAlertCount, setMyBetsAlertCount, betslipManuallyClosed, setBetslipManuallyClosed, activeSport, setActiveSport }: { activeTab: string; onTabChange: (tab: string) => void; onBack: () => void; brandPrimary: string; brandPrimaryHover: string; onSearchClick: () => void; betslipOpen: boolean; setBetslipOpen: (open: boolean) => void; bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>; setBets: (bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }> | ((prev: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>) => Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number }>)) => void; setShowToast: (show: boolean) => void; setToastMessage: (message: string) => void; setToastAction: (action: { label: string; onClick: () => void } | null) => void; placedBets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>; setPlacedBets: (bets: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }> | ((prev: Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>) => Array<{ id: string; eventId: number; eventName: string; marketTitle: string; selection: string; odds: string; stake: number; placedAt: Date }>)) => void; myBetsAlertCount: number; setMyBetsAlertCount: (count: number | ((prev: number) => number)) => void; betslipManuallyClosed: boolean; setBetslipManuallyClosed: (closed: boolean) => void; activeSport: string; setActiveSport: (sport: string) => void }) {
-  const { state: sidebarState, toggleSidebar } = useSidebar()
+  const { state: sidebarState, toggleSidebar, setOpenMobile } = useSidebar()
   const isMobile = useIsMobile()
   const router = useRouter()
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
@@ -3447,6 +3447,13 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   }, [])
   const [eventOrderBy, setEventOrderBy] = useState<string>('Popularity')
   const [selectedLeague, setSelectedLeague] = useState<number>(1) // Default to Premier League (id: 1)
+
+  // Sportsbook settings state
+  const [sportsbookSettingsOpen, setSportsbookSettingsOpen] = useState(false)
+  const [oddsFormat, setOddsFormat] = useState<'American' | 'Fractional' | 'Decimal'>('American')
+  const [betslipOddsSetting, setBetslipOddsSetting] = useState<'dont_accept' | 'higher' | 'any'>('higher')
+  const [showBetConfirmation, setShowBetConfirmation] = useState(false)
+
   
   // Slots carousel state
   const [sportsSlotsCarouselApi, setSportsSlotsCarouselApi] = useState<CarouselApi>()
@@ -5178,44 +5185,46 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
       >
         <SidebarContent className="overflow-y-auto">
           <TooltipProvider>
-            {/* Settings Icon - Show when collapsed */}
-            {sidebarState === 'collapsed' && (
-              <div className="p-2 border-b border-white/10">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('Settings clicked')
-                      }}
-                      className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/5 cursor-pointer w-full"
-                    >
-                      <IconSettings className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
-                    <p>Settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-            
-          {/* Time + Odds Format - Hide when collapsed */}
-          {sidebarState !== 'collapsed' && (
-          <div className="p-2 border-b border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <select className="flex-1 bg-white/5 border border-white/10 rounded-small px-2 py-1.5 text-xs text-white/70">
-                <option>Starting in</option>
-              </select>
-              <select className="flex-1 bg-white/5 border border-white/10 rounded-small px-2 py-1.5 text-xs text-white/70">
-                <option>American</option>
-              </select>
-            </div>
-          </div>
-          )}
+            {/* Settings */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton
+                          className={cn(
+                            "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                            "text-white/70 hover:text-white hover:bg-white/5",
+                            sportsbookSettingsOpen && "bg-white/5 text-white"
+                          )}
+                          onClick={() => {
+                            if (isMobile) {
+                              setOpenMobile(false)
+                              setTimeout(() => setSportsbookSettingsOpen(true), 300)
+                            } else {
+                              setSportsbookSettingsOpen(true)
+                            }
+                          }}
+                        >
+                          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
+                            <IconSettings strokeWidth={1.5} className="w-4 h-4" />
+                          </div>
+                          <span>Settings</span>
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                          <p>Settings</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+
             <SidebarGroup>
               <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">FEATURES</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -5535,6 +5544,103 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
           </TooltipProvider>
         </SidebarContent>
       </Sidebar>
+
+      {/* Settings Modal */}
+      {sportsbookSettingsOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[10002] flex items-center justify-center pt-[10px] md:pt-0" onClick={() => setSportsbookSettingsOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div 
+            className="relative w-[85vw] max-w-sm bg-[#2d2d2d] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <IconSettings strokeWidth={1.5} className="w-4 h-4 text-white/70" />
+                <span className="text-sm font-semibold text-white">Settings</span>
+              </div>
+              <button onClick={() => setSportsbookSettingsOpen(false)} className="p-1 rounded-md text-white/50 hover:text-white hover:bg-white/5 transition-colors">
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Odds Format */}
+            <div className="p-3 border-b border-white/10">
+              <p className="text-xs text-white/50 font-medium mb-2 uppercase tracking-wider">Odds Format</p>
+              <div className="space-y-0.5">
+                {(['American', 'Fractional', 'Decimal'] as const).map((format) => (
+                  <button
+                    key={format}
+                    onClick={() => setOddsFormat(format)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
+                      oddsFormat === format
+                        ? "text-white bg-white/5"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <span className="w-4 flex-shrink-0">
+                      {oddsFormat === format && <IconCheck className="w-3.5 h-3.5" />}
+                    </span>
+                    {format}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Betslip Settings */}
+            <div className="p-3 border-b border-white/10">
+              <p className="text-xs text-white/50 font-medium mb-2 uppercase tracking-wider">Betslip Settings</p>
+              <div className="space-y-0.5">
+                {([
+                  { value: 'dont_accept' as const, label: "Don't accept odds changes" },
+                  { value: 'higher' as const, label: 'Accept higher odds' },
+                  { value: 'any' as const, label: 'Accept any odds' },
+                ]).map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setBetslipOddsSetting(option.value)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
+                      betslipOddsSetting === option.value
+                        ? "text-white bg-white/5"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <span className="w-4 flex-shrink-0">
+                      {betslipOddsSetting === option.value && <IconCheck className="w-3.5 h-3.5" />}
+                    </span>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Show Confirmation Toggle */}
+            <div className="p-3">
+              <button
+                onClick={() => setShowBetConfirmation(!showBetConfirmation)}
+                className="w-full flex items-center justify-between py-1"
+              >
+                <div
+                  className={cn(
+                    "relative w-10 h-[22px] rounded-full transition-colors duration-200 flex-shrink-0",
+                    showBetConfirmation ? "bg-[var(--ds-primary,#ee3536)]" : "bg-white/20"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "absolute top-[3px] w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
+                      showBetConfirmation ? "translate-x-[22px]" : "translate-x-[3px]"
+                    )}
+                  />
+                </div>
+                <span className="text-sm text-white/70 ml-3">Show Confirmation</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       
       {/* Main Content */}
       <SidebarInset className="bg-[#1a1a1a] text-white overflow-x-hidden" style={{ width: 'auto', flex: '1 1 0%', minWidth: 0, maxWidth: '100%' }}>
@@ -8897,7 +9003,7 @@ function NavTestPageContent() {
                   { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { window.location.href = '/poker'; setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setQuickLinksOpen(false); } },
+                  { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -8969,7 +9075,11 @@ function NavTestPageContent() {
                 {openMobile ? (
                   <IconX className="h-4 w-4" strokeWidth={1.5} />
                 ) : (
-                  <IconMenu2 className="h-4 w-4" strokeWidth={1.5} />
+                  <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
+                  </svg>
                 )}
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>
@@ -8988,7 +9098,11 @@ function NavTestPageContent() {
                 {sidebarOpen ? (
                   <IconX className="h-4 w-4" strokeWidth={1.5} />
                 ) : (
-                  <IconMenu2 className="h-4 w-4" strokeWidth={1.5} />
+                  <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
+                    <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
+                  </svg>
                 )}
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>
@@ -10891,6 +11005,7 @@ function NavTestPageContent() {
                             })
                             setInitialVipSidebarItem('Cash Races')
                             setShowVipRewards(true)
+                            setShowSports(false)
                             // Scroll to top when navigating to new page
                             window.scrollTo({ top: 0, behavior: 'smooth' })
                           }}

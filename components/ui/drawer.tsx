@@ -92,15 +92,16 @@ DrawerHandle.displayName = "DrawerHandle"
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { noOverlay?: boolean; showOverlay?: boolean }
->(({ className, children, noOverlay = false, showOverlay = false, style, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { noOverlay?: boolean; showOverlay?: boolean; overlayClassName?: string; onOverlayClick?: () => void; noDrag?: boolean }
+>(({ className, children, noOverlay = false, showOverlay = false, overlayClassName, onOverlayClick, noDrag = false, style, ...props }, ref) => {
   return (
     <DrawerPortal>
       {showOverlay && (
-        <DrawerOverlay />
+        <DrawerOverlay className={overlayClassName} onClick={onOverlayClick ? (e) => { e.stopPropagation(); onOverlayClick(); } : undefined} />
       )}
       <DrawerPrimitive.Content
         ref={ref}
+        {...(noDrag ? { 'data-vaul-no-drag': '' } : {})}
         className={cn(
           "fixed z-[9999] flex flex-col border bg-background",
           "[&[data-vaul-drawer-direction='right']]:inset-y-0 [&[data-vaul-drawer-direction='right']]:right-0 [&[data-vaul-drawer-direction='right']]:h-full [&[data-vaul-drawer-direction='right']]:w-3/4 [&[data-vaul-drawer-direction='right']]:sm:max-w-sm [&[data-vaul-drawer-direction='right']]:rounded-l-[10px] [&[data-vaul-drawer-direction='right']]:border-l",
