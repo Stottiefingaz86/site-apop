@@ -1015,39 +1015,39 @@ function LevelsCarousel() {
           {/* Arrows — desktop only */}
           {!isMobile && (
             <>
-              <Button
-                onClick={() => {
-                  if (api) {
-                    const currentIndex = api.selectedScrollSnap()
-                    const targetIndex = Math.max(0, currentIndex - 1)
-                    api.scrollTo(targetIndex)
-                  }
-                }}
-                className="!left-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
-                variant="outline"
-                size="icon"
-                disabled={!api || !canScrollPrev}
-              >
-                <IconChevronLeft className="h-4 w-4 m-0" strokeWidth={1.5} />
-                <span className="sr-only">Previous slide</span>
-              </Button>
-              <Button
-                onClick={() => {
-                  if (api) {
-                    const currentIndex = api.selectedScrollSnap()
-                    const slideCount = api.scrollSnapList().length
-                    const targetIndex = Math.min(slideCount - 1, currentIndex + 1)
-                    api.scrollTo(targetIndex)
-                  }
-                }}
-                className="!right-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
-                variant="outline"
-                size="icon"
-                disabled={!api || !canScrollNext}
-              >
-                <IconChevronRight className="h-4 w-4 m-0" strokeWidth={1.5} />
-                <span className="sr-only">Next slide</span>
-              </Button>
+          <Button
+            onClick={() => {
+              if (api) {
+                const currentIndex = api.selectedScrollSnap()
+                const targetIndex = Math.max(0, currentIndex - 1)
+                api.scrollTo(targetIndex)
+              }
+            }}
+            className="!left-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
+            variant="outline"
+            size="icon"
+            disabled={!api || !canScrollPrev}
+          >
+            <IconChevronLeft className="h-4 w-4 m-0" strokeWidth={1.5} />
+            <span className="sr-only">Previous slide</span>
+          </Button>
+          <Button
+            onClick={() => {
+              if (api) {
+                const currentIndex = api.selectedScrollSnap()
+                const slideCount = api.scrollSnapList().length
+                const targetIndex = Math.min(slideCount - 1, currentIndex + 1)
+                api.scrollTo(targetIndex)
+              }
+            }}
+            className="!right-2 !top-1/2 !-translate-y-1/2 !-translate-x-0 !absolute text-white border-white/20 hover:bg-white/10 bg-[#1a1a1a]/80 z-30 !visible !opacity-100 !flex h-8 w-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center p-0"
+            variant="outline"
+            size="icon"
+            disabled={!api || !canScrollNext}
+          >
+            <IconChevronRight className="h-4 w-4 m-0" strokeWidth={1.5} />
+            <span className="sr-only">Next slide</span>
+          </Button>
             </>
           )}
         </Carousel>
@@ -1278,7 +1278,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1295,20 +1295,20 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
             ].map((banner, index) => (
               <CarouselItem key={index} className={`${index === 0 ? 'pl-0' : 'pl-2 md:pl-4'} basis-auto flex-shrink-0`}>
                 <Card className="border-0 relative overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity rounded-small" style={{ width: '340px', height: '164px' }}>
-                  <Image
+                <Image
                     src={banner.src}
                     alt={banner.alt}
                     width={340}
                     height={164}
                     className="object-cover w-full h-full"
-                    unoptimized
+                  unoptimized
                   />
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
         {/* Cash Races Title with Back Button */}
         <div className="flex items-center gap-4 mb-6">
@@ -1549,7 +1549,7 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1577,9 +1577,9 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* Promos Section */}
@@ -1823,7 +1823,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
     <SidebarInset className="bg-[#1a1a1a] text-white">
       {/* Banner Carousel - Full Width with Arrows */}
       <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-        <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
+          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
           {!isMobile && (
             <>
               <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
@@ -1851,9 +1851,9 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
                 </Card>
               </CarouselItem>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+            </CarouselContent>
+          </Carousel>
+        </div>
       <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
 
         {/* My Bonus Section */}
@@ -1894,7 +1894,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
           {/* Sports Tab Content */}
           {activeTab === 'Sports' && (
             <>
-              {/* Filters */}
+          {/* Filters */}
               {isMobile ? (
             /* Mobile: ADD FILTER bar */
             <Popover>
@@ -2042,7 +2042,7 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
 
           {/* Mobile: Card-based list */}
           {isMobile ? (
-            <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
               {/* Header row */}
               <div className="flex items-center px-4 py-3 border-b border-white/10">
                 <span className="flex-1 text-sm font-medium text-white/60">Code</span>
@@ -2109,112 +2109,112 @@ function MyBonusPage({ brandPrimary, setShowVipRewards }: { brandPrimary: string
             <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden mb-4">
               <div className="overflow-x-auto">
                 <Table className="table-fixed min-w-[540px]">
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id} className="hover:bg-transparent border-white/10">
-                        {headerGroup.headers.map((header) => {
-                          return (
-                            <TableHead
-                              key={header.id}
-                              style={{ width: `${header.getSize()}px` }}
-                              className="h-11 text-white/60 text-xs font-normal">
-                              {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                                <div
-                                  className={cn(
-                                    header.column.getCanSort() &&
-                                      "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
-                                  )}
-                                  onClick={header.column.getToggleSortingHandler()}
-                                  onKeyDown={(e) => {
-                                    if (
-                                      header.column.getCanSort() &&
-                                      (e.key === "Enter" || e.key === " ")
-                                    ) {
-                                      e.preventDefault();
-                                      header.column.getToggleSortingHandler()?.(e);
-                                    }
-                                  }}
-                                  tabIndex={header.column.getCanSort() ? 0 : undefined}>
-                                  {flexRender(header.column.columnDef.header, header.getContext())}
-                                  {{
-                                    asc: (
-                                      <ChevronUpIcon
-                                        className="shrink-0 opacity-60 text-white"
-                                        size={16}
-                                        aria-hidden="true"
-                                      />
-                                    ),
-                                    desc: (
-                                      <ChevronDownIcon
-                                        className="shrink-0 opacity-60 text-white"
-                                        size={16}
-                                        aria-hidden="true"
-                                      />
-                                    )
-                                  }[header.column.getIsSorted() as string] ?? null}
-                                </div>
-                              ) : (
-                                flexRender(header.column.columnDef.header, header.getContext())
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent border-white/10">
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead
+                          key={header.id}
+                          style={{ width: `${header.getSize()}px` }}
+                          className="h-11 text-white/60 text-xs font-normal">
+                          {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                            <div
+                              className={cn(
+                                header.column.getCanSort() &&
+                                  "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
                               )}
-                            </TableHead>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <React.Fragment key={row.id}>
-                          <TableRow className="border-white/10 hover:bg-white/5">
-                            {row.getVisibleCells().map((cell) => {
-                              // Skip rendering the actions cell in the main row
-                              if (cell.column.id === "actions") {
-                                return null
-                              }
-                              return (
-                                <TableCell key={cell.id}>
-                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                              )
-                            })}
-                            <TableCell className="w-[60px]">
-                              <button
-                                onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
-                                className="flex items-center justify-center w-full h-full"
-                              >
-                                <IconChevronDown 
-                                  className={cn(
-                                    "w-4 h-4 text-white/70 transition-transform",
-                                    expandedRow === row.id && "rotate-180"
-                                  )} 
-                                />
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                          {expandedRow === row.id && (
-                            <TableRow className="border-white/10">
-                              <TableCell colSpan={columns.length} className="py-4 bg-white/5">
-                                <div className="space-y-2 pl-4">
-                                  <div className="text-sm text-white/70">
-                                    <strong className="text-white">Bonus Details:</strong> Additional information about this bonus will appear here.
-                                  </div>
-                                </div>
-                              </TableCell>
-                            </TableRow>
+                              onClick={header.column.getToggleSortingHandler()}
+                              onKeyDown={(e) => {
+                                if (
+                                  header.column.getCanSort() &&
+                                  (e.key === "Enter" || e.key === " ")
+                                ) {
+                                  e.preventDefault();
+                                  header.column.getToggleSortingHandler()?.(e);
+                                }
+                              }}
+                              tabIndex={header.column.getCanSort() ? 0 : undefined}>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {{
+                                asc: (
+                                  <ChevronUpIcon
+                                    className="shrink-0 opacity-60 text-white"
+                                    size={16}
+                                    aria-hidden="true"
+                                  />
+                                ),
+                                desc: (
+                                  <ChevronDownIcon
+                                    className="shrink-0 opacity-60 text-white"
+                                    size={16}
+                                    aria-hidden="true"
+                                  />
+                                )
+                              }[header.column.getIsSorted() as string] ?? null}
+                            </div>
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
                           )}
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className="h-24 text-center text-white/70">
-                          No results.
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <React.Fragment key={row.id}>
+                      <TableRow className="border-white/10 hover:bg-white/5">
+                        {row.getVisibleCells().map((cell) => {
+                          // Skip rendering the actions cell in the main row
+                          if (cell.column.id === "actions") {
+                            return null
+                          }
+                          return (
+                            <TableCell key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          )
+                        })}
+                        <TableCell className="w-[60px]">
+                          <button
+                            onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
+                            className="flex items-center justify-center w-full h-full"
+                          >
+                            <IconChevronDown 
+                              className={cn(
+                                "w-4 h-4 text-white/70 transition-transform",
+                                expandedRow === row.id && "rotate-180"
+                              )} 
+                            />
+                          </button>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      {expandedRow === row.id && (
+                        <TableRow className="border-white/10">
+                          <TableCell colSpan={columns.length} className="py-4 bg-white/5">
+                            <div className="space-y-2 pl-4">
+                              <div className="text-sm text-white/70">
+                                <strong className="text-white">Bonus Details:</strong> Additional information about this bonus will appear here.
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center text-white/70">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
             </div>
           )}
             </>
@@ -2438,7 +2438,7 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
         variant="sidebar"
         className="!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] hidden md:flex"
       >
-        <SidebarContent className="overflow-y-auto">
+        <SidebarContent className="overflow-y-auto flex flex-col">
           <TooltipProvider>
             <SidebarGroup>
               <SidebarGroupContent>
@@ -2541,7 +2541,49 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
+
+            {/* Spacer to push bottom items down */}
+            <div className="flex-1" />
+
+            <Separator className="bg-white/10 mx-2" />
+
+            {/* Bottom section — Loyalty Hub, Banking, Need Help */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {[
+                    { icon: IconCrown, label: 'Loyalty Hub' },
+                    { icon: IconBuilding, label: 'Banking' },
+                    { icon: IconLifebuoy, label: 'Need Help' },
+                  ].map((item, index) => {
+                    const Icon = item.icon
+                    return (
+                      <SidebarMenuItem key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              className="w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer text-white/70 hover:text-white hover:bg-white/5"
+                            >
+                              <Icon strokeWidth={1.5} className="w-5 h-5" />
+                              <span>{item.label}</span>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          {sidebarState === 'collapsed' && (
+                            <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                              <p>{item.label}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
           </TooltipProvider>
+          {/* Spacer for Safari bottom bar on mobile */}
+          {isMobileVip && <div className="flex-shrink-0 h-24" />}
         </SidebarContent>
       </Sidebar>
       
@@ -2669,9 +2711,9 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
                   </div>
                 </CardContent>
               </Card>
-              </div>
+            </div>
               <div className="flex flex-col md:flex-row gap-3">
-                <TotalRewardsCard />
+          <TotalRewardsCard />
                 <div className="flex-1 min-w-0">
                   <StreakCounter />
                 </div>
@@ -3762,18 +3804,18 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   }, 0) + parlayPotentialWin
 
   // ── Betslip state hoisted to parent so it survives view re-renders ──
-  const currencySymbol = '$'
+    const currencySymbol = '$'
   const [bsIsScrolled, setBsIsScrolled] = useState(false)
-  const [nudgeKey, setNudgeKey] = useState(0)
+    const [nudgeKey, setNudgeKey] = useState(0)
   const bsScrollContainerRef = useRef<HTMLDivElement>(null)
-  const previousBetsLengthRef = useRef(bets.length)
-  const [localStakes, setLocalStakes] = useState<Record<string, string>>({})
-  const [localParlayStake, setLocalParlayStake] = useState<string>('')
+    const previousBetsLengthRef = useRef(bets.length)
+    const [localStakes, setLocalStakes] = useState<Record<string, string>>({})
+    const [localParlayStake, setLocalParlayStake] = useState<string>('')
   const [numpadTarget, _setNumpadTarget] = useState<string | null>(null)
   const numpadTargetRef = useRef<string | null>(null)
   const setNumpadTarget = (val: string | null) => { numpadTargetRef.current = val; _setNumpadTarget(val) }
-  const inputRefs = useRef<Record<string, HTMLInputElement>>({})
-  const focusedInputRef = useRef<string | null>(null)
+    const inputRefs = useRef<Record<string, HTMLInputElement>>({})
+    const focusedInputRef = useRef<string | null>(null)
 
   // ── Betslip numpad handlers (parent scope so they survive re-renders) ──
   const handleNumpadDigit = useCallback((digit: string) => {
@@ -3848,11 +3890,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
     const container = bsScrollContainerRef.current
     if (!container) return
     const handleScroll = () => setBsIsScrolled(container.scrollTop > 0)
-    container.addEventListener('scroll', handleScroll)
-    return () => container.removeEventListener('scroll', handleScroll)
+      container.addEventListener('scroll', handleScroll)
+      return () => container.removeEventListener('scroll', handleScroll)
   }, [betslipOpen])
 
-  useEffect(() => {
+    useEffect(() => {
     if (!isMobile || !numpadTarget) return
     const container = bsScrollContainerRef.current
     if (!container) return
@@ -3872,14 +3914,14 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
     return () => clearTimeout(timer)
   }, [isMobile, numpadTarget])
 
-  useEffect(() => {
-    const prevLength = previousBetsLengthRef.current
-    const newLength = bets.length
+    useEffect(() => {
+      const prevLength = previousBetsLengthRef.current
+      const newLength = bets.length
     if (newLength > prevLength && betslipMinimized && !isMobile) {
       setNudgeKey(prev => prev + 1)
     }
-    previousBetsLengthRef.current = newLength
-  }, [bets.length, betslipMinimized, isMobile])
+      previousBetsLengthRef.current = newLength
+    }, [bets.length, betslipMinimized, isMobile])
 
   // Betslip Views — pure render function (called directly, NOT as <Component/>)
   const renderBetslipDefault = () => {
@@ -3973,7 +4015,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               }}
               className="text-[10px] font-semibold uppercase tracking-wide text-black/60 hover:text-black/80 flex items-center gap-1 px-2.5 py-1 rounded-md border border-black/20 hover:border-black/30 transition-colors"
             >
-              <IconChevronDown className="w-3 h-3" />
+                  <IconChevronDown className="w-3 h-3" />
                   MINIMIZE
                   </button>
                 )}
@@ -4013,7 +4055,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               minHeight: 0,
               overflowY: 'auto', 
               overflowX: 'hidden', 
-              WebkitOverflowScrolling: 'touch',
+              WebkitOverflowScrolling: 'touch', 
               touchAction: 'pan-y',
               overscrollBehavior: 'auto',
             }}
@@ -4196,11 +4238,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         </>
                       ) : (
                         <>
-                          <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">{bet.selection}</div>
-                          <div className="text-[10px] text-black/50 mb-0.5 leading-tight">{bet.marketTitle}</div>
-                          {event && (
+                      <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">{bet.selection}</div>
+                      <div className="text-[10px] text-black/50 mb-0.5 leading-tight">{bet.marketTitle}</div>
+                      {event && (
                             <>
-                              <div className="text-[10px] text-black/40 truncate leading-tight">{event.team1} v {event.team2}</div>
+                        <div className="text-[10px] text-black/40 truncate leading-tight">{event.team1} v {event.team2}</div>
                               {('isLive' in event) && (event as any).isLive && liveScores[bet.eventId] && (
                                 <div className="flex items-center gap-1.5 mt-1">
                                   <div className="flex items-center gap-0.5 bg-red-500/10 border border-red-500/20 rounded px-1 py-[1px]">
@@ -4258,9 +4300,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             onFocus={(e) => {
                               if (isMobile) {
                                 setNumpadTarget(bet.id)
-                                if (localStakes[bet.id] === undefined) {
-                                  setLocalStakes(prev => ({ ...prev, [bet.id]: bet.stake === 0 ? '' : bet.stake.toString() }))
-                                }
+                              if (localStakes[bet.id] === undefined) {
+                                setLocalStakes(prev => ({ ...prev, [bet.id]: bet.stake === 0 ? '' : bet.stake.toString() }))
+                              }
                                 e.target.blur()
                                 return
                               }
@@ -4309,7 +4351,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         To Win {currencySymbol}{toWin.toFixed(2)}
                       </div>
                     </div>
-                    </div>
+                  </div>
                   </motion.div>
                 )
               })}
@@ -4494,7 +4536,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
             onDone={handleNumpadDone}
             onQuickAmount={handleQuickAmount}
           />
-        )}
+                )}
 
       </div>
     )
@@ -4668,40 +4710,86 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
         mobileOverlayClassName="!bg-black/30 !backdrop-blur-sm"
         className="!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] !h-screen !top-0 !z-[102]"
       >
-        {/* Sidebar Header — B lockup logo + close button (mobile only) */}
-        {isMobile && (
-        <SidebarHeader
+        {/* Sidebar Header — sticky, clean (both mobile and desktop) */}
+        <SidebarHeader 
           className="px-4 h-14 flex items-center flex-shrink-0 overflow-hidden sticky top-0 z-20"
           style={{
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            backgroundColor: 'rgba(45, 45, 45, 0.92)',
+            backdropFilter: isMobile ? 'none' : 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px) saturate(180%)',
+            backgroundColor: isMobile ? '#2d2d2d' : 'rgba(45, 45, 45, 0.75)',
           }}
         >
           <div className="relative w-full h-full flex items-center justify-center">
-            <motion.div
-              key="b-lockup-sports-mobile"
-              className="flex items-center justify-center"
-              initial={{ opacity: 0, y: 12, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 350, damping: 20, mass: 0.6, delay: 0.05 }}
-            >
-              <svg viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
-                <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
-              </svg>
-            </motion.div>
-            <button
-              onClick={() => setOpenMobile(false)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="9" y1="3" x2="9" y2="21" />
-              </svg>
-            </button>
+            {/* Close button — right side (absolute so logo stays centred) */}
+            {isMobile && (
+              <button
+                onClick={() => setOpenMobile(false)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                </svg>
+              </button>
+            )}
+            <div onClick={() => router.push('/')} className="cursor-pointer">
+            <AnimatePresence mode="wait" initial={false}>
+              {(sidebarState === 'collapsed' && !isMobile) ? (
+                <motion.div
+                  key="b-lockup-sports-desktop"
+                  className="flex items-center justify-center"
+                  initial={{ opacity: 0, y: 16, scale: 0.75 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, transition: { duration: 0.08 } }}
+                  transition={{ type: "spring", stiffness: 400, damping: 18, mass: 0.6, delay: 0.2 }}
+                >
+                  <svg viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
+                  </svg>
+                </motion.div>
+              ) : isMobile ? (
+                <motion.div
+                  key="b-lockup-sports-mobile"
+                  className="flex items-center justify-center"
+                  initial={{ opacity: 0, y: 12, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20, mass: 0.6, delay: 0.05 }}
+                >
+                  <svg viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
+                  </svg>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="full-logo-sports"
+                  className="flex items-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.05 } }}
+                  transition={{ duration: 0.1 }}
+                >
+                  {/* Full BETONLINE logo */}
+                  <div className="h-5 w-[110px] flex-shrink-0">
+                    <svg viewBox="0 0 640 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      <g id="BETONLINE">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
+                        <path d="M120.693 85.7021V0.0993091H178.194V17.4781H140.558V33.6651H176.197V50.2494H140.658V68.0254H180.39V85.7021H120.693Z" fill="#ee3536"/>
+                        <path d="M257.757 8.54042C261.251 5.16397 265.244 2.38337 269.736 0.0993091H185.781V17.776H209.939V85.7021H230.604V17.776H250.37C252.466 14.3995 254.962 11.321 257.757 8.54042Z" fill="#ee3536"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M313.761 3.47575C319.151 5.66051 323.843 8.63973 327.737 12.5127C331.63 16.3857 334.625 20.9538 336.821 26.1178C339.017 31.3811 340.115 37.0416 340.115 43.0993C340.115 49.1571 339.017 54.9169 336.821 60.0808C334.625 65.2448 331.63 69.8129 327.737 73.6859C323.843 77.4596 319.151 80.5381 313.761 82.7229C308.27 84.9076 302.28 86 295.891 86C289.403 86 283.413 84.9076 278.022 82.7229C272.631 80.5381 267.939 77.5589 264.046 73.6859C260.253 69.9122 257.158 65.2448 254.962 60.0808C252.766 54.8176 251.667 49.1571 251.667 43.0993C251.667 37.0416 252.766 31.2818 254.962 26.1178C257.158 20.9538 260.153 16.3857 264.046 12.5127C267.939 8.73903 272.631 5.66051 278.022 3.47575C283.513 1.291 289.502 0.198618 295.891 0.198618C302.38 0.198618 308.37 1.291 313.761 3.47575ZM324.642 55.3141C326.139 51.5404 326.838 47.3695 326.838 43.0993C326.838 38.8291 326.04 34.6582 324.642 30.8845C323.244 27.1109 321.148 23.7344 318.453 20.9538C315.757 18.1732 312.563 15.8891 308.769 14.2009C305.076 12.5127 300.783 11.7182 296.091 11.7182C291.399 11.7182 287.206 12.5127 283.413 14.2009C279.719 15.8891 276.425 18.1732 273.73 20.9538C271.134 23.7344 269.038 27.1109 267.54 30.8845C266.043 34.6582 265.344 38.8291 265.344 43.0993C265.344 47.3695 266.043 51.5404 267.54 55.3141C268.938 59.0878 271.034 62.4642 273.73 65.2448C276.425 68.0254 279.619 70.3095 283.413 71.9977C287.107 73.6859 291.399 74.4804 296.091 74.4804C300.783 74.4804 304.976 73.6859 308.769 71.9977C312.463 70.3095 315.757 68.0254 318.453 65.2448C321.048 62.4642 323.145 59.0878 324.642 55.3141Z" fill="white"/>
+                        <path d="M437.847 0.0993091H425.069V85.6028H476.681V74.1824H437.847V0.0993091Z" fill="white"/>
+                        <path d="M484.268 0.0993091H497.046V85.7021H484.268V0.0993091Z" fill="white"/>
+                        <path d="M594.778 74.1824V48.2633H634.909V36.7436H594.778V11.6189H637.804V0.0993091H582V85.6028H640V74.1824H594.778Z" fill="white"/>
+                        <path d="M347.802 0.0993091L405.403 56.903V0.0993091H417.482V85.6028L359.782 29.4942V85.6028H347.802V0.0993091Z" fill="white"/>
+                        <path d="M562.333 57.3002L504.633 0.0993091V85.6028H516.712V29.8915L574.313 85.2055V0.0993091H562.333V57.3002Z" fill="white"/>
+                      </g>
+                    </svg>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            </div>
           </div>
         </SidebarHeader>
-        )}
 
         {/* Quick Links — mobile only, below logo, sticky */}
         {isMobile && (
@@ -4809,15 +4897,15 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
           </AnimatePresence>
         )}
 
-        <SidebarContent className="overflow-y-auto">
+        <SidebarContent className="overflow-y-auto flex flex-col">
           <TooltipProvider>
             {/* Settings */}
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
                         <SidebarMenuButton
                           className={cn(
                             "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
@@ -4838,11 +4926,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                           </div>
                           <span>Settings</span>
                         </SidebarMenuButton>
-                      </TooltipTrigger>
+                  </TooltipTrigger>
                       {sidebarState === 'collapsed' && (
-                        <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
-                          <p>Settings</p>
-                        </TooltipContent>
+                  <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                    <p>Settings</p>
+                  </TooltipContent>
                       )}
                     </Tooltip>
                   </SidebarMenuItem>
@@ -9097,12 +9185,12 @@ function NavTestPageContent() {
               const startTime = performance.now()
               const animate = (now: number) => {
                 const elapsed = now - startTime
-                const progress = Math.min(elapsed / duration, 1)
+            const progress = Math.min(elapsed / duration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3)
                 setDisplayBalance(+(start + (end - start) * eased).toFixed(2))
                 if (progress < 1) requestAnimationFrame(animate)
-              }
-              requestAnimationFrame(animate)
+          }
+          requestAnimationFrame(animate)
               return currentDisplay
             })
             return newBal
@@ -9282,12 +9370,13 @@ function NavTestPageContent() {
                 ease: "easeOut",
                 duration: 0.2
               }}
-          className="fixed left-0 right-0 bg-[#2d2d2d] overflow-hidden z-[100]"
+          className="fixed left-0 right-0 overflow-hidden z-[100]"
           style={{ 
             top: 0, 
             pointerEvents: quickLinksOpen ? 'auto' : 'none',
             opacity: 1,
-            visibility: 'visible'
+            visibility: 'visible',
+            backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
           }}
         >
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
@@ -9334,8 +9423,8 @@ function NavTestPageContent() {
       <motion.header 
         data-nav-header
         className={cn(
-          "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed left-0 right-0",
-          isMobile ? "px-3" : "px-6",
+          "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed right-0",
+          isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6"),
           isMobile && quickLinksOpen && "border-t-0"
         )}
         initial={false}
@@ -9352,11 +9441,14 @@ function NavTestPageContent() {
           pointerEvents: 'auto',
           top: isMobile ? (quickLinksOpen ? 40 : 0) : 0,
           zIndex: 101,
-          position: 'fixed'
+          position: 'fixed',
+          boxShadow: '0 -200px 0 0 var(--ds-nav-bg, #2D2E2C)',
         }}
       >
           <div className="flex items-center gap-6">
-            {isMobile ? (
+            {/* Hamburger + Logo — mobile only (desktop has sidebar logo) */}
+            {isMobile && (
+              <>
               <Button
                 variant="ghost"
                 size="icon"
@@ -9378,43 +9470,41 @@ function NavTestPageContent() {
                 )}
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-white hover:bg-white/5"
+              <div 
+                className="relative h-8 w-[120px] flex items-center cursor-pointer"
                 onClick={() => {
-                  if (sidebarState === 'collapsed') {
-                    useChatStore.getState().setIsOpen(false)
-                  }
-                  toggleSidebar()
+                  router.push('/')
                 }}
               >
-                {sidebarOpen ? (
-                  <IconX className="h-4 w-4" strokeWidth={1.5} />
-                ) : (
-                  <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
-                    <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
-                    <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
-                    <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
-                  </svg>
-                )}
-                <span className="sr-only">Toggle Sidebar</span>
-              </Button>
+                {currentBrand.logo}
+              </div>
+              </>
             )}
-            <div 
-              className="relative h-8 w-[120px] flex items-center cursor-pointer"
-              onClick={() => {
-                router.push('/')
-              }}
-            >
-              {currentBrand.logo}
-            </div>
             
             {/* Navigation Menu - Desktop only */}
             {!isMobile && (
-              <nav className="flex-1 flex items-center z-[110] ml-6" style={{ pointerEvents: 'auto' }}>
+              <nav className="flex-1 flex items-center z-[110] -ml-1" style={{ pointerEvents: 'auto' }}>
                 <SidebarMenu className="flex flex-row items-center gap-2">
+                  {/* Sidebar collapse toggle — always visible on desktop */}
+                  <div className="flex items-center gap-1.5 mr-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (sidebarState === 'collapsed') {
+                          useChatStore.getState().setIsOpen(false)
+                        }
+                        toggleSidebar()
+                      }}
+                      className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <line x1="9" y1="3" x2="9" y2="21" />
+                      </svg>
+                    </Button>
+                    <div className="w-px h-5 bg-white/20" />
+                  </div>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       className={cn(
@@ -9741,8 +9831,8 @@ function NavTestPageContent() {
           </div>
         </motion.header>
 
-        {/* Sports Sub Nav - Sticky with glass effect */}
-        {showSports && (
+        {/* Sports Sub Nav - Sticky with glass effect — hide during page transitions (e.g. sports→VIP) */}
+        {showSports && !isPageTransitioning && (
           <motion.div
             data-sub-nav
             className={cn(
@@ -10409,6 +10499,16 @@ function NavTestPageContent() {
 
         {/* Content area with sidebar and main content - starts below header */}
         <div className="flex relative" style={{ marginTop: '64px' }}>
+          {/* Persistent sidebar backdrop — prevents black flash during page transitions */}
+          {!isMobile && (
+            <div 
+              className="fixed top-0 left-0 h-screen z-[101] transition-[width] duration-200 ease-linear border-r border-white/10"
+              style={{ 
+                width: sidebarOpen ? '16rem' : '3rem',
+                backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)'
+              }}
+            />
+          )}
           {/* Sidebar using shadcn component - positioned under header - Hide on Sports and VIP Rewards */}
           {!showSports && !showVipRewards && (
           <Sidebar 
@@ -10416,7 +10516,7 @@ function NavTestPageContent() {
             variant="sidebar"
             className="!bg-[#2d2d2d] dark:!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] dark:[&>div]:!bg-[#2d2d2d]"
           >
-            <SidebarContent className="overflow-y-auto">
+            <SidebarContent className="overflow-y-auto flex flex-col">
               <TooltipProvider>
                 <SidebarGroup>
                   <SidebarGroupContent>
@@ -10817,7 +10917,6 @@ function NavTestPageContent() {
               flex: '1 1 0%', 
               minWidth: 0, 
               maxWidth: 'none',
-              viewTransitionName: 'content-area'
             }}
           >
             {/* Icon Tabs (Left) and Text Tabs (Right) - Fixed Sub Nav - Hide on Sports and VIP Rewards */}
@@ -11021,11 +11120,13 @@ function NavTestPageContent() {
             <motion.div 
               initial={false}
               animate={isMobile ? {
-                height: showSports 
-                  ? (quickLinksOpen ? '144px' : '104px') // 64px header + 40px quick links (when open) + 40px sports sub nav = 144px, or 64px header + 40px sports sub nav = 104px
-                  : (quickLinksOpen ? '155px' : '100px') // 64px header + 40px quick links (when open) + 57px sub nav - 6px = 155px, or 64px header + 57px sub nav - 21px = 100px (reduced gap for both states)
+                height: showVipRewards
+                  ? (quickLinksOpen ? '104px' : '64px') // VIP: 64px header + 40px quick links (when open) = 104px, no sub-nav
+                  : showSports 
+                    ? (quickLinksOpen ? '144px' : '104px') // Sports: 64px header + 40px quick links (when open) + 40px sports sub nav = 144px
+                    : (quickLinksOpen ? '155px' : '100px') // Casino: 64px header + 40px quick links (when open) + 57px sub nav - 6px = 155px
               } : {
-                height: showSports ? '104px' : '115px' // 64px header + 40px sports sub nav = 104px, or 64px header + 57px sub nav - 6px = 115px (reduced gap for desktop)
+                height: showVipRewards ? '64px' : showSports ? '104px' : '115px' // VIP: just header, Sports: header + sports sub nav, Casino: header + casino sub nav
               }}
               transition={isMobile ? {
                 type: "tween",
@@ -11040,14 +11141,14 @@ function NavTestPageContent() {
             />
             
             {/* Sports Page */}
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="popLayout" initial={false}>
               {isPageTransitioning ? (
                 <motion.div
                   key="sports-skeleton"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 >
                   <SidebarInset className="bg-[#1a1a1a] text-white">
                     <div className="px-6 py-4">
@@ -11127,7 +11228,7 @@ function NavTestPageContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 >
                   {/* Spacer for VIP page — accounts for fixed header + quick links on mobile */}
                   <motion.div 
@@ -11167,7 +11268,7 @@ function NavTestPageContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 >
               <SportsPage 
                 activeTab={sportsActiveTab}
@@ -11201,7 +11302,7 @@ function NavTestPageContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 >
                   <SidebarInset className="bg-[#1a1a1a] text-white">
                     <div className="px-6 py-4">
@@ -11239,7 +11340,7 @@ function NavTestPageContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 >
               <>
             {/* Banner Carousel - Static, below tabs, only show on "For You" page */}
@@ -11785,7 +11886,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ width: '100%', maxWidth: '100%', overflow: 'visible', boxSizing: 'border-box', display: 'flex', minWidth: 0 }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '1rem' }}>Blackjack (52)</h2>
                             <Button
@@ -11871,7 +11972,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Roulette (34)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>
@@ -11958,7 +12059,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Baccarat (23)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>
@@ -12080,7 +12181,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Casino Poker (26)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>
@@ -12175,7 +12276,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ width: '100%', maxWidth: '100%', overflow: 'visible', boxSizing: 'border-box', display: 'flex', minWidth: 0 }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '1rem' }}>BlackJack (52)</h2>
                             <Button
@@ -12256,7 +12357,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Originals (26)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>
@@ -12344,7 +12445,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Slots (128)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>
@@ -12603,7 +12704,7 @@ function NavTestPageContent() {
                         <div>
                           <div className={cn(
                             "flex items-center justify-between mb-6 relative z-10",
-                            isMobile ? "px-3" : "px-6"
+                            isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
                           )} style={{ maxWidth: '100%', width: '100%', overflow: 'visible', boxSizing: 'border-box' }}>
                             <h2 className="text-lg font-semibold text-black dark:text-white flex-shrink-0 min-w-0 transition-colors duration-300" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>Baccarat (23)</h2>
                             <div className="flex items-center gap-2 relative z-10 flex-shrink-0 ml-2" style={{ visibility: 'visible', opacity: 1, display: 'flex', flexShrink: 0, marginLeft: 'auto' }}>

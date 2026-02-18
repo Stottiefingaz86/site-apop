@@ -780,6 +780,7 @@ export default function GlobalBetslip() {
   // unlike popstate which only fires on browser history navigation.
   const pathname = usePathname()
   const isSportsPage = pathname?.startsWith('/sports') ?? false
+  const isMaintenancePage = pathname === '/live-betting'
 
   // Close global betslip if we navigate to sports (prevent stale open state)
   useEffect(() => {
@@ -819,7 +820,7 @@ export default function GlobalBetslip() {
 
   // Don't render on sports pages — they have their own local betslip
   // Don't render on server — vaul needs document
-  if (!mounted || isSportsPage) return null
+  if (!mounted || isSportsPage || isMaintenancePage) return null
 
   return (
     <FamilyDrawerRoot

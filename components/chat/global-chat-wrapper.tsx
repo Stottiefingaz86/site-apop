@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom"
+import { usePathname } from "next/navigation"
 import ChatPanel from "@/components/chat/chat-panel"
 import { useChatStore } from "@/lib/store/chatStore"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -17,6 +18,8 @@ import { startChatSimulator, stopChatSimulator } from "@/lib/chat-simulator"
 export default function GlobalChatWrapper({ children }: { children: React.ReactNode }) {
   const { isOpen, setIsOpen } = useChatStore()
   const isMobile = useIsMobile()
+  const pathname = usePathname()
+  const isMaintenancePage = pathname === '/live-betting'
   const [mounted, setMounted] = useState(false)
   const [portalEl, setPortalEl] = useState<HTMLElement | null>(null)
   const hasInitialized = useRef(false)
@@ -55,11 +58,18 @@ export default function GlobalChatWrapper({ children }: { children: React.ReactN
     }
   }, [mounted])
 
+  // Force-close chat on maintenance page
+  useEffect(() => {
+    if (mounted && isMaintenancePage && isOpen) {
+      setIsOpen(false)
+    }
+  }, [mounted, isMaintenancePage, isOpen, setIsOpen])
+
   // Toggle .chat-open on <html> so CSS can shift all fixed + flow elements
   useEffect(() => {
     if (!mounted) return
     const html = document.documentElement
-    if (!isMobile && isOpen) {
+    if (!isMobile && isOpen && !isMaintenancePage) {
       html.classList.add('chat-open')
     } else {
       html.classList.remove('chat-open')
@@ -67,12 +77,12 @@ export default function GlobalChatWrapper({ children }: { children: React.ReactN
     return () => {
       html.classList.remove('chat-open')
     }
-  }, [mounted, isMobile, isOpen])
+  }, [mounted, isMobile, isOpen, isMaintenancePage])
 
   return (
     <>
       {children}
-      {portalEl && createPortal(
+      {portalEl && !isMaintenancePage && createPortal(
         <ChatPanel />,
         portalEl
       )}

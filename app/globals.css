@@ -58,11 +58,17 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Match html + body background to nav bg so overscroll area blends with nav.
+   Page content sets its own bg via [data-page-bg] / inline styles. */
+html, body {
+  background-color: var(--ds-nav-bg, #2D2E2C);
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -95,6 +101,12 @@ img, video {
     overflow-y: auto;
     position: relative;
   }
+}
+
+/* ─── Chrome iOS: GPU-promote fixed header so it never unsticks ─── */
+[data-nav-header] {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* SF Sans font for titles */
@@ -281,7 +293,10 @@ img[decoding="sync"] {
             @apply border-border;
           }
           body {
-            @apply bg-background text-foreground;
+            @apply text-foreground;
+            /* bg-background removed — body bg set to nav bg via html,body rule
+               so iOS overscroll area matches the navigation colour.
+               Page content sets its own bg via [data-page-bg] / inline styles. */
             overflow-x: hidden !important;
             overflow-y: auto !important;
             height: auto !important;
@@ -316,14 +331,8 @@ header.bg-\[#2d2d2d\] {
   background-color: var(--ds-sidebar-bg, #2d2d2d) !important;
 }
 
-/* Adjust sidebar fixed positioning to start below fixed header */
+/* All sidebars: full height, flush with top of viewport (same as poker) */
 .group.peer > div.fixed {
-  top: 64px !important;
-  height: calc(100vh - 64px) !important;
-}
-
-/* Poker sidebar: full height, flush with top of viewport */
-[data-sidebar-full-height] .group.peer > div.fixed {
   top: 0 !important;
   height: 100vh !important;
 }
@@ -915,6 +924,8 @@ body {
   display: block !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Desktop: Keep transition for sidebar movement + chat responsive */
@@ -1155,43 +1166,7 @@ main[data-sidebar="inset"] > div > div:first-child + div {
   margin-top: 0;
 }
 
-/* Sports Page Sidebar Styling */
-/* Ensure Sports page sidebar is positioned correctly below header */
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] [data-sidebar="sidebar"] {
-  position: fixed !important;
-  top: 64px !important;
-  left: 0 !important;
-  height: calc(100vh - 64px) !important;
-  background-color: var(--ds-sidebar-bg, #2d2d2d) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-  z-index: 80 !important;
-}
-
-/* Sports page sidebar when collapsed */
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] [data-sidebar="sidebar"][data-state="collapsed"] {
-  width: 3rem !important;
-}
-
-/* Sports page sidebar when expanded */
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] [data-sidebar="sidebar"]:not([data-state="collapsed"]) {
-  width: 16rem !important;
-}
-
-/* Sports page SidebarInset should adjust based on sidebar state */
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] main[data-sidebar="inset"] {
-  margin-left: 16rem !important;
-  transition: margin-left 0.2s ease-in-out !important;
-}
-
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] [data-sidebar="sidebar"][data-state="collapsed"] ~ main[data-sidebar="inset"] {
-  margin-left: 3rem !important;
-}
-
-/* Ensure Sports page content is properly positioned */
-div.flex.w-full.min-h-screen.bg-\[#1a1a1a\] {
-  margin-top: 64px !important;
-  min-height: calc(100vh - 64px) !important;
-}
+/* All page wrappers that use sidebar: no margin-top (sidebar is full-height now) */
 
 /* Toast Notification - Ensure it's at the top right */
 [data-toast-notification] {

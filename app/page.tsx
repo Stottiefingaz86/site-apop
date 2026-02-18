@@ -1462,15 +1462,15 @@ function HomePageContent() {
   
   // Initialize and update activity feed
   useEffect(() => {
-    // Initialize with 10 items
-    const initialFeed = Array.from({ length: 10 }, () => generateActivity())
+    // Initialize with 6 items
+    const initialFeed = Array.from({ length: 6 }, () => generateActivity())
     setActivityFeed(initialFeed)
     
-    // Add new activity every 3-5 seconds
+    // Add new activity every 3-5 seconds, keep only 6 visible
     const interval = setInterval(() => {
       setActivityFeed(prev => {
         const newActivity = generateActivity()
-        return [newActivity, ...prev.slice(0, 19)] // Keep max 20 items
+        return [newActivity, ...prev.slice(0, 5)] // Keep max 6 items
       })
     }, Math.random() * 2000 + 3000) // 3-5 seconds
     
@@ -1761,12 +1761,14 @@ function HomePageContent() {
             ease: "linear",
             duration: 0.3
           }}
-          className="fixed left-0 right-0 bg-[#2d2d2d] overflow-hidden z-[100]"
+          className="fixed left-0 right-0 overflow-hidden z-[100]"
           style={{ 
             top: 0, 
             pointerEvents: quickLinksOpen ? 'auto' : 'none',
             opacity: 1,
-            visibility: 'visible'
+            visibility: 'visible',
+            backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
+            boxShadow: '0 -200px 0 0 var(--ds-nav-bg, #2D2E2C)',
           }}
         >
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
@@ -1809,6 +1811,7 @@ function HomePageContent() {
 
       {/* Global Header - Same as casino page */}
       <motion.header 
+        data-nav-header
         className={cn(
           "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed left-0 right-0",
           isMobile ? "px-3" : "px-6",
@@ -1827,7 +1830,9 @@ function HomePageContent() {
           pointerEvents: 'auto',
           top: isMobile ? (quickLinksOpen ? 40 : 0) : 0,
           zIndex: 101,
-          position: 'fixed'
+          position: 'fixed',
+          backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
+          boxShadow: '0 -200px 0 0 var(--ds-nav-bg, #2D2E2C)',
         }}
       >
         <div className="flex items-center gap-6">

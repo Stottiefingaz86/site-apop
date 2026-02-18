@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import GlobalChatWrapper from '@/components/chat/global-chat-wrapper'
 import GlobalBetslip from '@/components/betslip/global-betslip'
 import { DesignCustomizer } from '@/components/design-customizer'
+import { PreventOverscroll } from '@/components/prevent-overscroll'
 import './globals.css'
 
 const figtree = Figtree({
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="en" className={figtree.variable} suppressHydrationWarning>
       <body style={{ fontFamily: 'var(--font-figtree), sans-serif' }}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="theme">
+          <PreventOverscroll />
           <GlobalChatWrapper>
             {children}
           </GlobalChatWrapper>

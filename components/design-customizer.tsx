@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconPalette, IconX, IconCheck, IconPencil, IconArrowLeft } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
@@ -35,6 +36,8 @@ export interface BrandTokens {
   logo: React.ReactNode
   /** Path to logo SVG in /public for DOM-based logo swap */
   logoSrc?: string
+  /** Path to lockup/collapsed logo SVG in /public */
+  lockupSrc?: string
   lockup?: React.ReactNode
   /** Which products this brand offers */
   products: ProductToggles
@@ -91,6 +94,7 @@ export const BRANDS: BrandTokens[] = [
       <img src="/brands/WildcasinoLogo.svg" alt="Wild Casino" className="h-6 w-auto" />
     ),
     logoSrc: '/brands/WildcasinoLogo.svg',
+    lockupSrc: '/brands/wildcasino_lockup.svg',
     products: {
       sports: false,
       liveBetting: false,
@@ -115,6 +119,7 @@ export const BRANDS: BrandTokens[] = [
       <img src="/brands/superslots.svg" alt="Super Slots" className="h-6 w-auto" />
     ),
     logoSrc: '/brands/superslots.svg',
+    lockupSrc: '/brands/superslot_lockup.svg',
     products: {
       sports: false,
       liveBetting: false,
@@ -138,6 +143,7 @@ export const BRANDS: BrandTokens[] = [
       <img src="/brands/sportsbetting.svg" alt="SportsBetting" className="h-5 w-auto" />
     ),
     logoSrc: '/brands/sportsbetting.svg',
+    lockupSrc: '/brands/sportsbetting_lockup.svg',
     products: {
       sports: true,
       liveBetting: true,
@@ -161,6 +167,7 @@ export const BRANDS: BrandTokens[] = [
       <img src="/brands/tigergaming.svg" alt="Tiger Gaming" className="h-5 w-auto" />
     ),
     logoSrc: '/brands/tigergaming.svg',
+    lockupSrc: '/brands/tiger_lockup.svg',
     products: {
       sports: true,
       liveBetting: true,
@@ -251,21 +258,17 @@ function buildOverrideCSS(b: BrandTokens): string {
   background-color: ${b.pageBg} !important;
 }
 
-/* PRIMARY COLOR: #ee3536 */
-.bg-\\[\\#ee3536\\],
-.\\!bg-\\[\\#ee3536\\] {
+/* PRIMARY COLOR: #ee3536  — exclude LIVE-tag pulse dots (animate-pulse) */
+.bg-\\[\\#ee3536\\]:not(.animate-pulse),
+.\\!bg-\\[\\#ee3536\\]:not(.animate-pulse) {
   background-color: ${b.primary} !important;
 }
 .hover\\:bg-\\[\\#d42e2f\\]:hover,
 .hover\\:bg-\\[\\#ee3536\\]\\/90:hover {
   background-color: ${b.primaryHover} !important;
 }
-.border-\\[\\#ee3536\\] {
-  border-color: ${b.primary} !important;
-}
-.text-\\[\\#ee3536\\] {
-  color: ${b.primary} !important;
-}
+/* NOTE: .text-[#ee3536] and .border-[#ee3536] are intentionally NOT overridden —
+   they are only used for LIVE tags and live-event times, which must always stay red. */
 
 /* ── Text contrast: ONLY on elements with primary as BACKGROUND ── */
 /* Tailwind bg class buttons */
@@ -493,25 +496,28 @@ function removeOverrideStyles() {
 }
 
 /** Swap logos in the DOM — finds BetOnline SVGs by viewBox and replaces */
-function swapLogos(logoSrc: string | undefined) {
+function swapLogos(logoSrc: string | undefined, lockupSrc?: string) {
   // Remove any previously injected custom logos
   document.querySelectorAll('[data-custom-brand-logo]').forEach(el => el.remove())
+  document.querySelectorAll('[data-custom-brand-lockup]').forEach(el => el.remove())
   // Show any hidden original logos
   document.querySelectorAll('[data-original-logo-hidden]').forEach(el => {
     (el as HTMLElement).style.display = ''
     el.removeAttribute('data-original-logo-hidden')
   })
+  document.querySelectorAll('[data-original-lockup-hidden]').forEach(el => {
+    (el as HTMLElement).style.display = ''
+    el.removeAttribute('data-original-lockup-hidden')
+  })
 
   if (!logoSrc) return // back to default
 
-  // Find all BetOnline logo SVGs (they have viewBox="0 0 640 86")
+  // Find all BetOnline full logo SVGs (viewBox="0 0 640 86")
   document.querySelectorAll('svg[viewBox="0 0 640 86"]').forEach(svg => {
     const parent = svg.parentElement
     if (!parent) return
-    // Hide original
     ;(svg as HTMLElement).style.display = 'none'
     svg.setAttribute('data-original-logo-hidden', 'true')
-    // Inject replacement
     const img = document.createElement('img')
     img.src = logoSrc
     img.alt = 'Brand Logo'
@@ -521,6 +527,24 @@ function swapLogos(logoSrc: string | undefined) {
     img.setAttribute('data-custom-brand-logo', 'true')
     parent.appendChild(img)
   })
+
+  // Find all BetOnline "B" lockup SVGs (viewBox="0 0 114 86") and swap with brand lockup
+  if (lockupSrc) {
+    document.querySelectorAll('svg[viewBox="0 0 114 86"]').forEach(svg => {
+      const parent = svg.parentElement
+      if (!parent) return
+      ;(svg as HTMLElement).style.display = 'none'
+      svg.setAttribute('data-original-lockup-hidden', 'true')
+      const img = document.createElement('img')
+      img.src = lockupSrc
+      img.alt = 'Brand Lockup'
+      img.style.height = '100%'
+      img.style.width = 'auto'
+      img.style.objectFit = 'contain'
+      img.setAttribute('data-custom-brand-lockup', 'true')
+      parent.appendChild(img)
+    })
+  }
 }
 
 /** Hide/show nav items based on product toggles */
@@ -538,6 +562,8 @@ interface DesignCustomizerProps {
 
 export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }: DesignCustomizerProps) {
   const isMobile = useIsMobile()
+  const pathname = usePathname()
+  const isMaintenancePage = pathname === '/live-betting'
   const [isOpen, setIsOpen] = useState(false)
   const [activeBrandId, setActiveBrandId] = useState(currentBrandId)
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null)
@@ -558,7 +584,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
         // Apply the brand after a tick to ensure DOM is ready
         requestAnimationFrame(() => {
           injectOverrideStyles(brand)
-          swapLogos(brand.logoSrc)
+          swapLogos(brand.logoSrc, brand.lockupSrc)
 
           const root = document.documentElement
           root.style.setProperty('--ds-primary', brand.primary)
@@ -637,6 +663,65 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
     }
   }, [])
 
+  // MutationObserver: auto-swap any new BetOnline SVGs that appear after navigation
+  useEffect(() => {
+    const brand = BRANDS.find(b => b.id === activeBrandId)
+    if (!brand || activeBrandId === 'betonline' || !brand.logoSrc) return
+
+    const logoSrc = brand.logoSrc
+    const lockupSrc = brand.lockupSrc
+
+    const swapSvg = (svg: Element, src: string, dataAttrHidden: string, dataAttrCustom: string, alt: string) => {
+      const parent = svg.parentElement
+      if (!parent) return
+      ;(svg as HTMLElement).style.display = 'none'
+      svg.setAttribute(dataAttrHidden, 'true')
+      const img = document.createElement('img')
+      img.src = src
+      img.alt = alt
+      img.style.height = '100%'
+      img.style.width = 'auto'
+      img.style.objectFit = 'contain'
+      img.setAttribute(dataAttrCustom, 'true')
+      parent.appendChild(img)
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of Array.from(mutation.addedNodes)) {
+          if (!(node instanceof HTMLElement)) continue
+
+          // Swap full logos (viewBox="0 0 640 86")
+          const fullLogos = node.matches?.('svg[viewBox="0 0 640 86"]')
+            ? [node]
+            : Array.from(node.querySelectorAll?.('svg[viewBox="0 0 640 86"]') ?? [])
+          for (const svg of fullLogos) {
+            if (svg.hasAttribute('data-original-logo-hidden')) continue
+            swapSvg(svg, logoSrc, 'data-original-logo-hidden', 'data-custom-brand-logo', 'Brand Logo')
+          }
+
+          // Swap lockup logos (viewBox="0 0 114 86")
+          if (lockupSrc) {
+            const lockups = node.matches?.('svg[viewBox="0 0 114 86"]')
+              ? [node]
+              : Array.from(node.querySelectorAll?.('svg[viewBox="0 0 114 86"]') ?? [])
+            for (const svg of lockups) {
+              if (svg.hasAttribute('data-original-lockup-hidden')) continue
+              swapSvg(svg, lockupSrc, 'data-original-lockup-hidden', 'data-custom-brand-lockup', 'Brand Lockup')
+            }
+          }
+        }
+      }
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    // Also do an immediate sweep in case the DOM already has un-swapped logos
+    requestAnimationFrame(() => swapLogos(logoSrc, lockupSrc))
+
+    return () => observer.disconnect()
+  }, [activeBrandId])
+
   /** Get the effective product toggles for a brand (localStorage override > default) */
   const getProducts = useCallback((brandId: string): ProductToggles => {
     const brand = BRANDS.find(b => b.id === brandId)
@@ -683,7 +768,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
       root.style.removeProperty('--ds-primary-text')
     } else {
       injectOverrideStyles(brand)
-      swapLogos(brand.logoSrc)
+      swapLogos(brand.logoSrc, brand.lockupSrc)
     }
 
     // Set CSS variables on :root (both --ds-* and legacy --brand-* for compatibility)
@@ -770,7 +855,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
   }, [activeBrandId])
 
   // Don't render on mobile
-  if (isMobile) return null
+  if (isMobile || isMaintenancePage) return null
 
   return (
     <>
