@@ -3,9 +3,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconPalette, IconX, IconCheck, IconPencil, IconArrowLeft } from '@tabler/icons-react'
+import { IconPalette, IconX, IconCheck, IconPencil, IconArrowLeft, IconUpload, IconBook2 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useRouter } from 'next/navigation'
 
 // ── Product definitions ───────────────────────────────────────────
 export const ALL_PRODUCTS = [
@@ -562,13 +563,16 @@ interface DesignCustomizerProps {
 
 export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }: DesignCustomizerProps) {
   const isMobile = useIsMobile()
+  const router = useRouter()
   const pathname = usePathname()
   const isMaintenancePage = pathname === '/live-betting'
+  const isLibraryPage = pathname?.startsWith('/library')
   const [isOpen, setIsOpen] = useState(false)
   const [activeBrandId, setActiveBrandId] = useState(currentBrandId)
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null)
   const [productOverrides, setProductOverrides] = useState<Record<string, ProductToggles>>({})
   const hasRestoredRef = useRef(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Load saved product overrides and active brand from localStorage on mount
   useEffect(() => {
@@ -854,8 +858,39 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
     })
   }, [activeBrandId])
 
+  // ── JSON brand import handler ──
+  const handleJsonImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const json = JSON.parse(ev.target?.result as string)
+        // Expect an object with BrandTokens-shaped color fields
+        const root = document.documentElement
+        if (json.primary) root.style.setProperty('--ds-primary', json.primary)
+        if (json.primaryHover) root.style.setProperty('--ds-primary-hover', json.primaryHover)
+        if (json.navBg) root.style.setProperty('--ds-nav-bg', json.navBg)
+        if (json.pageBg) root.style.setProperty('--ds-page-bg', json.pageBg)
+        if (json.sidebarBg) root.style.setProperty('--ds-sidebar-bg', json.sidebarBg)
+        if (json.cardBg) root.style.setProperty('--ds-card-bg', json.cardBg)
+        if (json.accentGreen) root.style.setProperty('--ds-accent-green', json.accentGreen)
+        if (json.primaryTextBlack !== undefined) {
+          root.style.setProperty('--ds-primary-text', json.primaryTextBlack ? '#000000' : '#ffffff')
+        }
+        // Store in localStorage so it persists
+        localStorage.setItem('__brand_json_override', JSON.stringify(json))
+      } catch {
+        console.error('Invalid JSON brand file')
+      }
+    }
+    reader.readAsText(file)
+    // Reset so the same file can be re-uploaded
+    e.target.value = ''
+  }, [])
+
   // Don't render on mobile
-  if (isMobile || isMaintenancePage) return null
+  if (isMobile || isMaintenancePage || isLibraryPage) return null
 
   return (
     <>
@@ -1062,8 +1097,43 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
                     </div>
                   </div>
 
+                  {/* JSON Upload + Our Library */}
+                  <div className="px-3 pb-2 pt-1 space-y-1.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    {/* Upload JSON brand */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,application/json"
+                      className="hidden"
+                      onChange={handleJsonImport}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all duration-150 hover:bg-white/5 border border-transparent hover:border-white/10"
+                    >
+                      <IconUpload className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }} />
+                      <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                        Import Brand JSON
+                      </span>
+                    </button>
+
+                    {/* Our Library CTA */}
+                    <button
+                      onClick={() => { setIsOpen(false); router.push('/library') }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all duration-150 hover:bg-white/5 border border-dashed border-white/10 hover:border-white/20"
+                    >
+                      <IconBook2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.5)' }} />
+                      <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                        Our Library
+                      </span>
+                      <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        NEW
+                      </span>
+                    </button>
+                  </div>
+
                   {/* Footer hint */}
-                  <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="px-4 py-2 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                     <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.2)' }}>Local preview only</span>
                     <div className="flex items-center gap-1">
                       {[activeBrand.primary, activeBrand.navBg, activeBrand.pageBg, activeBrand.sidebarBg].map((c, i) => (

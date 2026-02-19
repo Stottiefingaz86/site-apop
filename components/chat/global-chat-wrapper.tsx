@@ -21,6 +21,7 @@ export default function GlobalChatWrapper({ children }: { children: React.ReactN
   const isMobile = useIsMobile()
   const pathname = usePathname()
   const isMaintenancePage = pathname === '/live-betting'
+  const isLibraryPage = pathname?.startsWith('/library')
   const [mounted, setMounted] = useState(false)
   const [portalEl, setPortalEl] = useState<HTMLElement | null>(null)
   const hasInitialized = useRef(false)
@@ -83,7 +84,7 @@ export default function GlobalChatWrapper({ children }: { children: React.ReactN
   return (
     <>
       {children}
-      {portalEl && !isMaintenancePage && createPortal(
+      {portalEl && !isMaintenancePage && !isLibraryPage && createPortal(
         <>
           <ChatPanel />
           <WidgetDockManager />

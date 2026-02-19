@@ -1433,6 +1433,16 @@ button[data-active="true"][class*="SidebarMenuButton"],
   }
 }
 
+/* ─── STATSCORE Widget SDK — allow full rendering ─── */
+.statscore-widget-root {
+  overflow: visible;
+  position: relative;
+}
+
+.statscore-widget-root .STATSCOREWidget--PreLoader {
+  z-index: 5;
+}
+
 /* Lock vaul drawer — prevent drag, allow open/close animation */
 [data-vaul-no-drag] [data-sidebar="content"] {
   overflow: visible !important;

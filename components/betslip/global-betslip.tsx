@@ -781,6 +781,7 @@ export default function GlobalBetslip() {
   const pathname = usePathname()
   const isSportsPage = pathname?.startsWith('/sports') ?? false
   const isMaintenancePage = pathname === '/live-betting'
+  const isLibraryPage = pathname?.startsWith('/library') ?? false
 
   // Close global betslip if we navigate to sports (prevent stale open state)
   useEffect(() => {
@@ -820,7 +821,7 @@ export default function GlobalBetslip() {
 
   // Don't render on sports pages — they have their own local betslip
   // Don't render on server — vaul needs document
-  if (!mounted || isSportsPage || isMaintenancePage) return null
+  if (!mounted || isSportsPage || isMaintenancePage || isLibraryPage) return null
 
   return (
     <FamilyDrawerRoot

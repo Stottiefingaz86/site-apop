@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import Script from 'next/script'
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion'
 import {
   IconX,
@@ -28,9 +27,8 @@ const WIDGET_HEADER_HEIGHT = 40
 const RESIZE_HANDLE_HEIGHT = 10
 const MIN_DOCK_WIDGET_HEIGHT = 100
 
-// STATSCORE LivescorePro Generator
-const STATSCORE_GENERATOR_URL =
-  'https://live.statscore.com/livescorepro/generator'
+// STATSCORE Widget SDK — loaded from local (license header removed)
+const STATSCORE_SDK_URL = '/scripts/statscore-widget.js'
 
 // ═════════════════════════════════════════════════════════════
 // 1. TrackerWidgetContent — shared inner content
@@ -53,7 +51,7 @@ export function TrackerWidgetContent({
   const [statscoreStatus, setStatscoreStatus] = useState<
     'idle' | 'loading' | 'loaded' | 'error'
   >('idle')
-  const [statscoreScriptLoaded, setStatscoreScriptLoaded] = useState(false)
+  const widgetInstanceRef = useRef<any>(null)
 
   const hasStatscoreConfig = !!(
     event?.statscoreEventId && event?.statscoreConfigId
@@ -63,83 +61,84 @@ export function TrackerWidgetContent({
   const widgetBgDarker =
     'color-mix(in srgb, var(--ds-page-bg, #222222) 85%, black)'
 
-  // STATSCORE observer
+  // STATSCORE Widget SDK — programmatic initialization
   useEffect(() => {
     if (!event?.statscoreEventId || !event?.statscoreConfigId) return
-    if (!statscoreScriptLoaded) return
     const el = statscoreContainerRef.current
     if (!el) return
+
+    let destroyed = false
     setStatscoreStatus('loading')
-    const observer = new MutationObserver(() => {
-      if (el.children.length > 0 || el.querySelector('iframe')) {
-        setStatscoreStatus('loaded')
-        observer.disconnect()
-      }
-    })
-    observer.observe(el, { childList: true, subtree: true })
-    const t1 = setTimeout(() => {
-      if (el.children.length > 0 || el.querySelector('iframe')) {
-        setStatscoreStatus('loaded')
-        observer.disconnect()
-      }
-    }, 3000)
-    const t2 = setTimeout(() => {
-      if (el.children.length === 0 && !el.querySelector('iframe')) {
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    w.STATSCOREWidgets = w.STATSCOREWidgets || {}
+    w.STATSCOREWidgets.onLoadCallbacks = w.STATSCOREWidgets.onLoadCallbacks || []
+
+    const initWidget = () => {
+      if (destroyed) return
+      if (!w.STATSCOREWidgets?.Widget) {
         setStatscoreStatus('error')
-        observer.disconnect()
+        return
       }
-    }, 10000)
-    return () => {
-      observer.disconnect()
-      clearTimeout(t1)
-      clearTimeout(t2)
+      try {
+        const instance = new w.STATSCOREWidgets.Widget(
+          el,
+          event.statscoreConfigId,
+          { eventId: String(event.statscoreEventId) },
+          { autoMount: true, loader: { enabled: true, size: 50, color1: '#ee3536', color2: '#333' } }
+        )
+        widgetInstanceRef.current = instance
+        instance.on('load', () => { if (!destroyed) setStatscoreStatus('loaded') })
+        instance.on('mount', () => { if (!destroyed) setStatscoreStatus('loaded') })
+        instance.on('error', () => { if (!destroyed) setStatscoreStatus('error') })
+      } catch (err) {
+        console.error('STATSCORE Widget init error:', err)
+        if (!destroyed) setStatscoreStatus('error')
+      }
     }
-  }, [
-    event?.statscoreEventId,
-    event?.statscoreConfigId,
-    statscoreScriptLoaded,
-  ])
+
+    // If SDK is already loaded, init immediately
+    if (w.STATSCOREWidgets?.Widget) {
+      initWidget()
+    } else {
+      // Queue callback for when SDK finishes loading
+      w.STATSCOREWidgets.onLoadCallbacks.push((err: any) => {
+        if (err) { if (!destroyed) setStatscoreStatus('error'); return }
+        initWidget()
+      })
+
+      // Load the SDK script if not already present
+      if (!document.getElementById('statscore-sdk-script')) {
+        const script = document.createElement('script')
+        script.id = 'statscore-sdk-script'
+        script.src = STATSCORE_SDK_URL
+        script.async = true
+        script.onerror = () => { if (!destroyed) setStatscoreStatus('error') }
+        document.body.appendChild(script)
+      }
+    }
+
+    return () => {
+      destroyed = true
+      try { widgetInstanceRef.current?.destroy?.() } catch (_) { /* noop */ }
+      widgetInstanceRef.current = null
+    }
+  }, [event?.statscoreEventId, event?.statscoreConfigId])
 
   if (hasStatscoreConfig) {
     return (
       <div
-        className="relative overflow-y-auto"
-        style={{ backgroundColor: widgetBg, maxHeight }}
+        className="relative"
+        style={{ backgroundColor: widgetBg, maxHeight, overflow: maxHeight ? 'auto' : undefined }}
       >
-        <Script
-          id="statscore-generator"
-          src={STATSCORE_GENERATOR_URL}
-          strategy="afterInteractive"
-          onLoad={() => {
-            console.log('✅ STATSCORE generator loaded')
-            setStatscoreScriptLoaded(true)
-          }}
-          onError={() => {
-            console.log('❌ STATSCORE generator failed to load')
-            setStatscoreStatus('error')
-          }}
-        />
+        {/* STATSCORE SDK mounts directly into this element */}
         <div
           ref={statscoreContainerRef}
-          className="STATSCORE__Tracker"
-          data-event={String(event?.statscoreEventId)}
-          data-lang="en"
-          data-config={event?.statscoreConfigId}
-          data-zone=""
-          data-use-mapped-id="0"
+          className="statscore-widget-root"
           style={{ width: '100%', minHeight: isMobile ? 280 : 380 }}
         />
-        {statscoreStatus === 'loading' && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center z-10"
-            style={{ backgroundColor: widgetBg }}
-          >
-            <div className="w-6 h-6 border-2 border-white/20 border-t-[#ee3536] rounded-full animate-spin mb-2" />
-            <span className="text-[10px] text-white/40">
-              Loading STATSCORE tracker...
-            </span>
-          </div>
-        )}
+        {/* Error fallback — only shows when SDK itself fails to initialise */}
         {statscoreStatus === 'error' && (
           <div
             className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4"
@@ -149,27 +148,21 @@ export function TrackerWidgetContent({
               STATSCORE widget couldn&apos;t load
             </span>
             <span className="text-[9px] text-white/30 mb-3 text-center">
-              Ensure your domain is whitelisted and widget ID is valid
+              Ensure your domain is whitelisted and the config/event IDs are valid.
             </span>
             <button
               onClick={() => {
                 setStatscoreStatus('idle')
-                setStatscoreScriptLoaded(false)
+                widgetInstanceRef.current = null
+                const el = statscoreContainerRef.current
+                if (el) el.innerHTML = ''
               }}
-              className="text-[10px] text-[#ee3536] hover:text-[#ee3536]/80 underline"
+              className="text-[10px] text-[#ee3536] hover:text-[#ee3536]/80 underline cursor-pointer"
             >
               Retry
             </button>
           </div>
         )}
-        <div
-          className="flex items-center justify-center py-1.5 border-t border-white/5"
-          style={{ backgroundColor: widgetBg }}
-        >
-          <span className="text-[8px] text-white/20 tracking-wider uppercase">
-            Powered by STATSCORE
-          </span>
-        </div>
       </div>
     )
   }
