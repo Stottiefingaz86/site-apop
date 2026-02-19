@@ -4764,7 +4764,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                           setIsPageTransitioning(false)
                         }, 200)
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                        window.scrollTo(0, 0)
                       }, 150)
                     }}
                     data-active={showSports}
@@ -4819,7 +4819,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                           setIsPageTransitioning(false)
                         }, 200)
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                      window.scrollTo(0, 0)
                       }, 150)
                     }}
                   >

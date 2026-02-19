@@ -61,6 +61,13 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Mobile only: prevent iOS rubber-band bounce on pull-down */
+@media (max-width: 768px) {
+  html, body {
+    overscroll-behavior-y: none;
+  }
+}
+
 /* Match html + body background to nav bg so overscroll area blends with nav.
    Page content sets its own bg via [data-page-bg] / inline styles. */
 html, body {

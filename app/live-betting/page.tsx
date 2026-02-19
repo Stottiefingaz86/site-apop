@@ -33,7 +33,7 @@ export default function LiveBettingPage() {
           {/* Refresh button */}
           <div className="mt-2">
             <button
-              onClick={() => router.push('/sports')}
+              onClick={() => router.push('/sports/football')}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
               style={{ backgroundColor: '#ee3536' }}
             >

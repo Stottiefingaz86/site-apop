@@ -427,9 +427,9 @@ function BetslipDefaultView() {
                     e.stopPropagation()
                     clearAll()
                   }}
-                  className="text-[10px] font-medium text-red-400 hover:text-red-500 uppercase tracking-wide px-2 py-0.5 rounded border border-red-200 hover:border-red-300 hover:bg-red-50 transition-colors"
+                  className="text-[10px] font-medium text-red-400 hover:text-red-500 uppercase tracking-wide px-2 py-0.5 rounded border border-red-200 hover:border-red-300 hover:bg-red-50 transition-colors inline-flex items-center gap-1"
                 >
-                  Remove All
+                  <IconTrash size={12} /> Remove All
                 </button>
               </div>
               <AnimatePresence initial={false}>

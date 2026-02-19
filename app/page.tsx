@@ -1774,11 +1774,11 @@ function HomePageContent() {
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
             {[
               { label: 'Home', onClick: () => { setQuickLinksOpen(false); } },
-              { label: 'Sports', onClick: () => { router.push('/sports'); setQuickLinksOpen(false); } },
+              { label: 'Sports', onClick: () => { router.push('/sports/football'); setQuickLinksOpen(false); } },
               { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
               { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
               { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
-              { label: 'Poker', onClick: () => { window.location.href = '/poker'; setQuickLinksOpen(false); } },
+              { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
               { label: 'VIP Rewards', onClick: () => { router.push('/casino?vip=true'); setQuickLinksOpen(false); } },
               { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
             ].map((item) => (
@@ -1852,7 +1852,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/sports')}
+                    onClick={() => router.push('/sports/football')}
                   >
                     Sports
                   </SidebarMenuButton>
@@ -1884,7 +1884,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => window.location.href = '/poker'}
+                    onClick={() => router.push('/casino?poker=true')}
                   >
                     Poker
                   </SidebarMenuButton>
@@ -2170,7 +2170,7 @@ function HomePageContent() {
           <div className={cn("flex items-center justify-between mb-4", isMobile ? "px-3" : "px-6")}>
             <h2 
               className="text-lg font-semibold text-white cursor-pointer hover:text-white/80 transition-colors"
-              onClick={() => router.push('/sports')}
+              onClick={() => router.push('/sports/football')}
             >
               Top Sports
             </h2>
@@ -2178,7 +2178,7 @@ function HomePageContent() {
               <Button
                 variant="ghost"
                 className="text-white/70 hover:text-white hover:bg-white/5 text-xs px-3 py-1.5 h-auto border border-white/20 rounded-small"
-                onClick={() => router.push('/sports')}
+                onClick={() => router.push('/sports/football')}
               >
                 View All
               </Button>
@@ -3741,10 +3741,17 @@ function HomePageContent() {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-12 px-3 min-w-0"
+                      onClick={() => {
+                        setAccountDrawerOpen(false)
+                        router.push('/sports?mybets=pending')
+                      }}
                     >
                       <IconFileText className="w-5 h-5 mr-3 text-gray-700 flex-shrink-0" />
                       <span className="flex-1 text-left text-gray-900">Pending Bets</span>
-                      <span className="text-sm text-gray-600 ml-auto">$0.00</span>
+                      <span className="text-sm text-gray-600 ml-auto flex items-center gap-1.5">
+                        <span className="bg-amber-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">4</span>
+                        $40.00
+                      </span>
                     </Button>
                     
                     <Button 

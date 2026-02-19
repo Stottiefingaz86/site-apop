@@ -180,6 +180,7 @@ function FamilyDrawerRoot({
         modal={false}
         shouldScaleBackground={false}
         dismissible={true}
+        noBodyStyles
       >
         {children}
       </Drawer.Root>
