@@ -122,6 +122,7 @@ import {
   IconMaximize,
   IconShare
 , IconMessageCircle2, IconTrash, IconBrandTelegram, IconRefresh, IconParachute, IconTargetArrow} from '@tabler/icons-react'
+import { SportsTrackerWidget } from '@/components/sports-tracker-widget'
 import { colorTokenMap } from '@/lib/agent/designSystem'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -3330,6 +3331,13 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showShareTicket, setShowShareTicket] = useState(false)
+
+  // Tracker widget state
+  const [trackerEvent, setTrackerEvent] = useState<{
+    id: number; team1: string; team2: string; league: string; country: string;
+    score?: { team1: number; team2: number }; minute?: string; isLive?: boolean
+  } | null>(null)
+  const sidebarPixelWidth = isMobile ? 0 : (sidebarState === 'expanded' ? 256 : 48)
   const [pendingBets, setPendingBets] = useState<Array<{
     id: string
     eventId: number
@@ -6909,7 +6917,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          console.log('Watch clicked for event:', event.id)
+                          setTrackerEvent({ id: event.id, team1: event.team1, team2: event.team2, league: event.league, country: event.country, score: event.score, minute: event.isLive ? "45'" : undefined, isLive: event.isLive })
                         }}
                         className="text-[10px] text-white/70 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                       >
@@ -8365,6 +8373,13 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
         </FamilyDrawerContent>
       </FamilyDrawerRoot>
 
+      {/* Draggable Sports Tracker Widget */}
+      <SportsTrackerWidget
+        event={trackerEvent}
+        onClose={() => setTrackerEvent(null)}
+        sidebarWidth={sidebarPixelWidth}
+      />
+
     </div>
   )
 }
@@ -9788,7 +9803,7 @@ function NavTestPageContent() {
                     >
                       {showSports && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9835,7 +9850,7 @@ function NavTestPageContent() {
                     >
                       {!showSports && !showVipRewards && activeSubNav !== 'Live' && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9864,7 +9879,7 @@ function NavTestPageContent() {
                     >
                       {!showSports && !showVipRewards && activeSubNav === 'Live' && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9913,7 +9928,7 @@ function NavTestPageContent() {
                     >
                       {showVipRewards && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}

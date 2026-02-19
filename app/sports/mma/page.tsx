@@ -9116,7 +9116,7 @@ function NavTestPageContent() {
                     >
                       {showSports && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9163,7 +9163,7 @@ function NavTestPageContent() {
                     >
                       {!showSports && !showVipRewards && activeSubNav !== 'Live' && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9192,7 +9192,7 @@ function NavTestPageContent() {
                     >
                       {!showSports && !showVipRewards && activeSubNav === 'Live' && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}
@@ -9241,7 +9241,7 @@ function NavTestPageContent() {
                     >
                       {showVipRewards && (
                         <motion.div
-                          layoutId="mainNavPill" layout="position"
+                          layoutId="sportsNavPill" layout="position"
                           className="absolute inset-0 rounded-small"
                           style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                           initial={false}

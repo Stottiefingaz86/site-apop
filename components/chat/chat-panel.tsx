@@ -21,6 +21,19 @@ function DesktopChatPanel() {
   const isNearBottomRef = useRef(true)
   const hasInitScrolled = useRef(false)
 
+  // Track whether the tracker widget is docked above us (via CSS var)
+  const [trackerDocked, setTrackerDocked] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      const val = getComputedStyle(document.documentElement).getPropertyValue('--tracker-is-docked').trim()
+      setTrackerDocked(val === '1')
+    }
+    check()
+    // Poll briefly — the CSS var changes on drag end
+    const interval = setInterval(check, 200)
+    return () => clearInterval(interval)
+  }, [])
+
   // Show messages for the active room only
   const messages = useMemo(() => {
     const roomMessages = activeRoom === 'casino' ? casinoMessages : sportsMessages
@@ -65,8 +78,14 @@ function DesktopChatPanel() {
           animate={{ x: 0 }}
           exit={{ x: 340 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed top-[64px] right-0 bottom-0 w-[340px] z-[200] border-l border-white/10 overflow-hidden"
-          style={{ pointerEvents: 'auto', backgroundColor: 'var(--ds-page-bg, #222222)' }}
+          className={`fixed right-0 bottom-0 w-[340px] z-[200] border-l border-white/10 overflow-hidden ${trackerDocked ? '' : ''}`}
+          style={{
+            pointerEvents: 'auto',
+            backgroundColor: 'var(--ds-page-bg, #222222)',
+            top: 'calc(64px + var(--tracker-above-chat-height, 0px))',
+            // When tracker is docked above, remove top border for seamless connection
+            ...(trackerDocked ? { borderTop: 'none' } : {}),
+          }}
         >
           <div className="flex flex-col h-full w-[340px]">
             {/* Header */}
