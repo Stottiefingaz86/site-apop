@@ -1,7 +1,7 @@
 'use client'
 
 import { IconBackspace, IconCheck } from '@tabler/icons-react'
-import { useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 interface BetslipNumberPadProps {
   onDigit: (digit: string) => void
@@ -10,7 +10,7 @@ interface BetslipNumberPadProps {
   onQuickAmount: (amount: number) => void
 }
 
-const quickAmounts = [5, 10, 25, 50, 100]
+const quickAmounts = [5, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000]
 
 export function BetslipNumberPad({
   onDigit,
@@ -18,6 +18,9 @@ export function BetslipNumberPad({
   onDone,
   onQuickAmount,
 }: BetslipNumberPadProps) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
+
   const makeTapHandler = useCallback(
     (action: () => void) => ({
       onTouchEnd: (e: React.TouchEvent) => {
@@ -33,9 +36,17 @@ export function BetslipNumberPad({
     []
   )
 
+  const handleQuickAmountTap = useCallback(
+    (amount: number) => {
+      setSelectedAmount(amount)
+      onQuickAmount(amount)
+    },
+    [onQuickAmount]
+  )
+
   return (
     <div
-      className="shrink-0 w-full px-3 pt-2"
+      className="shrink-0 w-full pt-2"
       style={{
         background: 'rgba(255, 255, 255, 0.78)',
         backdropFilter: 'blur(40px)',
@@ -49,14 +60,28 @@ export function BetslipNumberPad({
       onTouchEnd={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      {/* Quick Stake Amounts */}
-      <div className="flex gap-1.5 mb-2">
+      {/* Quick Stake Amounts — Swipeable Carousel */}
+      <div
+        ref={scrollRef}
+        className="flex gap-1.5 mb-2 px-3 overflow-x-auto scrollbar-hide"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollSnapType: 'x proximity',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+        }}
+      >
         {quickAmounts.map((amount) => (
           <button
             key={amount}
             type="button"
-            {...makeTapHandler(() => onQuickAmount(amount))}
-            className="flex-1 py-2 rounded-lg text-[13px] font-semibold text-black/70 bg-black/[0.05] active:bg-black/[0.12] transition-colors select-none touch-manipulation"
+            {...makeTapHandler(() => handleQuickAmountTap(amount))}
+            className={`shrink-0 px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors select-none touch-manipulation ${
+              selectedAmount === amount
+                ? 'bg-[#8BC34A] text-white'
+                : 'text-black/70 bg-black/[0.05] active:bg-black/[0.12]'
+            }`}
+            style={{ scrollSnapAlign: 'start' }}
           >
             ${amount}
           </button>
@@ -64,7 +89,7 @@ export function BetslipNumberPad({
       </div>
 
       {/* Digit Grid */}
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5 px-3">
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((key) => (
           <button
             key={key}

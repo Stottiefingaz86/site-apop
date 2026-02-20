@@ -7443,50 +7443,60 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
               <div className="absolute w-3/4 h-[44px] blur-xl" style={{ background: `linear-gradient(to right, transparent, ${resolvedPrimary}33, transparent)` }} />
                 </div>
 
-            <div className="relative z-10 max-w-5xl mx-auto text-center">
-              {!isMobile && (
-                <div className="mb-4 flex justify-center">
-                  <span className="text-[10px] uppercase tracking-wider font-medium px-3 py-1 rounded-full" style={{ color: '#2AABEE', backgroundColor: 'rgba(42, 171, 238, 0.1)', border: '1px solid rgba(42, 171, 238, 0.15)' }}>Navigation Option 2</span>
+            <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 max-w-6xl mx-auto">
+              {/* Left — text content, left-aligned on desktop */}
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
+                  The BetOnline<br />Poker Platform
+                </h1>
+                <p className="text-sm md:text-base text-white/60 mb-6 max-w-lg">
+                  Play online or download the BetOnline poker app today,<br />available on IOS, PC, and Android.
+                </p>
+                <div className="flex items-center md:justify-start justify-center gap-3 mb-6">
+                  <Button className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small gap-2" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
+                    <IconDownload className="w-4 h-4" strokeWidth={2} />
+                    DOWNLOAD &amp; PLAY
+                  </Button>
+                  <Button variant="outline" className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small border-white/20 bg-transparent hover:bg-white/5">
+                    PLAY ONLINE
+                  </Button>
+                </div>
+
+                {/* Separator */}
+                <div className="w-full max-w-md h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent mb-6 md:mx-0 mx-auto" />
+
+                {/* Platform availability — compact, single row */}
+                <div className="flex items-center md:justify-start justify-center gap-2 md:gap-3">
+                  {[
+                    { icon: IconBrandApple, label: 'iOS', sublabel: 'APP STORE' },
+                    { icon: IconBrandWindows, label: 'Windows', sublabel: 'DESKTOP' },
+                    { icon: IconBrandAndroid, label: 'Android', sublabel: 'GOOGLE PLAY' },
+                    { icon: IconDeviceDesktop, label: 'Mac', sublabel: 'DESKTOP' },
+                  ].map((platform, idx) => {
+                    const Icon = platform.icon
+                    return (
+                      <button key={idx} className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15 transition-all group">
+                        <Icon className="w-4 h-4 md:w-5 md:h-5 text-white/50 group-hover:text-white/80 transition-colors flex-shrink-0" strokeWidth={1.5} />
+                        <div className="text-left">
+                          <div className="text-[7px] md:text-[8px] text-white/35 uppercase tracking-wider leading-none">{platform.sublabel}</div>
+                          <div className="text-[10px] md:text-xs font-semibold text-white/80">{platform.label}</div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-              )}
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
-                The BetOnline<br />Poker Platform
-              </h1>
-              <p className="text-sm md:text-base text-white/60 mb-6 max-w-lg mx-auto">
-                Play online or download the BetOnline poker app today,<br />available on IOS, PC, and Android.
-              </p>
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <Button className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small gap-2" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}>
-                  <IconDownload className="w-4 h-4" strokeWidth={2} />
-                  DOWNLOAD &amp; PLAY
-                </Button>
-                <Button variant="outline" className="text-white font-semibold text-sm px-6 py-3 h-11 rounded-small border-white/20 bg-transparent hover:bg-white/5">
-                  PLAY ONLINE
-                </Button>
-                </div>
 
-              {/* Separator */}
-              <div className="w-full max-w-md mx-auto h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent mb-6" />
-
-              {/* Platform availability — compact, single row */}
-              <div className="flex items-center justify-center gap-2 md:gap-3 mt-6">
-                {[
-                  { icon: IconBrandApple, label: 'iOS', sublabel: 'APP STORE' },
-                  { icon: IconBrandWindows, label: 'Windows', sublabel: 'DESKTOP' },
-                  { icon: IconBrandAndroid, label: 'Android', sublabel: 'GOOGLE PLAY' },
-                  { icon: IconDeviceDesktop, label: 'Mac', sublabel: 'DESKTOP' },
-                ].map((platform, idx) => {
-                  const Icon = platform.icon
-                  return (
-                    <button key={idx} className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/15 transition-all group">
-                      <Icon className="w-4 h-4 md:w-5 md:h-5 text-white/50 group-hover:text-white/80 transition-colors flex-shrink-0" strokeWidth={1.5} />
-                      <div className="text-left">
-                        <div className="text-[7px] md:text-[8px] text-white/35 uppercase tracking-wider leading-none">{platform.sublabel}</div>
-                        <div className="text-[10px] md:text-xs font-semibold text-white/80">{platform.label}</div>
-                </div>
-                    </button>
-                  )
-                })}
+              {/* Right — Poker Ape SVG, aligned to bottom */}
+              <div className="hidden md:flex items-end justify-center flex-shrink-0" style={{ marginBottom: '-56px' }}>
+                <Image
+                  src="/pokerape/UI Design - 29/09/Image.svg"
+                  alt="Poker Ape"
+                  width={420}
+                  height={420}
+                  className="object-contain"
+                  priority
+                />
               </div>
             </div>
           </section>
@@ -13541,6 +13551,10 @@ function NavTestPageContent() {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-12 px-3 min-w-0"
+                    onClick={() => {
+                      setAccountDrawerOpen(false)
+                      router.push('/account')
+                    }}
                     >
                       <IconUser className="w-5 h-5 mr-3 text-gray-700" />
                       <span className="flex-1 text-left text-gray-900">My Account</span>
