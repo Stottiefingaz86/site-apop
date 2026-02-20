@@ -9,6 +9,8 @@ import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTracking } from '@/hooks/use-tracking'
+import { useTrackingStore } from '@/lib/store/trackingStore'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   ColumnDef,
@@ -3328,6 +3330,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const { state: sidebarState, toggleSidebar, setOpenMobile } = useSidebar()
   const isMobile = useIsMobile()
   const router = useRouter()
+  const trackStore = useTrackingStore((s) => s.track)
+  // Deep tracking: sport changes
+  useEffect(() => {
+    if (activeSport) trackStore({ type: 'action', page: 'sports', target: 'sport-view', label: activeSport, meta: { sport: activeSport } })
+  }, [activeSport]) // eslint-disable-line react-hooks/exhaustive-deps
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
   const [loadingLeague, setLoadingLeague] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -4246,6 +4253,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
     )
     
       if (existingBetIndex !== -1) {
+        // Deep tracking: bet removed from betslip
+        trackStore({ type: 'action', page: 'sports', target: 'bet-deselect', label: `Deselected ${selection}`, meta: { event: eventName, market: marketTitle, selection, odds, sport: activeSport } })
         // Remove it immediately - no delay
         const newBets = prev.filter((_, index) => index !== existingBetIndex)
         // Close drawer if no bets left
@@ -4256,6 +4265,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
         return newBets
       }
       
+      // Deep tracking: bet added to betslip
+      trackStore({ type: 'action', page: 'sports', target: 'bet-select', label: `Selected ${selection} @ ${odds}`, meta: { event: eventName, market: marketTitle, selection, odds, sport: activeSport } })
+
       // Add new bet immediately
     const newBet = {
       id: `${eventId}-${marketTitle}-${selection}-${Date.now()}`,
@@ -4287,7 +4299,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
       
       return [...prev, newBet]
     })
-  }, [setBets, setBetslipOpen, betslipOpen, betslipMinimized, isMobile, betslipManuallyClosed])
+  }, [setBets, setBetslipOpen, betslipOpen, betslipMinimized, isMobile, betslipManuallyClosed, trackStore, activeSport])
 
   // Helper function to update bet stake
   const updateBetStake = (betId: string, stake: number) => {
@@ -5027,6 +5039,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         
                         // Store bets for confirmation modal
                         const betsToPlace = [...bets]
+
+                        // Track bet placement with deep context
+                        trackStore({ type: 'action', page: 'sports', target: 'place-bet', label: `Placed ${betsToPlace.length} bet(s)`, meta: { count: betsToPlace.length, stake: totalStake, potentialWin: totalPotentialWin, sport: activeSport } })
                         
                         // Immediately place bets to My Bets
                         const newPlacedBets = betsToPlace.map(bet => ({
@@ -5577,6 +5592,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                   onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
+                                    trackSidebar(league.label.toLowerCase(), league.label)
+                                    trackStore({ type: 'action', page: 'sports', target: 'league-select', label: league.label, meta: { league: league.label, sport: activeSport, section: 'sidebar' } })
                                     router.push(league.href)
                                   }}
                                   className="pl-4 text-xs text-white/70 hover:text-white hover:bg-white/5 cursor-pointer"
@@ -5781,6 +5798,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
+                                trackSidebar(sport.label.toLowerCase(), sport.label)
+                                trackStore({ type: 'action', page: 'sports', target: 'sport-select', label: sport.label, meta: { sport: sport.label, section: 'a-z-sidebar' } })
                                 setLoadingItem(sport.label)
                                 router.push(sport.href)
                               }}
@@ -7415,6 +7434,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
+                          trackStore({ type: 'action', page: 'sports', target: 'event-expand', label: `${event.team1} v ${event.team2}`, meta: { sport: activeSport, league: event.league, event: `${event.team1} v ${event.team2}`, isLive: event.isLive ? 'true' : 'false' } })
                           setTrackerEvent({
                             id: event.id,
                             team1: event.team1,
@@ -9443,6 +9463,7 @@ function VipDrawerContent({
 function NavTestPageContent() {
   const isMobile = useIsMobile()
   const router = useRouter()
+  const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('sports')
   const [loadingNav, setLoadingNav] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [activeFilter, setActiveFilter] = useState('For You')
@@ -9484,23 +9505,26 @@ function NavTestPageContent() {
 
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
+    trackClick('account-drawer', 'My Account')
     setVipDrawerOpen(false)
     setDepositDrawerOpen(false)
     setAccountDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openVipDrawer = useCallback(() => {
+    trackClick('vip-hub', 'VIP Hub')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openDepositDrawer = useCallback(() => {
+    trackClick('deposit', 'Deposit')
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
 
   // Panel exclusivity: when chat opens, close all drawers + collapse sidebar
   useEffect(() => {
@@ -9585,6 +9609,25 @@ function NavTestPageContent() {
       setTimeout(() => setInitialVipSidebarItem(null), 100)
     }
   }, [initialVipSidebarItem])
+
+  // Track sub-page views within sports
+  const trackRef = useRef({ vip: false, myBets: false })
+  useEffect(() => {
+    if (showVipRewards && !trackRef.current.vip) {
+      trackRef.current.vip = true
+      trackAction('sub-page-view', 'VIP Rewards (from Sports)')
+    } else if (!showVipRewards) {
+      trackRef.current.vip = false
+    }
+  }, [showVipRewards, trackAction])
+  useEffect(() => {
+    if (showMyBets && !trackRef.current.myBets) {
+      trackRef.current.myBets = true
+      trackAction('sub-page-view', 'My Bets')
+    } else if (!showMyBets) {
+      trackRef.current.myBets = false
+    }
+  }, [showMyBets, trackAction])
   const [previousPageState, setPreviousPageState] = useState<{ showSports: boolean; showVipRewards: boolean; activeSubNav?: string } | null>(null)
   const [sportsActiveTab, setSportsActiveTab] = useState('Events')
   const [isPageTransitioning, setIsPageTransitioning] = useState(false)
@@ -9944,13 +9987,13 @@ function NavTestPageContent() {
         >
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
                 {[
-                  { label: 'Home', onClick: () => { router.push('/'); setQuickLinksOpen(false); } },
-                  { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
-                  { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setQuickLinksOpen(false); } },
+                  { label: 'Home', onClick: () => { trackNav('home', 'Home'); router.push('/'); setQuickLinksOpen(false); } },
+                  { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
+                  { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
+                  { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
+                  { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
+                  { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
+                  { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -10080,6 +10123,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('sports', 'Sports')
                         setShowSports(true)
                         setShowVipRewards(false)
                         window.scrollTo(0, 0)
@@ -10110,6 +10154,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('live-betting', 'Live Betting')
                         window.location.href = '/live-betting'
                       }}
                     >
@@ -10130,6 +10175,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('casino', 'Casino')
                         router.push('/casino')
                       }}
                     >
@@ -10159,6 +10205,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('casino', 'Live Casino')
                         router.push('/casino?tab=live')
                       }}
                     >
@@ -10186,6 +10233,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('poker', 'Poker')
                         router.push('/casino?poker=true')
                       }}
                     >
@@ -10204,6 +10252,7 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        trackNav('vip-rewards', 'VIP Rewards')
                         setShowVipRewards(true)
                         setShowSports(false)
                         window.scrollTo(0, 0)
@@ -10451,6 +10500,7 @@ function NavTestPageContent() {
                     e.preventDefault()
                     e.stopPropagation()
                     // Clear alert when My Bets is clicked
+                    trackClick('my-bets', 'My Bets')
                     setMyBetsAlertCount(0)
                     setMyBetsInitialFilter('all')
                     setShowMyBets(true); window.scrollTo(0, 0)
@@ -11880,7 +11930,7 @@ function NavTestPageContent() {
                 >
               <SportsPage 
                 activeTab={sportsActiveTab}
-                onTabChange={setSportsActiveTab}
+                onTabChange={(tab: string) => { trackClick('sports-tab', tab, { section: 'sub-nav', sport: activeSport, tab }); setSportsActiveTab(tab) }}
                 onBack={() => {
                   router.push('/casino')
                 }}
@@ -13501,6 +13551,7 @@ function NavTestPageContent() {
                       variant="ghost" 
                       className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-12 px-3 min-w-0"
                       onClick={() => {
+                        trackClick('my-bets', 'My Bets (from drawer)')
                         setAccountDrawerOpen(false)
                         setMyBetsInitialFilter('pending')
                         setShowMyBets(true); window.scrollTo(0, 0)

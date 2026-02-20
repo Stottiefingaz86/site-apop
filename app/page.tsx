@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useChatStore } from '@/lib/store/chatStore'
 import { useBetslipStore } from '@/lib/store/betslipStore'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTracking } from '@/hooks/use-tracking'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -1197,6 +1198,7 @@ function HomePageContent() {
   const isMobile = useIsMobile()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('home')
   
   // Global betslip store for adding bets from homepage Top Sports
   const globalBets = useBetslipStore((s) => s.bets)
@@ -1232,23 +1234,26 @@ function HomePageContent() {
 
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
+    trackClick('account-drawer', 'My Account')
     setVipDrawerOpen(false)
     setDepositDrawerOpen(false)
     setAccountDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openVipDrawer = useCallback(() => {
+    trackClick('vip-hub', 'VIP Hub')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openDepositDrawer = useCallback(() => {
+    trackClick('deposit', 'Deposit')
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
 
   // Panel exclusivity: when chat opens, close all drawers + collapse sidebar
   useEffect(() => {
@@ -1774,12 +1779,12 @@ function HomePageContent() {
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
             {[
               { label: 'Home', onClick: () => { setQuickLinksOpen(false); } },
-              { label: 'Sports', onClick: () => { router.push('/sports/football'); setQuickLinksOpen(false); } },
-              { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-              { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
-              { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
-              { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
-              { label: 'VIP Rewards', onClick: () => { router.push('/casino?vip=true'); setQuickLinksOpen(false); } },
+              { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
+              { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
+              { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
+              { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
+              { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
+              { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true'); setQuickLinksOpen(false); } },
               { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
             ].map((item) => (
               <button
@@ -1852,7 +1857,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/sports/football')}
+                    onClick={() => { trackNav('sports', 'Sports'); router.push('/sports/football') }}
                   >
                     Sports
                   </SidebarMenuButton>
@@ -1860,7 +1865,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => window.location.href = '/live-betting'}
+                    onClick={() => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' }}
                   >
                     Live Betting
                   </SidebarMenuButton>
@@ -1868,7 +1873,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/casino')}
+                    onClick={() => { trackNav('casino', 'Casino'); router.push('/casino') }}
                   >
                     Casino
                   </SidebarMenuButton>
@@ -1876,7 +1881,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/casino?tab=live')}
+                    onClick={() => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live') }}
                   >
                     Live Casino
                   </SidebarMenuButton>
@@ -1884,7 +1889,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/casino?poker=true')}
+                    onClick={() => { trackNav('poker', 'Poker'); router.push('/casino?poker=true') }}
                   >
                     Poker
                   </SidebarMenuButton>
@@ -1892,7 +1897,7 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => router.push('/casino?vip=true')}
+                    onClick={() => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') }}
                   >
                     VIP Rewards
                   </SidebarMenuButton>

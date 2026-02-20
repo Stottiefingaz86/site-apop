@@ -39,8 +39,24 @@ import {
   IconMaximize,
   IconUpload,
   IconTrash,
+  IconCrown,
+  IconWallet,
+  IconLayoutDashboard,
+  IconLifebuoy,
+  IconBuilding,
+  IconStar,
+  IconPlayerPlay,
+  IconCards,
+  IconMenu2,
+  IconBallBasketball,
+  IconBallAmericanFootball,
+  IconBallTennis,
+  IconSettings,
+  IconFlame,
+  IconHome,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
+import NumberFlow from '@number-flow/react'
 
 // ── Real component imports (wrapped in try/catch safe wrappers) ──
 // NOTE: These components are used in previews. If any crash during
@@ -387,6 +403,1283 @@ function SideNavDrawerPreview() {
   )
 }
 
+// ── SubNavGlassPreview (interactive AnimateTabs recreation) ─────────
+function SubNavGlassPreview() {
+  const [active, setActive] = useState('For You')
+  const tabs = ['For You', 'Slots', 'Bonus Buys', 'Megaways', 'Live', 'Jackpots', 'Early', 'Staff Picks', 'Exclusive', 'New']
+  return (
+    <div className="w-full rounded-lg overflow-hidden">
+      <div
+        className="backdrop-blur-xl border-b border-white/10 py-3 px-4"
+        style={{ backgroundColor: 'rgba(26, 26, 26, 0.6)' }}
+      >
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+          <div className="inline-flex bg-white/5 p-0.5 h-auto gap-1 rounded-3xl relative items-center">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActive(tab)}
+                className={cn(
+                  'relative z-10 rounded-2xl px-4 py-1 h-9 text-xs font-medium transition-colors duration-300 ease-in-out flex items-center gap-1.5 whitespace-nowrap cursor-pointer',
+                  active === tab ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                )}
+              >
+                {active === tab && (
+                  <motion.div
+                    layoutId="libSubNavTab"
+                    className="absolute inset-0 rounded-2xl -z-10"
+                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                  />
+                )}
+                <span className="relative z-10">{tab}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── QuickLinksPreview (interactive mobile quick links bar) ─────────
+function QuickLinksPreview() {
+  const [open, setOpen] = useState(true)
+  const [active, setActive] = useState('Casino')
+  const [otherOpen, setOtherOpen] = useState(false)
+  const items = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  return (
+    <div className="w-full rounded-lg overflow-hidden border border-white/10">
+      {/* Quick links bar */}
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 40 : 0 }}
+        transition={{ type: 'tween', ease: 'linear', duration: 0.3 }}
+        className="overflow-hidden"
+        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+      >
+        <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          {items.map((item) => (
+            <button
+              key={item}
+              onClick={() => setActive(item)}
+              className={cn(
+                'flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative whitespace-nowrap cursor-pointer',
+                active === item ? 'text-white' : 'text-white/70 hover:text-white'
+              )}
+            >
+              {item}
+            </button>
+          ))}
+          <button
+            onClick={() => setOtherOpen(!otherOpen)}
+            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-white/70 hover:text-white flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+          >
+            Other
+            <IconChevronDown className={cn('w-3 h-3 transition-transform duration-200', otherOpen && 'rotate-180')} />
+          </button>
+        </div>
+      </motion.div>
+      {/* Other dropdown */}
+      <AnimatePresence initial={false}>
+        {otherOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden border-t border-white/5"
+            style={{ backgroundColor: 'rgba(45, 45, 45, 0.95)' }}
+          >
+            <div className="flex items-center gap-0 px-1 py-1">
+              {['Esports', 'Racebook', 'Contests', 'Virtuals'].map((item) => (
+                <button key={item} className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors cursor-pointer">
+                  {item}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Main header bar */}
+      <div
+        className="border-t border-white/10 h-16 flex items-center justify-between px-3"
+        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+      >
+        <div className="flex items-center gap-3">
+          <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
+            <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
+            <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
+          </svg>
+          <span className="text-sm font-bold text-white tracking-tight">BET<span className="text-white/70">ONLINE</span></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+            <span className="text-xs font-semibold text-white/80">CH</span>
+            <span className="text-xs font-bold text-white tabular-nums">$10.00</span>
+          </div>
+        </div>
+      </div>
+      {/* Toggle button */}
+      <div className="flex justify-center py-2 border-t border-white/5" style={{ backgroundColor: 'var(--ds-page-bg, #1a1a1a)' }}>
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-[10px] text-white/30 hover:text-white/50 transition-colors cursor-pointer"
+        >
+          {open ? '↑ scroll down to hide' : '↓ scroll up to show'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── MainNavPreview (interactive header nav — exact match to casino/poker/sports) ─────────
+function MainNavPreview() {
+  const [active, setActive] = useState('Casino')
+  const [otherOpen, setOtherOpen] = useState(false)
+  const navItems = ['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  // Items that get the animated pill (layoutId shared)
+  const pillItems = ['Sports', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  return (
+    <div className="w-full rounded-lg overflow-hidden border border-white/10 relative">
+      <div
+        className="border-b border-white/10 h-16 flex items-center justify-between px-4"
+        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+      >
+        {/* Left — sidebar toggle + nav pills + "Other" dropdown */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1.5 mr-1 flex-shrink-0">
+            <button className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+            </button>
+            <div className="w-px h-5 bg-white/20" />
+          </div>
+          {navItems.map((item) => (
+            <button
+              key={item}
+              onClick={() => setActive(item)}
+              className={cn(
+                'relative h-10 px-4 py-2 rounded-small text-sm font-medium transition-colors cursor-pointer overflow-visible flex-shrink-0',
+                active === item ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
+              )}
+            >
+              {active === item && pillItems.includes(item) && (
+                <motion.div
+                  layoutId="libMainNavPill"
+                  layout="position"
+                  className="absolute inset-0 rounded-small -z-10"
+                  style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                  initial={false}
+                  transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                />
+              )}
+              <span className="relative z-10 whitespace-nowrap">{item}</span>
+            </button>
+          ))}
+          {/* Other dropdown */}
+          <button
+            onClick={() => setOtherOpen(!otherOpen)}
+            className="relative h-10 px-4 py-2 rounded-small text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
+          >
+            Other
+            <IconChevronDown className={cn('h-3 w-3 transition-transform duration-200', otherOpen && 'rotate-180')} />
+          </button>
+        </div>
+        {/* Right — VIP crown, separator, avatar+balance, DEPOSIT, chat */}
+        <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+          {/* VIP Crown */}
+          <button className="h-8 w-8 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center hover:bg-yellow-400/30 hover:border-yellow-400/40 transition-colors cursor-pointer">
+            <IconCrown className="text-yellow-400 w-4 h-4" />
+          </button>
+          <div className="h-6 w-px bg-white/20" />
+          {/* Avatar + Balance */}
+          <button className="flex items-center gap-1.5 px-2 py-1 rounded-small bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+            <div className="relative">
+              <div className="h-6 w-6 rounded-full bg-white/10 border border-white/20 group-hover:border-white/40 flex items-center justify-center transition-colors">
+                <span className="text-[10px] font-semibold text-white">CH</span>
+              </div>
+              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+            </div>
+            <span className="text-xs font-medium text-white tabular-nums">$10.00</span>
+          </button>
+          {/* DEPOSIT */}
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-small bg-white/5 hover:bg-white/10 transition-colors cursor-pointer text-xs font-semibold text-white">
+            <IconWallet className="w-3.5 h-3.5 text-white" />
+            DEPOSIT
+          </button>
+          {/* Chat toggle */}
+          <button className="h-8 w-8 rounded-small bg-white/5 flex items-center justify-center border border-transparent hover:bg-white/10 transition-colors cursor-pointer relative">
+            <IconMessageCircle2 className="w-4 h-4 text-white/70" strokeWidth={2} />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-[#2d2d2d] animate-pulse" />
+          </button>
+        </div>
+      </div>
+      {/* "Other" dropdown panel */}
+      <AnimatePresence initial={false}>
+        {otherOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15, ease: 'easeInOut' }}
+            className="overflow-hidden"
+            style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+          >
+            <div className="px-4 py-2 flex flex-col border-t border-white/5">
+              {['Esports', 'Racebook', 'Contests', 'Virtuals'].map((item) => (
+                <button key={item} className="text-left px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-small transition-colors cursor-pointer">
+                  {item}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ── SubNavWithIconsPreview (casino sub-nav with search + favorite) ─────────
+function SubNavWithIconsPreview() {
+  const [active, setActive] = useState('For You')
+  const [iconTab, setIconTab] = useState<'search' | 'favorite'>('search')
+  const tabs = ['For You', 'Slots', 'Bonus Buys', 'Megaways', 'Originals', 'Blackjack', 'Live', 'Jackpots', 'Early', 'Staff Picks', 'Exclusive', 'New']
+  return (
+    <div className="w-full rounded-lg overflow-hidden">
+      <div
+        className="backdrop-blur-xl border-b border-white/10 py-3 px-4"
+        style={{ backgroundColor: 'rgba(26, 26, 26, 0.6)' }}
+      >
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+          {/* Icon tabs — search + favourite */}
+          <div className="flex-shrink-0">
+            <div className="bg-white/5 p-0.5 h-auto gap-0.5 rounded-3xl border-0 flex items-center">
+              <button
+                onClick={() => { setIconTab('search'); setActive('For You') }}
+                className={cn(
+                  'rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer',
+                  iconTab === 'search' && active === ''
+                    ? 'text-white bg-white/10'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                )}
+              >
+                <IconSearch className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => { setIconTab('favorite'); setActive('') }}
+                className={cn(
+                  'rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer',
+                  iconTab === 'favorite'
+                    ? 'text-pink-500 bg-white/10'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                )}
+              >
+                <IconHeart className={cn('w-3.5 h-3.5 transition-colors', iconTab === 'favorite' && 'fill-pink-500 text-pink-500')} />
+              </button>
+            </div>
+          </div>
+          {/* AnimateTabs pills */}
+          <div className="inline-flex bg-white/5 p-0.5 h-auto gap-1 rounded-3xl relative items-center">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => { setActive(tab); setIconTab('search') }}
+                className={cn(
+                  'relative z-10 rounded-2xl px-4 py-1 h-9 text-xs font-medium transition-colors duration-300 ease-in-out flex items-center gap-1.5 whitespace-nowrap cursor-pointer',
+                  active === tab ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                )}
+              >
+                {active === tab && (
+                  <motion.div
+                    layoutId="libSubNavIconsTab"
+                    className="absolute inset-0 rounded-2xl -z-10"
+                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                  />
+                )}
+                <span className="relative z-10">{tab}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SidebarNavPreview (interactive — desktop + mobile) ─────────
+function SidebarNavPreview() {
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
+  const [collapsed, setCollapsed] = useState(false)
+  const [activeItem, setActiveItem] = useState('My Favorites')
+  const [mobileOtherOpen, setMobileOtherOpen] = useState(false)
+  const [activeQuickLink, setActiveQuickLink] = useState('Casino')
+
+  // Casino sidebar items
+  const casinoTop = [
+    { icon: IconHeart, label: 'My Favorites' },
+    { icon: IconPlayerPlay, label: 'Last Game Played', sub: 'Golden Fortune' },
+    { icon: IconDice, label: 'Play Random' },
+  ]
+  const casinoMenu = [
+    { icon: IconStar, label: 'Popular Games' },
+    { icon: IconCards, label: 'Slots' },
+    { icon: IconLayoutGrid, label: 'Blackjack' },
+    { icon: IconDeviceGamepad2, label: 'Video Poker' },
+    { icon: IconFlame, label: 'Table Games' },
+    { icon: IconBolt, label: 'Live Casino' },
+  ]
+  const bottomItems = [
+    { icon: IconCrown, label: 'Loyalty Hub' },
+    { icon: IconBuilding, label: 'Banking' },
+    { icon: IconLifebuoy, label: 'Need Help' },
+  ]
+  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const otherLinks = ['Esports', 'Racebook', 'Contests', 'Virtuals']
+
+  // Sidebar width
+  const sidebarW = viewMode === 'mobile' ? '280px' : collapsed ? '48px' : '256px'
+
+  return (
+    <div className="w-full">
+      {/* Toggle desktop/mobile */}
+      <div className="flex items-center gap-2 mb-3">
+        {(['desktop', 'mobile'] as const).map(mode => (
+          <button
+            key={mode}
+            onClick={() => { setViewMode(mode); if (mode === 'mobile') setCollapsed(false) }}
+            className={cn(
+              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer',
+              viewMode === mode ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
+          >
+            {mode === 'desktop' ? 'Desktop' : 'Mobile'}
+          </button>
+        ))}
+        {viewMode === 'desktop' && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="ml-auto px-3 py-1.5 rounded-small text-xs font-medium text-white/50 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+          >
+            {collapsed ? 'Expand' : 'Collapse'}
+          </button>
+        )}
+      </div>
+
+      <div className="flex rounded-lg overflow-hidden border border-white/10" style={{ backgroundColor: '#1a1a1a' }}>
+        {/* Sidebar */}
+        <motion.div
+          animate={{ width: sidebarW }}
+          transition={{ duration: 0.2, ease: 'linear' }}
+          className="flex-shrink-0 border-r border-white/10 flex flex-col overflow-hidden"
+          style={{ backgroundColor: '#2d2d2d', height: '480px' }}
+        >
+          {/* Sidebar Header — logo + close (mobile) */}
+          <div className="h-14 px-4 flex items-center flex-shrink-0 relative" style={{ backgroundColor: viewMode === 'mobile' ? '#2d2d2d' : 'rgba(45,45,45,0.75)' }}>
+            <div className="relative w-full h-full flex items-center justify-center">
+              {viewMode === 'mobile' && (
+                <button className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                  </svg>
+                </button>
+              )}
+              {collapsed && viewMode === 'desktop' ? (
+                <span className="text-white font-bold text-sm">B</span>
+              ) : (
+                <div className="h-5 w-[110px] flex items-center">
+                  <svg viewBox="0 0 120 20" className="h-5 w-[110px] text-white">
+                    <text x="0" y="15" fill="currentColor" fontSize="14" fontWeight="700" fontFamily="system-ui">BETONLINE</text>
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Quick Links — horizontal scrolling strip */}
+          {viewMode === 'mobile' && (
+            <>
+              <div className="border-b border-white/5" style={{ backgroundColor: 'rgba(45,45,45,0.92)' }}>
+                <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide px-1">
+                  {quickLinks.map(item => {
+                    const isCurrent = item === activeQuickLink
+                    return (
+                      <button
+                        key={item}
+                        onClick={() => setActiveQuickLink(item)}
+                        className={cn(
+                          'flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors relative cursor-pointer',
+                          isCurrent ? 'text-white font-bold' : 'text-white/35 font-medium hover:text-white/60'
+                        )}
+                      >
+                        {item}
+                        {isCurrent && (
+                          <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }} />
+                        )}
+                      </button>
+                    )
+                  })}
+                  <button
+                    onClick={() => setMobileOtherOpen(!mobileOtherOpen)}
+                    className="flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap text-white/35 font-medium hover:text-white/60 flex items-center gap-0.5 cursor-pointer"
+                  >
+                    Other
+                    <IconChevronDown className={cn('w-3 h-3 transition-transform duration-200', mobileOtherOpen && 'rotate-180')} />
+                  </button>
+                </div>
+              </div>
+              <AnimatePresence initial={false}>
+                {mobileOtherOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden border-b border-white/5"
+                    style={{ backgroundColor: 'rgba(45,45,45,0.95)' }}
+                  >
+                    <div className="flex items-center gap-0 px-1 py-1">
+                      {otherLinks.map(item => (
+                        <button key={item} className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors cursor-pointer">{item}</button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 px-1.5 space-y-0.5">
+            {/* Featured top items (square icon style) */}
+            <div className="space-y-0.5">
+              {viewMode === 'mobile' && <div className="px-2 py-1 text-[10px] text-white/40 font-medium uppercase tracking-wider">Casino Menu</div>}
+              {casinoTop.map(item => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => setActiveItem(item.label)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
+                      collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
+                      activeItem === item.label ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                    )}
+                    style={activeItem === item.label ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+                  >
+                    <div className={cn('w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0', activeItem === item.label ? 'bg-white/20' : 'bg-white/10')}>
+                      <Icon strokeWidth={1.5} className="w-4 h-4" />
+                    </div>
+                    {(!collapsed || viewMode === 'mobile') && (
+                      item.sub ? (
+                        <div className="flex flex-col leading-tight">
+                          <span>{item.label}</span>
+                          <span className="text-[11px] text-white/40 font-normal">{item.sub}</span>
+                        </div>
+                      ) : <span>{item.label}</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Separator */}
+            <div className="border-b border-white/10 mx-1 my-2" />
+
+            {/* Menu items */}
+            {casinoMenu.map(item => {
+              const Icon = item.icon
+              const isActive = activeItem === item.label
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => setActiveItem(item.label)}
+                  className={cn(
+                    'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
+                    collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
+                    isActive ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                  )}
+                  style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+                >
+                  <Icon strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
+                  {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                </button>
+              )
+            })}
+
+            {/* Spacer */}
+            <div className="flex-1 min-h-[24px]" />
+          </div>
+
+          {/* Bottom — Loyalty Hub, Banking, Need Help */}
+          <div className="border-t border-white/10 py-2 px-1.5 space-y-0.5 flex-shrink-0">
+            {bottomItems.map(item => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.label}
+                  className={cn(
+                    'w-full flex items-center gap-2.5 rounded-small text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all cursor-pointer',
+                    collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5'
+                  )}
+                >
+                  <Icon strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
+                  {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                </button>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        {/* Content placeholder */}
+        <div className="flex-1 p-6 flex items-center justify-center min-w-0">
+          <span className="text-white/20 text-sm">Page Content</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── SportsbarNavPreview (sports sidebar with expandable items) ─────────
+function SportsSidebarPreview() {
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
+  const [collapsed, setCollapsed] = useState(false)
+  const [activeItem, setActiveItem] = useState('Soccer')
+  const [expanded, setExpanded] = useState<string[]>(['Soccer'])
+  const [mobileOtherOpen, setMobileOtherOpen] = useState(false)
+  const [activeQuickLink, setActiveQuickLink] = useState('Sports')
+
+  const sportsList = [
+    { icon: '/sports_icons/soccer.svg', label: 'Soccer', expandable: true, subItems: ['Premier League', 'La Liga', 'Serie A', 'Bundesliga'] },
+    { icon: '/sports_icons/Basketball.svg', label: 'Basketball', expandable: true, subItems: ['NBA', 'NCAA', 'EuroLeague'] },
+    { icon: '/sports_icons/football.svg', label: 'Football', expandable: true, subItems: ['NFL', 'NCAAF'] },
+    { icon: '/sports_icons/tennis.svg', label: 'Tennis', expandable: true, subItems: ['ATP', 'WTA'] },
+    { icon: '/sports_icons/Hockey.svg', label: 'Hockey', expandable: false },
+    { icon: '/sports_icons/mma.svg', label: 'MMA', expandable: false },
+  ]
+  const features = [
+    { icon: IconTicket, label: 'My Bets' },
+    { icon: IconFlame, label: 'Same Game Parlays' },
+    { icon: IconSettings, label: 'Settings' },
+  ]
+  const bottomItems = [
+    { icon: IconCrown, label: 'Loyalty Hub' },
+    { icon: IconBuilding, label: 'Banking' },
+    { icon: IconLifebuoy, label: 'Need Help' },
+  ]
+  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const otherLinks = ['Esports', 'Racebook', 'Contests', 'Virtuals']
+
+  const toggleExpand = (label: string) => {
+    setExpanded(prev => prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label])
+  }
+  const sidebarW = viewMode === 'mobile' ? '280px' : collapsed ? '48px' : '256px'
+
+  return (
+    <div className="w-full">
+      {/* Toggle desktop/mobile */}
+      <div className="flex items-center gap-2 mb-3">
+        {(['desktop', 'mobile'] as const).map(mode => (
+          <button
+            key={mode}
+            onClick={() => { setViewMode(mode); if (mode === 'mobile') setCollapsed(false) }}
+            className={cn(
+              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer',
+              viewMode === mode ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
+          >
+            {mode === 'desktop' ? 'Desktop' : 'Mobile'}
+          </button>
+        ))}
+        {viewMode === 'desktop' && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="ml-auto px-3 py-1.5 rounded-small text-xs font-medium text-white/50 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+          >
+            {collapsed ? 'Expand' : 'Collapse'}
+          </button>
+        )}
+      </div>
+
+      <div className="flex rounded-lg overflow-hidden border border-white/10" style={{ backgroundColor: '#1a1a1a' }}>
+        <motion.div
+          animate={{ width: sidebarW }}
+          transition={{ duration: 0.2, ease: 'linear' }}
+          className="flex-shrink-0 border-r border-white/10 flex flex-col overflow-hidden"
+          style={{ backgroundColor: '#2d2d2d', height: '480px' }}
+        >
+          {/* Header — logo + panel close (mobile) */}
+          <div className="h-14 px-4 flex items-center flex-shrink-0 relative" style={{ backgroundColor: viewMode === 'mobile' ? '#2d2d2d' : 'rgba(45,45,45,0.75)' }}>
+            <div className="relative w-full h-full flex items-center justify-center">
+              {viewMode === 'mobile' && (
+                <button className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                  </svg>
+                </button>
+              )}
+              {collapsed && viewMode === 'desktop' ? (
+                <span className="text-white font-bold text-sm">B</span>
+              ) : (
+                <div className="h-5 w-[110px] flex items-center">
+                  <svg viewBox="0 0 120 20" className="h-5 w-[110px] text-white"><text x="0" y="15" fill="currentColor" fontSize="14" fontWeight="700" fontFamily="system-ui">BETONLINE</text></svg>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Quick Links — horizontal scrolling strip */}
+          {viewMode === 'mobile' && (
+            <>
+              <div className="border-b border-white/5" style={{ backgroundColor: 'rgba(45,45,45,0.92)' }}>
+                <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide px-1">
+                  {quickLinks.map(item => {
+                    const isCurrent = item === activeQuickLink
+                    return (
+                      <button
+                        key={item}
+                        onClick={() => setActiveQuickLink(item)}
+                        className={cn(
+                          'flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors relative cursor-pointer',
+                          isCurrent ? 'text-white font-bold' : 'text-white/35 font-medium hover:text-white/60'
+                        )}
+                      >
+                        {item}
+                        {isCurrent && (
+                          <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }} />
+                        )}
+                      </button>
+                    )
+                  })}
+                  <button
+                    onClick={() => setMobileOtherOpen(!mobileOtherOpen)}
+                    className="flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap text-white/35 font-medium hover:text-white/60 flex items-center gap-0.5 cursor-pointer"
+                  >
+                    Other
+                    <IconChevronDown className={cn('w-3 h-3 transition-transform duration-200', mobileOtherOpen && 'rotate-180')} />
+                  </button>
+                </div>
+              </div>
+              <AnimatePresence initial={false}>
+                {mobileOtherOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden border-b border-white/5"
+                    style={{ backgroundColor: 'rgba(45,45,45,0.95)' }}
+                  >
+                    <div className="flex items-center gap-0 px-1 py-1">
+                      {otherLinks.map(item => (
+                        <button key={item} className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors cursor-pointer">{item}</button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 px-1.5">
+            {/* FEATURES section label (mobile) */}
+            {viewMode === 'mobile' && <div className="px-2 py-1 text-[10px] text-white/40 font-medium uppercase tracking-wider">Features</div>}
+            {/* Features — square icon style */}
+            <div className="space-y-0.5 mb-1">
+              {features.map(item => {
+                const Icon = item.icon
+                const isActive = activeItem === item.label
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => setActiveItem(item.label)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
+                      collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
+                      isActive ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                    )}
+                    style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+                  >
+                    <div className={cn('w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0', isActive ? 'bg-white/20' : 'bg-white/10')}>
+                      <Icon strokeWidth={1.5} className="w-4 h-4" />
+                    </div>
+                    {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Top Leagues separator */}
+            <div className="border-b border-white/10 mx-1 my-2" />
+            {(!collapsed || viewMode === 'mobile') && <div className="px-2 py-1 text-[10px] text-white/40 font-medium uppercase tracking-wider">Top Sports</div>}
+
+            {/* Sports list with expandable sub-items */}
+            <div className="space-y-0.5">
+              {sportsList.map(sport => {
+                const isActive = activeItem === sport.label
+                const isExpanded = expanded.includes(sport.label)
+                return (
+                  <div key={sport.label}>
+                    <button
+                      onClick={() => { setActiveItem(sport.label); if (sport.expandable) toggleExpand(sport.label) }}
+                      className={cn(
+                        'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
+                        collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
+                        isActive ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                      )}
+                      style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+                    >
+                      <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain flex-shrink-0" />
+                      {(!collapsed || viewMode === 'mobile') && (
+                        <>
+                          <span>{sport.label}</span>
+                          {sport.expandable && (
+                            <IconChevronRight className={cn('w-4 h-4 ml-auto transition-transform duration-300', isExpanded && 'rotate-90')} />
+                          )}
+                        </>
+                      )}
+                    </button>
+                    {/* Animated sub-items */}
+                    <AnimatePresence initial={false}>
+                      {sport.expandable && isExpanded && (!collapsed || viewMode === 'mobile') && sport.subItems && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pl-8 space-y-0.5 py-1">
+                            {sport.subItems.map(sub => (
+                              <button key={sub} className="w-full text-left px-3 py-1.5 text-xs text-white/60 hover:text-white hover:bg-white/5 rounded-small transition-colors cursor-pointer">
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="min-h-[24px]" />
+          </div>
+
+          {/* Bottom */}
+          <div className="border-t border-white/10 py-2 px-1.5 space-y-0.5 flex-shrink-0">
+            {bottomItems.map(item => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.label}
+                  className={cn(
+                    'w-full flex items-center gap-2.5 rounded-small text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all cursor-pointer',
+                    collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5'
+                  )}
+                >
+                  <Icon strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
+                  {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                </button>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        <div className="flex-1 p-6 flex items-center justify-center min-w-0">
+          <span className="text-white/20 text-sm">Page Content</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── CasinoTilesPreview (different tile types) ──────────────
+function CasinoTilesPreview() {
+  const [viewType, setViewType] = useState<'square' | 'rectangle' | 'live'>('square')
+
+  // Tag configs
+  const tags = [
+    { label: 'Hot', bg: 'bg-red-950/80', border: 'border-red-500/60', icon: '🔥', text: 'text-red-400' },
+    { label: 'Early', bg: 'bg-emerald-900/80', border: 'border-emerald-500/60', icon: '⏱', text: 'text-emerald-400' },
+    { label: 'Exclusive', bg: 'bg-indigo-950/80', border: 'border-indigo-400/60', icon: '✦', text: 'text-indigo-300' },
+    { label: 'New', bg: 'bg-yellow-900/80', border: 'border-yellow-500/60', icon: '✨', text: 'text-yellow-400' },
+    { label: 'Original', bg: 'bg-white/15', border: 'border-white/25', icon: 'B', text: 'text-white/80' },
+  ]
+
+  const games = [
+    { title: 'Gold Nugget Rush', vendor: 'Dragon Gaming', tag: 0 },
+    { title: 'Mega Fortune', vendor: 'BetSoft', tag: 1 },
+    { title: 'Starburst', vendor: 'Nucleus', tag: 2 },
+    { title: 'Book of Dead', vendor: 'Rival', tag: 3 },
+    { title: 'Dead or Alive', vendor: 'Felix', tag: 4 },
+  ]
+
+  const liveGames = [
+    { title: 'Roulette VIP', subtitle: 'LIVE ROULETTE', range: '$25 - $5,000', history: [0, 32, 15, 3, 26, 12, 8] },
+    { title: 'Lightning Blackjack', subtitle: 'LIVE BLACKJACK', range: '$10 - $2,500', seats: { occupied: 5, total: 7 } },
+    { title: 'Baccarat Squeeze', subtitle: 'LIVE BACCARAT', range: '$50 - $10,000', history: ['P', 'B', 'B', 'P', 'B', 'P'] },
+  ]
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center gap-2 mb-3">
+        {(['square', 'rectangle', 'live'] as const).map(type => (
+          <button
+            key={type}
+            onClick={() => setViewType(type)}
+            className={cn(
+              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer capitalize',
+              viewType === type ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
+          >
+            {type === 'live' ? 'Live Casino' : type === 'rectangle' ? 'Portrait (4:5)' : 'Square Grid'}
+          </button>
+        ))}
+      </div>
+
+      {viewType === 'square' && (
+        <div className="grid grid-cols-5 gap-2">
+          {games.map((game, i) => {
+            const tag = tags[game.tag]
+            return (
+              <div key={i} className="relative group cursor-pointer">
+                <div className="w-full aspect-square rounded-small overflow-hidden bg-white/5 hover:bg-white/10 transition-all duration-300 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                  {/* Tag badge */}
+                  <div className="absolute top-1.5 left-1.5 flex items-center gap-1 z-10">
+                    <div className="w-5 h-5 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15">
+                      <span className="text-[8px]">D</span>
+                    </div>
+                    <div className={cn('flex items-center gap-0.5 px-1.5 py-[3px] rounded-full border backdrop-blur-sm', tag.bg, tag.border)}>
+                      <span className={cn('text-[8px]', tag.text)}>{tag.icon}</span>
+                      <span className={cn('text-[9px] font-semibold leading-none text-white')}>{tag.label}</span>
+                    </div>
+                  </div>
+                  {/* Hover shimmer */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {viewType === 'rectangle' && (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {games.map((game, i) => {
+            const tag = tags[game.tag]
+            return (
+              <div key={i} className="relative group cursor-pointer flex-shrink-0">
+                <div className="relative w-[120px] aspect-[4/5] rounded-small overflow-hidden bg-white/5">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                  {/* Tag badge */}
+                  <div className="absolute top-1.5 left-1.5 flex items-center gap-1 z-10">
+                    <div className={cn('flex items-center gap-0.5 px-1.5 py-[3px] rounded-full border backdrop-blur-sm', tag.bg, tag.border)}>
+                      <span className={cn('text-[8px]', tag.text)}>{tag.icon}</span>
+                      <span className={cn('text-[9px] font-semibold leading-none text-white')}>{tag.label}</span>
+                    </div>
+                  </div>
+                  {/* Bottom info */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-2">
+                    <div className="text-white text-[10px] font-bold truncate leading-tight mb-0.5">{game.title}</div>
+                    <div className="text-white/70 text-[8px] truncate">{game.vendor}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {viewType === 'live' && (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {liveGames.map((game, i) => (
+            <div key={i} className="relative group cursor-pointer flex-shrink-0 rounded-small overflow-hidden bg-white/5 hover:bg-white/10 transition-all" style={{ width: '200px', height: '220px' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+              {/* Live pill */}
+              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-white/10 backdrop-blur-md rounded-full px-2 py-0.5 border border-white/15">
+                <div className="relative w-1.5 h-1.5"><div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" /><div className="relative w-1.5 h-1.5 rounded-full bg-red-500" /></div>
+                <span className="text-white text-[10px] font-medium">{game.range}</span>
+              </div>
+              {/* Bottom content */}
+              <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10">
+                <div className="text-white/60 text-[10px] font-medium uppercase tracking-wider mb-0.5">{game.subtitle}</div>
+                <div className="text-white font-bold text-sm leading-tight mb-2">{game.title}</div>
+                {/* History or seats */}
+                {game.history && Array.isArray(game.history) && typeof game.history[0] === 'number' && (
+                  <div className="flex gap-0.5 mb-2">
+                    {(game.history as number[]).map((n, j) => (
+                      <div key={j} className={cn('w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center',
+                        n === 0 ? 'bg-emerald-600 text-white' : n <= 18 ? 'bg-red-600 text-white' : 'bg-gray-800 text-white'
+                      )}>{n}</div>
+                    ))}
+                  </div>
+                )}
+                {game.seats && (
+                  <div className="flex gap-1 mb-2">
+                    {Array.from({ length: game.seats.total }).map((_, j) => (
+                      <div key={j} className={cn('w-4 h-4 rounded-sm', j < game.seats!.occupied ? 'bg-white/30' : 'bg-white/10 border border-dashed border-white/20')} />
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded-sm bg-white/10" />
+                  <span className="text-white/50 text-[10px] font-medium">Evolution</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── VendorCarouselPreview ──────────────────────────────────
+function VendorCarouselPreview() {
+  const vendors = ['Dragon Gaming', 'BetSoft', '5 Clover', 'Arrow\'s Edge', 'Blaze', 'DeckFresh', 'Felix', 'KA Gaming', 'Nucleus', 'Rival']
+  return (
+    <div className="w-full overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2 pb-1">
+        {vendors.map((vendor, i) => (
+          <button
+            key={vendor}
+            className="group relative bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all duration-300 whitespace-nowrap overflow-hidden flex items-center gap-2 flex-shrink-0 cursor-pointer"
+          >
+            <div className="w-5 h-5 rounded-sm bg-white/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-[8px] font-bold text-white/50">{vendor.charAt(0)}</span>
+            </div>
+            <span className="relative z-10">{vendor}</span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out z-0" />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── GameLauncherPreview ────────────────────────────────────
+function GameLauncherPreview() {
+  const [loading, setLoading] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [favorited, setFavorited] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 1500)
+    return () => clearTimeout(t)
+  }, [])
+
+  return (
+    <div className="w-full rounded-lg overflow-hidden border border-white/10" style={{ backgroundColor: '#1a1a1a', height: '320px' }}>
+      {/* Top bar */}
+      <div className="h-10 px-3 flex items-center justify-between relative rounded-t-lg border-b border-white/10" style={{ backgroundColor: 'rgba(26,26,26,0.6)', backdropFilter: 'blur(16px)' }}>
+        {/* Hamburger */}
+        <div className="relative">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="7" x2="20" y2="7" /><line x1="6" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="18" y2="17" />
+            </svg>
+          </button>
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full left-0 mt-2 w-48 bg-[#2d2d2d]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+              >
+                <div className="py-2">
+                  <button className="w-full px-4 py-2.5 text-left text-white hover:bg-white/10 transition-colors text-sm cursor-pointer">Quick Deposit</button>
+                  <button className="w-full px-4 py-2.5 text-left text-white hover:bg-white/10 transition-colors text-sm cursor-pointer">More Games Like This</button>
+                </div>
+                <div className="px-4 py-3 border-t border-white/10 bg-white/5">
+                  <div className="text-xs text-white/70 mb-2">Gold To Platinum I</div>
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: '45%', background: 'linear-gradient(to right, #d4af37, #f5d061)' }} />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        {/* Game name center */}
+        <h2 className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-white max-w-[50%] truncate">Gold Nugget Rush</h2>
+        {/* Right icons */}
+        <div className="flex items-center gap-1">
+          <button className="p-1.5 hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+            <IconMaximize className="w-4 h-4 text-white/70" />
+          </button>
+          <button onClick={() => setFavorited(!favorited)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+            <IconHeart className={cn('w-4 h-4 transition-colors', favorited ? 'text-pink-500 fill-pink-500' : 'text-white/70')} />
+          </button>
+          <button className="p-1.5 hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+            <IconX className="w-4 h-4 text-white/70" />
+          </button>
+        </div>
+      </div>
+      {/* Game area */}
+      <div className="h-[280px] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-3">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-10 h-10 border-3 border-white/20 border-t-white rounded-full" />
+              <p className="text-white/70 text-xs">Loading game...</p>
+              <p className="text-white/50 text-[10px]">Dragon Gaming</p>
+            </motion.div>
+          ) : (
+            <motion.div key="loaded" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full h-full bg-white/5 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-xl bg-white/10 mx-auto mb-3 flex items-center justify-center">
+                  <IconDeviceGamepad2 className="w-10 h-10 text-white/30" />
+                </div>
+                <p className="text-white/40 text-xs">Game viewport</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+// ── SportsOfferingsPreview (Live + Upcoming) ───────────────
+function SportsOfferingsPreview() {
+  const [tab, setTab] = useState<'live' | 'upcoming'>('live')
+  const [selectedOdds, setSelectedOdds] = useState<string[]>([])
+
+  const toggleOdds = (id: string) => {
+    setSelectedOdds(prev => prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id])
+  }
+
+  const liveEvents = [
+    { id: 'l1', league: 'NFL', sport: '/sports_icons/football.svg', team1: 'Green Bay Packers', team2: 'Detroit Lions', score1: 14, score2: 10, period: 'Q2', time: "7'", markets: [{ label: 'GB -4.5', odds: '-110' }, { label: 'DET +4.5', odds: '-110' }, { label: 'O 48.5', odds: '-105' }, { label: 'U 48.5', odds: '-115' }] },
+    { id: 'l2', league: 'Premier League', sport: '/sports_icons/soccer.svg', team1: 'Arsenal', team2: 'Chelsea', score1: 2, score2: 1, period: '2H', time: "67'", markets: [{ label: 'ARS', odds: '-250' }, { label: 'Draw', odds: '+350' }, { label: 'CHE', odds: '+600' }] },
+  ]
+  const upcomingEvents = [
+    { id: 'u1', league: 'NFL', sport: '/sports_icons/football.svg', team1: 'Kansas City Chiefs', team2: 'Buffalo Bills', time: 'Today 20:00', markets: [{ label: 'KC -3.5', odds: '-110' }, { label: 'BUF +3.5', odds: '-110' }, { label: 'O 51.5', odds: '-110' }, { label: 'U 51.5', odds: '-110' }] },
+    { id: 'u2', league: 'La Liga', sport: '/sports_icons/soccer.svg', team1: 'Real Madrid', team2: 'Barcelona', time: 'Tomorrow 21:00', markets: [{ label: 'RMA', odds: '+180' }, { label: 'Draw', odds: '+220' }, { label: 'BAR', odds: '+150' }] },
+  ]
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center gap-2 mb-3">
+        {(['live', 'upcoming'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={cn(
+              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer capitalize',
+              tab === t ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
+            )}
+          >
+            {t === 'live' ? '🔴 Live' : 'Upcoming'}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {(tab === 'live' ? liveEvents : upcomingEvents).map(event => (
+          <div key={event.id} className="bg-white/5 border border-white/10 rounded-small overflow-hidden">
+            {/* Header */}
+            <div className="px-2.5 py-1.5 flex items-center gap-2 bg-white/[0.02]">
+              <img src={event.sport} alt="" className="w-3.5 h-3.5 object-contain" />
+              <span className="text-[10px] text-white/60 font-medium">{event.league}</span>
+              {'score1' in event ? (
+                <div className="ml-auto flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5">
+                    <div className="w-1 h-1 bg-[#ee3536] rounded-full animate-pulse" />
+                    <span className="text-[8px] font-semibold text-[#ee3536]">LIVE</span>
+                  </div>
+                  <span className="text-[8px] text-white/50">{(event as any).period} {(event as any).time}</span>
+                </div>
+              ) : (
+                <span className="ml-auto text-[10px] text-white/50">{(event as any).time}</span>
+              )}
+            </div>
+            {/* Content */}
+            <div className="px-2.5 py-2 flex items-center gap-3">
+              {/* Status */}
+              {'score1' in event ? (
+                <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-[40px]">
+                  <span className="text-xs font-bold text-white">{(event as any).score1}</span>
+                  <span className="text-xs font-bold text-white">{(event as any).score2}</span>
+                </div>
+              ) : (
+                <div className="flex-shrink-0 w-[50px]">
+                  <div className="flex items-center gap-0.5 bg-green-500/20 border border-green-500/50 rounded px-1 py-0.5 w-fit">
+                    <span className="text-[8px] font-semibold text-green-400">UPCOMING</span>
+                  </div>
+                </div>
+              )}
+              {/* Teams */}
+              <div className="flex flex-col gap-1 min-w-0 w-[140px] flex-shrink-0">
+                <div className="text-[11px] font-semibold text-white truncate">{event.team1}</div>
+                <div className="text-[11px] font-semibold text-white truncate">{event.team2}</div>
+              </div>
+              {/* Markets */}
+              <div className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
+                {event.markets.map((m, j) => {
+                  const oddsId = `${event.id}-${j}`
+                  const isSelected = selectedOdds.includes(oddsId)
+                  return (
+                    <button
+                      key={j}
+                      onClick={() => toggleOdds(oddsId)}
+                      className={cn(
+                        'flex flex-col items-center px-2 py-1.5 rounded-small border text-[10px] font-medium transition-all flex-shrink-0 cursor-pointer min-w-[52px]',
+                        isSelected
+                          ? 'border-[#ee3536] bg-[#ee3536]/20 text-white'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+                      )}
+                    >
+                      <span className="text-[8px] text-white/50 mb-0.5">{m.label}</span>
+                      <span className="font-bold">{m.odds}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── BalanceAnimationPreview ─────────────────────────────────
+function BalanceAnimationPreview() {
+  const [balance, setBalance] = useState(100.00)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const simulateDeposit = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    const amounts = [25, 50, 100, 250, 500]
+    const amount = amounts[Math.floor(Math.random() * amounts.length)]
+    setBalance(prev => +(prev + amount).toFixed(2))
+    setTimeout(() => setIsAnimating(false), 800)
+  }
+
+  const simulateWin = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    const amount = +(Math.random() * 500 + 10).toFixed(2)
+    setBalance(prev => +(prev + amount).toFixed(2))
+    setTimeout(() => setIsAnimating(false), 800)
+  }
+
+  const simulateBet = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    const amount = +(Math.random() * 50 + 5).toFixed(2)
+    setBalance(prev => Math.max(0, +(prev - amount).toFixed(2)))
+    setTimeout(() => setIsAnimating(false), 800)
+  }
+
+  const reset = () => {
+    setBalance(100.00)
+  }
+
+  return (
+    <div className="w-full space-y-4">
+      {/* Main balance display — mimics the nav header style */}
+      <div className="flex items-center justify-center">
+        <div className="bg-white/5 border border-white/10 rounded-small px-5 py-3 flex items-center gap-3">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[11px] font-semibold text-white">
+              CH
+            </div>
+            <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-[#1a1a1a]" />
+          </div>
+          {/* Balance */}
+          <div className="text-right">
+            <div className="text-[10px] text-white/40 mb-0.5">Available Balance</div>
+            <div className="text-xl font-bold text-white tabular-nums flex items-center gap-0.5">
+              $<NumberFlow
+                value={balance}
+                format={{ notation: 'standard', minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compact nav-bar style version */}
+      <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center gap-1.5 bg-white/5 rounded-small px-2.5 py-1.5 border border-white/10">
+          <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[9px] font-semibold text-white">CH</div>
+          <span className="text-xs font-medium text-white tabular-nums min-w-[70px] text-right">
+            $<NumberFlow value={balance} format={{ notation: 'standard', minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+          </span>
+        </div>
+        <div className="bg-[#ee3536] rounded-small px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5">
+          <IconWallet className="w-3.5 h-3.5" />
+          DEPOSIT
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={simulateDeposit}
+          disabled={isAnimating}
+          className={cn(
+            'px-3 py-1.5 rounded-small text-[11px] font-semibold transition-all cursor-pointer',
+            'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30',
+            isAnimating && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          + Deposit
+        </button>
+        <button
+          onClick={simulateWin}
+          disabled={isAnimating}
+          className={cn(
+            'px-3 py-1.5 rounded-small text-[11px] font-semibold transition-all cursor-pointer',
+            'bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/30',
+            isAnimating && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          🎰 Win
+        </button>
+        <button
+          onClick={simulateBet}
+          disabled={isAnimating}
+          className={cn(
+            'px-3 py-1.5 rounded-small text-[11px] font-semibold transition-all cursor-pointer',
+            'bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30',
+            isAnimating && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          − Place Bet
+        </button>
+        <button
+          onClick={reset}
+          className="px-3 py-1.5 rounded-small text-[11px] font-medium text-white/40 hover:text-white/60 transition-colors cursor-pointer"
+        >
+          Reset
+        </button>
+      </div>
+
+      <p className="text-center text-[10px] text-white/30">Click actions to see NumberFlow animate the balance up & down</p>
+    </div>
+  )
+}
+
 // ── Error Boundary ────────────────────────────────────────
 class LibraryErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -666,152 +1959,669 @@ const LIBRARY: ComponentEntry[] = [
   {
     id: 'sub-nav-glass',
     name: 'Sub Nav (Glass Sticky)',
-    description: 'Fixed glass-blur sub-navigation bar. Sits below the header, adjusts with sidebar state. Uses framer-motion for animated positioning.',
+    description: 'Fixed glass-blur sub-navigation bar with AnimateTabs. Animated pill slides between tabs using framer-motion spring animation. Sits below the header, adjusts with sidebar state.',
     category: 'components',
-    tags: ['navigation', 'sub-nav', 'glass', 'blur', 'sticky', 'backdrop-filter', 'framer-motion'],
-    filePath: 'app/sports/page.tsx (inline)',
-    preview: (
-      <div className="w-full rounded-lg overflow-hidden">
-        <div
-          className="backdrop-blur-xl border-b border-white/10 py-3 px-4"
-          style={{ backgroundColor: 'rgba(26, 26, 26, 0.6)' }}
-        >
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-            {['All', 'Live', 'Starting Soon', 'Popular', 'Boosted', 'Trending'].map((tab, i) => (
-              <button
-                key={tab}
-                className={cn(
-                  'px-3 py-1.5 rounded-small text-[12px] font-medium whitespace-nowrap transition-all shrink-0',
-                  i === 0
-                    ? 'text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-                )}
-                style={i === 0 ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    ),
-    codeSnippet: `{/* Sticky Sub Nav with glass effect */}
+    tags: ['navigation', 'sub-nav', 'glass', 'blur', 'sticky', 'backdrop-filter', 'framer-motion', 'animated-tabs', 'spring'],
+    filePath: 'app/casino/page.tsx (AnimateTabs + motion.div)',
+    preview: <SubNavGlassPreview />,
+    codeSnippet: `import { AnimateTabs, AnimateTabsList, TabsTab } from '@/components/ui/animate-tabs'
+import { motion } from 'framer-motion'
+
+{/* Sticky Sub Nav — glass blur + AnimateTabs with spring-animated pill */}
 <motion.div
   data-sub-nav
   className={cn(
-    "fixed z-[100]",
-    "backdrop-blur-xl border-b border-white/10 py-3 shadow-sm"
+    "fixed z-[100] backdrop-blur-xl border-b border-white/10 py-3 shadow-sm",
+    isMobile ? "left-0 right-0" : "px-6"
   )}
-  style={{
-    top: 64, // below header
+  initial={false}
+  animate={{ top: isMobile ? (quickLinksOpen ? 104 : 64) : 64 }}
+  transition={{ type: "tween", ease: "linear", duration: 0.3 }}
+  style={isMobile ? {
+    left: 0, right: 0, width: '100vw',
+  } : {
+    top: 64,
     left: sidebarState === 'collapsed' ? '3rem' : '16rem',
     right: 0,
     backgroundColor: 'rgba(26, 26, 26, 0.6)',
   }}
 >
-  <div className="flex items-center gap-1.5 px-4">
-    {tabs.map((tab) => (
-      <button
-        key={tab}
-        onClick={() => setActiveTab(tab)}
-        className={cn(
-          "px-3 py-1.5 rounded-small text-xs font-medium",
-          isActive
-            ? "text-white"
-            : "bg-white/5 text-white/60 hover:bg-white/10"
-        )}
-        style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}
-      >
-        {tab}
-      </button>
-    ))}
+  <div className="overflow-x-auto scrollbar-hide px-3">
+    <AnimateTabs value={activeSubNav} onValueChange={setActiveSubNav} className="w-max">
+      <AnimateTabsList className="bg-white/5 p-0.5 h-auto gap-1 rounded-3xl border-0">
+        {['For You', 'Slots', 'Bonus Buys', 'Megaways', 'Live', 'Jackpots'].map((tab) => (
+          <TabsTab
+            key={tab}
+            value={tab}
+            className="relative z-10 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl px-4 py-1 h-9 text-xs font-medium transition-colors whitespace-nowrap"
+          >
+            {activeSubNav === tab && (
+              <motion.div
+                layoutId="activeTab"
+                layout="position"
+                className="absolute inset-0 rounded-2xl -z-10"
+                style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                initial={false}
+                transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              />
+            )}
+            <span className="relative z-10">{tab}</span>
+          </TabsTab>
+        ))}
+      </AnimateTabsList>
+    </AnimateTabs>
   </div>
 </motion.div>
 
 // Features:
+// • AnimateTabs with spring-animated pill (stiffness: 400, damping: 40)
 // • Glassmorphism: bg rgba(26,26,26,0.6) + backdrop-blur-xl
 // • Responsive: adjusts left offset based on sidebar state
-// • Chat/Dock aware: right offset via CSS vars
-// • Mobile: full-width with touch scroll`,
+// • Mobile: animated top position based on quickLinksOpen state
+// • Scrollable tabs with overflow-x-auto`,
   },
   {
-    id: 'sidebar-nav',
-    name: 'Sidebar Navigation',
-    description: 'Collapsible sidebar with sport icons (SVG), expandable sub-menus, tooltips when collapsed, and brand-themed active state.',
-    category: 'blocks',
-    tags: ['sidebar', 'navigation', 'collapsible', 'menu', 'sports', 'accordion', 'tooltip'],
-    filePath: 'components/ui/sidebar.tsx + app/sports/',
-    preview: (
-      <div className="w-56 rounded-lg border border-white/10 overflow-hidden p-2 space-y-0.5" style={{ backgroundColor: 'var(--ds-sidebar-bg, #2d2d2d)' }}>
-        {[
-          { icon: '/sports_icons/soccer.svg', label: 'Soccer', active: true, expandable: true },
-          { icon: '/sports_icons/Basketball.svg', label: 'Basketball', active: false, expandable: true },
-          { icon: '/sports_icons/football.svg', label: 'Football', active: false, expandable: true },
-          { icon: '/sports_icons/tennis.svg', label: 'Tennis', active: false, expandable: true },
-          { icon: '/sports_icons/Hockey.svg', label: 'Hockey', active: false, expandable: true },
-          { icon: '/sports_icons/mma.svg', label: 'MMA', active: false, expandable: false },
-        ].map((item) => (
+    id: 'sub-nav-casino',
+    name: 'Sub Nav (Casino — Search + Favorites)',
+    description: 'Casino sub-navigation with icon buttons (search & favorite) alongside AnimateTabs. Favorite button turns pink when active with filled heart. Used on desktop casino for filtering games.',
+    category: 'components',
+    tags: ['navigation', 'sub-nav', 'casino', 'search', 'favorite', 'heart', 'animated-tabs', 'framer-motion', 'spring', 'icons'],
+    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    preview: <SubNavWithIconsPreview />,
+    codeSnippet: `import { AnimateTabs, AnimateTabsList, TabsTab } from '@/components/ui/animate-tabs'
+import { motion } from 'framer-motion'
+import { IconSearch, IconHeart } from '@tabler/icons-react'
+
+{/* Casino Sub Nav — icon buttons + AnimateTabs */}
+<motion.div
+  data-sub-nav
+  className="fixed z-[100] backdrop-blur-xl border-b border-white/10 py-3 px-6"
+  style={{
+    top: 64,
+    left: sidebarState === 'collapsed' ? '3rem' : '16rem',
+    right: 0,
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+  }}
+>
+  <div className="flex items-center gap-1.5">
+    {/* Icon Tabs — search + favorite (desktop only) */}
+    {!isMobile && (
+      <div className="flex-shrink-0">
+        <div className="bg-white/5 p-0.5 gap-0.5 rounded-3xl flex items-center">
           <button
-            key={item.label}
-            className={cn(
-              'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-small text-sm font-medium transition-all',
-              item.active
-                ? 'text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            )}
-            style={item.active ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+            onClick={() => setSearchOverlayOpen(true)}
+            className="text-white/70 hover:text-white hover:bg-white/5
+              rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center
+              transition-all duration-300"
           >
-            <img src={item.icon} alt={item.label} className="w-5 h-5 object-contain" />
-            <span className="flex items-center gap-1.5">{item.label}</span>
-            {item.expandable && <IconChevronRight className={cn('w-4 h-4 ml-auto', item.active ? 'text-white/70' : 'text-white/30')} />}
+            <IconSearch className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => {
+              setActiveIconTab('favorite')
+              setSelectedCategory('Favorites')
+            }}
+            className={cn(
+              "rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center transition-all",
+              activeIconTab === 'favorite'
+                ? "text-pink-500 bg-white/10"
+                : "text-white/70 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <IconHeart className={cn(
+              "w-3.5 h-3.5",
+              activeIconTab === 'favorite' && "fill-pink-500 text-pink-500"
+            )} />
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Text Tabs — AnimateTabs with spring pill */}
+    <AnimateTabs value={activeSubNav} onValueChange={setActiveSubNav}>
+      <AnimateTabsList className="bg-white/5 p-0.5 gap-1 rounded-3xl">
+        {['For You', 'Slots', 'Bonus Buys', 'Megaways', 'Live', ...].map(tab => (
+          <TabsTab key={tab} value={tab}
+            className="relative z-10 text-white/70 hover:text-white
+              rounded-2xl px-4 py-1 h-9 text-xs font-medium whitespace-nowrap"
+          >
+            {activeSubNav === tab && (
+              <motion.div
+                layoutId="activeTab" layout="position"
+                className="absolute inset-0 rounded-2xl -z-10"
+                style={{ backgroundColor: 'var(--ds-primary)' }}
+                initial={false}
+                transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              />
+            )}
+            <span className="relative z-10">{tab}</span>
+          </TabsTab>
+        ))}
+      </AnimateTabsList>
+    </AnimateTabs>
+  </div>
+</motion.div>
+
+// Features:
+// • Search icon opens search overlay
+// • Favorite icon toggles pink filled state + filters to Favorites
+// • Clicking a text tab resets icon tab to default
+// • Spring-animated pill shared with text tabs
+// • Desktop only: icons hidden on mobile (Dynamic Island has search/fav)`,
+  },
+  {
+    id: 'quick-links',
+    name: 'Quick Links (Mobile)',
+    description: 'Mobile-only product quick links bar that sits above the main header. Animates open/closed based on scroll direction. Includes expandable "Other" dropdown with secondary links.',
+    category: 'components',
+    tags: ['navigation', 'quick-links', 'mobile', 'scroll', 'animation', 'framer-motion', 'dropdown'],
+    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    preview: <QuickLinksPreview />,
+    codeSnippet: `import { motion, AnimatePresence } from 'framer-motion'
+
+// State
+const [quickLinksOpen, setQuickLinksOpen] = useState(false)
+const [otherDropdownOpen, setOtherDropdownOpen] = useState(false)
+const lastScrollYRef = useRef(0)
+
+// Scroll handler — show on scroll up, hide on scroll down
+useEffect(() => {
+  const handleScroll = () => {
+    const y = window.scrollY
+    if (y > 80 && y > lastScrollYRef.current + 8) {
+      setQuickLinksOpen(false)
+    } else if (y < lastScrollYRef.current - 8) {
+      setQuickLinksOpen(true)
+    }
+    lastScrollYRef.current = y
+  }
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  return () => window.removeEventListener('scroll', handleScroll)
+}, [])
+
+{/* Quick Links Bar — fixed above header, height animates 0↔40 */}
+{isMobile && (
+  <motion.div
+    initial={false}
+    animate={{ height: quickLinksOpen ? 40 : 0 }}
+    transition={{ type: "tween", ease: "linear", duration: 0.3 }}
+    className="fixed left-0 right-0 overflow-hidden z-[100]"
+    style={{
+      top: 0,
+      pointerEvents: quickLinksOpen ? 'auto' : 'none',
+      backgroundColor: 'var(--ds-nav-bg, #2D2E2C)',
+      boxShadow: '0 -200px 0 0 var(--ds-nav-bg, #2D2E2C)',
+    }}
+  >
+    <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      {[
+        { label: 'Home', product: null },
+        { label: 'Sports', product: 'sports' },
+        { label: 'Casino', product: 'casino' },
+        { label: 'Poker', product: 'poker' },
+        { label: 'VIP Rewards', product: 'vipRewards' },
+      ].filter(i => !i.product || visibleProducts[i.product]).map((item) => (
+        <button
+          key={item.label}
+          onClick={() => item.onClick()}
+          className={cn(
+            "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium",
+            isActive ? "text-white" : "text-white/70 hover:text-white"
+          )}
+        >
+          {item.label}
+        </button>
+      ))}
+      <button onClick={() => setOtherDropdownOpen(!otherDropdownOpen)}
+        className="flex items-center gap-0.5 text-xs text-white/70">
+        Other <IconChevronDown className={cn("w-3 h-3", otherDropdownOpen && "rotate-180")} />
+      </button>
+    </div>
+  </motion.div>
+)}
+
+{/* "Other" dropdown — slides open below quick links */}
+<AnimatePresence initial={false}>
+  {otherDropdownOpen && (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      className="overflow-hidden border-b border-white/5"
+    >
+      {['Esports', 'Racebook', 'Contests', 'Virtuals'].map(item => (
+        <a key={item} className="px-3 py-2 text-[13px] text-white/50">{item}</a>
+      ))}
+    </motion.div>
+  )}
+</AnimatePresence>
+
+// Features:
+// • Scroll-aware: shows on scroll up, hides on scroll down
+// • Height animation 0↔40px with framer-motion tween
+// • Pushes main header down when open (header top: quickLinksOpen ? 40 : 0)
+// • "Other" dropdown with AnimatePresence expand/collapse
+// • boxShadow trick fills area above the bar with nav-bg color`,
+  },
+  {
+    id: 'main-nav-header',
+    name: 'Main Navigation (Header)',
+    description: 'Global header bar used on casino, poker, sports, account. Left: sidebar toggle, divider, animated nav pills (Sports, Live Betting, Casino, Live Casino, Poker, VIP Rewards) with shared layoutId spring pill, "Other" dropdown. Right: VIP crown (gold), divider, avatar with red notification dot + balance (NumberFlow), DEPOSIT button with wallet icon, ChatNavToggle.',
+    category: 'components',
+    tags: ['navigation', 'header', 'nav-pills', 'animated', 'framer-motion', 'spring', 'layoutId', 'balance', 'vip', 'chat', 'deposit', 'crown', 'wallet', 'dropdown'],
+    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    preview: <MainNavPreview />,
+    codeSnippet: `import { motion, AnimatePresence } from 'framer-motion'
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
+import { ChatNavToggle } from '@/components/chat/chat-nav-toggle'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import NumberFlow from '@number-flow/react'
+import { IconCrown, IconWallet, IconChevronDown } from '@tabler/icons-react'
+
+{/* Header — fixed, adjusts left for sidebar */}
+<motion.header
+  className={cn(
+    "border-b border-white/10 h-16 flex items-center justify-between z-[101]",
+    "fixed right-0 transition-[left] duration-200 ease-linear",
+    isMobile ? "left-0 px-3" : (sidebarOpen ? "left-[16rem] px-6" : "left-[3rem] px-6")
+  )}
+  animate={{ top: isMobile ? (quickLinksOpen ? 40 : 0) : 0 }}
+  style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+>
+  {/* Left — sidebar toggle + nav pills + "Other" dropdown */}
+  <div className="flex items-center gap-6">
+    {!isMobile && (
+      <nav className="flex-1 flex items-center z-[110] -ml-1">
+        <SidebarMenu className="flex flex-row items-center gap-2">
+          {/* Sidebar collapse toggle */}
+          <div className="flex items-center gap-1.5 mr-1">
+            <Button variant="ghost" size="icon" onClick={toggleSidebar}
+              className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10">
+              <SidebarIcon />
+            </Button>
+            <div className="w-px h-5 bg-white/20" />
+          </div>
+
+          {/* Nav pills — animated with shared layoutId */}
+          {['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards'].map(item => (
+            <SidebarMenuItem key={item}>
+              <SidebarMenuButton
+                onClick={() => navigate(item)}
+                className={cn(
+                  "h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium",
+                  "justify-center relative overflow-visible",
+                  isActive(item) ? "!text-white" : "text-white/70 hover:bg-white/5"
+                )}
+              >
+                {isActive(item) && (
+                  <motion.div
+                    layoutId="casinoNavPill" layout="position"
+                    className="absolute inset-0 rounded-small"
+                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 400, damping: 40 }}
+                  />
+                )}
+                <span className="relative z-10">{item}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+
+          {/* "Other" dropdown — Esports, Racebook, Contests, Virtuals */}
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="h-10 px-4 py-2 rounded-small text-sm font-medium text-white/70 hover:bg-white/5">
+                  <span className="flex items-center gap-1">Other <IconChevronDown className="h-3 w-3" /></span>
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={5} className="w-[200px] bg-[#2d2d2d] border-white/10 z-[120]">
+                {['Esports', 'Racebook', 'Contests', 'Virtuals'].map(item => (
+                  <DropdownMenuItem key={item} className="text-white/70 hover:text-white hover:bg-white/5">
+                    {item}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </nav>
+    )}
+  </div>
+
+  {/* Right — VIP crown, divider, avatar+balance, DEPOSIT, chat */}
+  <div className={cn("flex items-center", isMobile ? "gap-2" : "gap-3")}>
+    {/* VIP Crown — gold circle */}
+    <button onClick={openVipDrawer}
+      className="h-8 w-8 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center hover:bg-yellow-400/30">
+      <IconCrown className="text-yellow-400 w-4 h-4" />
+    </button>
+
+    {!isMobile && <div className="h-6 w-px bg-white/20" />}
+
+    {/* Avatar + Balance — opens account drawer */}
+    <Button variant="ghost" onClick={openAccountDrawer}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-small bg-white/5 hover:bg-white/10 group">
+      <div className="relative">
+        <Avatar className="h-6 w-6 border border-white/20 group-hover:border-white/40">
+          <AvatarFallback className="bg-white/10 text-white text-[10px] font-semibold">CH</AvatarFallback>
+        </Avatar>
+        <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+      </div>
+      <span className="text-xs font-medium text-white tabular-nums min-w-[70px] text-right">
+        $ <NumberFlow value={displayBalance} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+      </span>
+    </Button>
+
+    {/* DEPOSIT — desktop only */}
+    {!isMobile && (
+      <Button variant="ghost" onClick={openDepositDrawer}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-small bg-white/5 hover:bg-white/10 text-xs font-semibold text-white">
+        <IconWallet className="w-3.5 h-3.5 text-white" />
+        DEPOSIT
+      </Button>
+    )}
+
+    {/* Chat toggle — desktop only */}
+    {!isMobile && <ChatNavToggle />}
+  </div>
+</motion.header>
+
+// Features:
+// • Nav pills: shared layoutId "casinoNavPill" for spring-animated sliding
+// • Spring animation: stiffness 400, damping 40
+// • Responsive: left offset adjusts for sidebar collapsed/expanded
+// • Mobile: hamburger + logo replaces nav pills, top adjusts for quick links
+// • VIP crown (gold circle) opens VIP Hub drawer
+// • Avatar has red notification dot indicator
+// • Balance uses NumberFlow for animated number transitions
+// • DEPOSIT button with IconWallet — desktop only
+// • "Other" dropdown with Esports, Racebook, Contests, Virtuals
+// • Chat toggle integrates with global chatStore — desktop only`,
+  },
+  {
+    id: 'sidebar-casino',
+    name: 'Sidebar Navigation (Casino)',
+    description: 'Casino sidebar with featured items (square icon style: My Favorites, Last Game Played, Play Random), separator, regular menu items (Popular Games, Slots, Blackjack, etc.), and bottom section (Loyalty Hub, Banking, Need Help). Supports desktop collapsed, expanded, and mobile sheet modes. Mobile includes horizontal scrolling quick links strip with active underline and "Other" dropdown, plus panel close icon in header.',
+    category: 'blocks',
+    tags: ['sidebar', 'navigation', 'collapsible', 'menu', 'casino', 'mobile', 'tooltip', 'animated', 'square-icon'],
+    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    preview: <SidebarNavPreview />,
+    codeSnippet: `import {
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel,
+  SidebarGroupContent, SidebarMenu, SidebarMenuItem,
+  SidebarMenuButton, SidebarHeader, SidebarProvider, useSidebar,
+} from '@/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Separator } from '@/components/ui/separator'
+import { AnimatePresence, motion } from 'framer-motion'
+
+<Sidebar collapsible="icon" mobileOverlay mobileBg="#2d2d2d"
+  className="!bg-[#2d2d2d] border-r border-white/10 text-white !h-screen !top-0 !z-[102]">
+
+  {/* Header — logo with AnimatePresence for collapsed/expanded/mobile transitions */}
+  <SidebarHeader className="px-4 h-14 flex items-center sticky top-0 z-20"
+    style={{ backgroundColor: 'rgba(45, 45, 45, 0.75)', backdropFilter: 'blur(16px)' }}>
+    <AnimatePresence mode="wait">
+      {sidebarState === 'collapsed' && !isMobile ? (
+        <motion.div key="collapsed" /* small "B" icon */ />
+      ) : isMobile ? (
+        <motion.div key="mobile" /* close button + logo */ />
+      ) : (
+        <motion.div key="expanded" /* full BETONLINE logo */ />
+      )}
+    </AnimatePresence>
+  </SidebarHeader>
+
+  {/* Mobile — horizontal scrolling quick links strip */}
+  {isMobile && (
+    <div className="sticky top-14 z-20 border-b border-white/5"
+      style={{ backgroundColor: 'rgba(45, 45, 45, 0.92)', backdropFilter: 'blur(16px)' }}>
+      <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide px-1">
+        {quickLinks.map(item => (
+          <button key={item.label}
+            className={cn("flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap relative",
+              isCurrentPage ? "text-white font-bold" : "text-white/35 font-medium hover:text-white/60")}>
+            {item.label}
+            {isCurrentPage && <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full"
+              style={{ backgroundColor: 'var(--ds-primary)' }} />}
           </button>
         ))}
+        <button className="text-[13px] text-white/35 flex items-center gap-0.5">
+          Other <IconChevronDown className="w-3 h-3" />
+        </button>
       </div>
-    ),
-    codeSnippet: `import {
-  Sidebar, SidebarContent, SidebarGroup,
-  SidebarGroupContent, SidebarMenu, SidebarMenuItem,
-  SidebarMenuButton, SidebarProvider, useSidebar,
-} from '@/components/ui/sidebar'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+    </div>
+  )}
 
-<SidebarProvider>
-  <Sidebar collapsible="icon">
-    <SidebarContent>
-      <SidebarGroup>
+  <SidebarContent className="overflow-y-auto flex flex-col">
+    <TooltipProvider>
+      {/* Featured top items — square icon style */}
+      <SidebarGroup className="mt-3">
+        {isMobile && <SidebarGroupLabel>CASINO MENU</SidebarGroupLabel>}
         <SidebarGroupContent>
           <SidebarMenu>
-            {sportsCategories.map((sport) => (
-              <SidebarMenuItem key={sport.label}>
+            {casinoTopItems.map(item => (
+              <SidebarMenuItem key={item.label}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <SidebarMenuButton
-                      isActive={activeSport === sport.label}
-                      onClick={() => handleSportClick(sport.label)}
-                      className="w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium"
-                      style={isActive ? {
-                        backgroundColor: 'var(--ds-primary, #ee3536)'
-                      } : undefined}
-                    >
-                      <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" />
-                      <span>{sport.label}</span>
-                      <IconChevronRight className="w-4 h-4 ml-auto" />
+                    <SidebarMenuButton isActive={isActive}
+                      style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}
+                      className="w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm">
+                      <div className={cn("w-7 h-7 rounded-md flex items-center justify-center",
+                        isActive ? "bg-white/20" : "bg-white/10")}>
+                        <Icon strokeWidth={1.5} className="w-4 h-4" />
+                      </div>
+                      <span>{item.label}</span>
                     </SidebarMenuButton>
                   </TooltipTrigger>
-                  {sidebarState === 'collapsed' && (
-                    <TooltipContent side="right">
-                      <p>{sport.label}</p>
-                    </TooltipContent>
-                  )}
+                  {sidebarState === 'collapsed' && <TooltipContent side="right">{item.label}</TooltipContent>}
                 </Tooltip>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-    </SidebarContent>
-  </Sidebar>
-</SidebarProvider>`,
+
+      <Separator className="bg-white/10 mx-2" />
+
+      {/* Regular menu items */}
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {sidebarMenuItems.map(item => (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton isActive={isActive}
+                  style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}
+                  className="w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm">
+                  <Icon strokeWidth={1.5} className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <div className="flex-1" />
+      <Separator className="bg-white/10 mx-2" />
+
+      {/* Bottom — Loyalty Hub, Banking, Need Help */}
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {[
+              { icon: IconCrown, label: 'Loyalty Hub' },
+              { icon: IconBuilding, label: 'Banking' },
+              { icon: IconLifebuoy, label: 'Need Help' },
+            ].map(item => (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton className="text-white/70 hover:text-white hover:bg-white/5">
+                  <Icon strokeWidth={1.5} className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </TooltipProvider>
+  </SidebarContent>
+</Sidebar>
+
+// Structure:
+// • Header: AnimatePresence — collapsed "B" | mobile panel-close icon (right) + logo | expanded full logo
+// • Mobile: Horizontal scrolling quick links strip with active underline + "Other" dropdown
+// • Featured items: square 7x7 icon + label, active = primary bg + white/20 icon bg
+// • Separator
+// • Regular items: 5x5 icon + label, active = primary bg
+// • flex-1 spacer pushes bottom section down
+// • Separator
+// • Bottom: Loyalty Hub, Banking, Need Help (always text-white/70)
+// • Collapsed desktop: icons only, tooltips on hover`,
+  },
+  {
+    id: 'sidebar-sports',
+    name: 'Sidebar Navigation (Sports)',
+    description: 'Sports sidebar with FEATURES section (My Bets, Same Game Parlays, Settings — square icon style), TOP SPORTS with expandable sub-items (animated with framer-motion), A-Z sports list, Top Leagues accordion, and bottom section. Supports desktop collapsed/expanded and mobile sheet. Mobile includes horizontal scrolling quick links strip with active underline and "Other" dropdown.',
+    category: 'blocks',
+    tags: ['sidebar', 'navigation', 'collapsible', 'menu', 'sports', 'expandable', 'accordion', 'tooltip', 'mobile', 'animated'],
+    filePath: 'app/sports/football/page.tsx (SportsPage)',
+    preview: <SportsSidebarPreview />,
+    codeSnippet: `import {
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel,
+  SidebarGroupContent, SidebarMenu, SidebarMenuItem,
+  SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem,
+  SidebarMenuSubButton, SidebarHeader, SidebarProvider,
+} from '@/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { AnimatePresence, motion } from 'framer-motion'
+
+<Sidebar collapsible="icon" mobileOverlay mobileBg="#2d2d2d"
+  className="!bg-[#2d2d2d] border-r border-white/10 text-white !h-screen !top-0 !z-[102]">
+
+  {/* Header — same AnimatePresence pattern as casino */}
+  <SidebarHeader />
+
+  {/* Mobile — horizontal scrolling quick links strip (same as casino) */}
+  {isMobile && (
+    <div className="sticky top-14 z-20 border-b border-white/5"
+      style={{ backgroundColor: 'rgba(45, 45, 45, 0.92)', backdropFilter: 'blur(16px)' }}>
+      <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide px-1">
+        {quickLinks.map(item => (
+          <button key={item.label} className="flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap relative">
+            {item.label}
+          </button>
+        ))}
+        <button className="text-[13px] text-white/35 flex items-center gap-0.5">
+          Other <IconChevronDown />
+        </button>
+      </div>
+    </div>
+  )}
+
+  <SidebarContent className="overflow-y-auto flex flex-col">
+    <TooltipProvider>
+      {/* FEATURES section — square icon style */}
+      <SidebarGroup>
+        <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">FEATURES</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {sportsFeatures.map(item => (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton isActive={isActive}
+                  style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}
+                  className="w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm">
+                  <div className={cn("w-7 h-7 rounded-md flex items-center justify-center",
+                    isActive ? "bg-white/20" : "bg-white/10")}>
+                    <Icon strokeWidth={1.5} className="w-4 h-4" />
+                  </div>
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <div className="border-b border-white/10 mx-3 my-1" />
+
+      {/* TOP SPORTS — expandable with animated sub-items */}
+      <SidebarGroup>
+        <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">TOP SPORTS</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {sportsCategories.map(sport => (
+              <SidebarMenuItem key={sport.label}>
+                <SidebarMenuButton isActive={isActive}
+                  onClick={() => toggleSport(sport.label)}
+                  style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}>
+                  <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" />
+                  <span>{sport.label}</span>
+                  {sport.expandable && (
+                    <IconChevronRight className={cn(
+                      "w-4 h-4 ml-auto transition-transform duration-300",
+                      isExpanded && "rotate-90"
+                    )} />
+                  )}
+                </SidebarMenuButton>
+
+                {/* Animated sub-items */}
+                <AnimatePresence>
+                  {isExpanded && sport.subItems && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <SidebarMenuSub>
+                        {sport.subItems.map(sub => (
+                          <SidebarMenuSubItem key={sub.label}>
+                            <SidebarMenuSubButton className="pl-8 text-xs text-white/70">
+                              {sub.label}
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <div className="border-b border-white/10 mx-3 my-1" />
+
+      {/* A-Z Sports — flat list */}
+      <SidebarGroup>
+        <SidebarGroupLabel>A-Z</SidebarGroupLabel>
+        {/* ... flat sport buttons ... */}
+      </SidebarGroup>
+
+      <div className="flex-1" />
+      <Separator className="bg-white/10 mx-2" />
+
+      {/* Bottom — Loyalty Hub, Banking, Need Help */}
+      {/* Same pattern as casino sidebar */}
+    </TooltipProvider>
+  </SidebarContent>
+</Sidebar>
+
+// Structure:
+// • FEATURES: square 7x7 icon style (My Bets, Same Game Parlays, Settings)
+// • Separator
+// • TOP SPORTS: expandable items with AnimatePresence animated sub-menus
+//   — sport icons from /sports_icons/*.svg, ChevronRight rotates on expand
+//   — Sub-items use SidebarMenuSub / SidebarMenuSubButton (pl-8)
+// • Separator
+// • A-Z: flat alphabetical sport list
+// • flex-1 spacer
+// • Separator
+// • Bottom: Loyalty Hub, Banking, Need Help`,
   },
   {
     id: 'dynamic-island',
@@ -1839,6 +3649,307 @@ switchView('confirmation')
 // • Mobile: vaul drawer with snap points
 // • Desktop: centered panel/modal`,
   },
+
+  // ── Casino Tile Types ───────────────────────────────────
+  {
+    id: 'casino-tile-types',
+    name: 'Casino Tile Types',
+    description: 'Three tile variants: Square grid tiles with tag badges (Hot, Early, Exclusive, New, Original), portrait 4:5 ratio tiles with bottom info overlay, and Live Casino tiles with live indicator, roulette history / seat tracker, and vendor badge. All tiles have hover shimmer effects and consistent rounded-small corners.',
+    category: 'components',
+    tags: ['casino', 'tile', 'game', 'card', 'live', 'badge', 'grid', 'carousel'],
+    filePath: 'app/casino/page.tsx (GameTile, LazyGameTile, LiveCasinoTile)',
+    preview: <CasinoTilesPreview />,
+    codeSnippet: `// ─ Square GameTile ─
+<div className="relative group cursor-pointer">
+  <div className="w-full aspect-square rounded-small overflow-hidden bg-white/5">
+    <Image src={game.image} alt={game.title} fill className="object-cover" />
+    {/* Tag badges — top-left */}
+    <div className="absolute top-1.5 left-1.5 flex items-center gap-1 z-10">
+      <VendorBadge vendor={game.provider} />
+      <GameTagBadge tag={game.tag} />   {/* Hot | Early | Exclusive | New | Original */}
+    </div>
+    {/* Hover overlay */}
+    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />
+  </div>
+</div>
+
+// ─ Portrait LazyGameTile (4:5) ─
+<div className="relative w-[160px] aspect-[4/5] rounded-small overflow-hidden bg-white/5">
+  <Image src={game.image} alt={game.title} fill className="object-cover" />
+  <GameTagBadge tag={game.tag} />
+  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-2">
+    <div className="text-white text-xs font-bold truncate">{game.title}</div>
+    <div className="text-white/70 text-[10px]">{game.provider}</div>
+  </div>
+</div>
+
+// ─ LiveCasinoTile ─
+<div className="relative rounded-small overflow-hidden bg-white/5" style={{ width: '200px', height: '220px' }}>
+  <Image src={game.image} alt={game.title} fill className="object-cover" />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+  {/* Live pill */}
+  <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-white/10 backdrop-blur-md rounded-full px-2 py-0.5 border border-white/15">
+    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+    <span className="text-white text-[10px] font-medium">$25 - $5,000</span>
+  </div>
+  {/* Bottom */}
+  <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10">
+    <div className="text-white/60 text-[10px] uppercase tracking-wider">LIVE ROULETTE</div>
+    <div className="text-white font-bold text-sm">{game.title}</div>
+    {/* Roulette history numbers */}
+    <div className="flex gap-0.5 my-1.5">
+      {history.map(n => (
+        <div className={cn('w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center',
+          n === 0 ? 'bg-emerald-600' : n <= 18 ? 'bg-red-600' : 'bg-gray-800'
+        )}>{n}</div>
+      ))}
+    </div>
+    <VendorBadge vendor="Evolution" />
+  </div>
+</div>`,
+  },
+
+  // ── Vendor Carousel ─────────────────────────────────────
+  {
+    id: 'vendor-carousel',
+    name: 'Vendor Carousel',
+    description: 'Horizontally scrollable vendor pills showing provider logo + name. Each pill has a glass-morphism hover effect with a sweep shimmer animation. Used in casino to filter games by software vendor (Dragon Gaming, BetSoft, Nucleus, Rival, etc.).',
+    category: 'components',
+    tags: ['casino', 'vendor', 'carousel', 'filter', 'pill', 'provider', 'scroll'],
+    filePath: 'app/casino/page.tsx (vendor carousel section)',
+    preview: <VendorCarouselPreview />,
+    codeSnippet: `// Vendor carousel — horizontal scrollable pills
+<div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+  {vendors.map(vendor => (
+    <button
+      key={vendor.id}
+      onClick={() => setActiveVendor(vendor.id)}
+      className={cn(
+        'group relative bg-white/5 border border-white/10 rounded-lg px-3 py-2.5',
+        'text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white',
+        'transition-all duration-300 whitespace-nowrap overflow-hidden',
+        'flex items-center gap-2 flex-shrink-0',
+        activeVendor === vendor.id && 'bg-white/10 text-white border-white/20'
+      )}
+    >
+      {/* Vendor icon */}
+      <div className="w-5 h-5 rounded-sm bg-white/10 flex items-center justify-center flex-shrink-0">
+        <Image src={vendor.logo} alt="" width={14} height={14} className="object-contain" />
+      </div>
+      <span className="relative z-10">{vendor.name}</span>
+      {/* Hover sweep */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
+        transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 z-0" />
+    </button>
+  ))}
+</div>
+
+// Vendor data shape:
+const vendors = [
+  { id: 'dragon', name: 'Dragon Gaming', logo: '/vendors/dragon.svg' },
+  { id: 'betsoft', name: 'BetSoft', logo: '/vendors/betsoft.svg' },
+  // ...
+]`,
+  },
+
+  // ── Game Launcher ───────────────────────────────────────
+  {
+    id: 'game-launcher',
+    name: 'Game Launcher',
+    description: 'Full-screen overlay for launching casino games. Features a top bar with hamburger menu (quick deposit, more games, VIP progress), centered game title, fullscreen toggle, favorite button, and close button. Includes animated loading state with spinner and provider name. Menu panel slides down with framer-motion.',
+    category: 'blocks',
+    tags: ['casino', 'game', 'launcher', 'overlay', 'fullscreen', 'loading', 'menu', 'favorite'],
+    filePath: 'app/casino/page.tsx (game launcher overlay)',
+    preview: <GameLauncherPreview />,
+    codeSnippet: `// Game Launcher Overlay — covers entire viewport
+<AnimatePresence>
+  {gameLauncherOpen && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] bg-[#1a1a1a] flex flex-col"
+    >
+      {/* ─ Top Bar ─ */}
+      <div className="h-12 px-4 flex items-center justify-between relative
+        bg-[rgba(26,26,26,0.6)] backdrop-blur-2xl border-b border-white/10">
+        {/* Hamburger menu */}
+        <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 hover:bg-white/10 rounded-full">
+          <IconMenu2 className="w-5 h-5 text-white" />
+        </button>
+        {/* Game name — centered */}
+        <h2 className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-white">{game.title}</h2>
+        {/* Right icons */}
+        <div className="flex items-center gap-1">
+          <button onClick={toggleFullscreen}><IconMaximize className="w-5 h-5 text-white/70" /></button>
+          <button onClick={toggleFavorite}>
+            <IconHeart className={cn('w-5 h-5', favorited ? 'text-pink-500 fill-pink-500' : 'text-white/70')} />
+          </button>
+          <button onClick={closeLauncher}><IconX className="w-5 h-5 text-white/70" /></button>
+        </div>
+      </div>
+
+      {/* ─ Menu Panel ─ */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+            className="absolute top-12 left-4 w-56 bg-[#2d2d2d]/95 backdrop-blur-xl border border-white/10 rounded-xl z-50">
+            <div className="py-2">
+              <button className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/10">Quick Deposit</button>
+              <button className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/10">More Games Like This</button>
+            </div>
+            <div className="px-4 py-3 border-t border-white/10 bg-white/5">
+              <p className="text-xs text-white/70 mb-2">Gold To Platinum I</p>
+              <VIPProgressBar />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─ Game Viewport ─ */}
+      <div className="flex-1 relative">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <motion.div animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full" />
+              <p className="text-white/70 text-sm">Loading game...</p>
+              <p className="text-white/50 text-xs">{game.provider}</p>
+            </motion.div>
+          ) : (
+            <motion.div key="game" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="absolute inset-0">
+              <iframe src={game.url} className="w-full h-full border-0" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>`,
+  },
+
+  // ── Sports Live & Upcoming Events ──────────────────────
+  {
+    id: 'sports-live-upcoming',
+    name: 'Sports Live & Upcoming Events',
+    description: 'Two-tab component showing live in-play events (with live score, period, pulsing red indicator) and upcoming events (with scheduled time). Each event row shows sport icon, league, team names, and a horizontal markets carousel with selectable odds buttons. Selected odds highlight in red (primary). Supports NFL, soccer, basketball, tennis, and more via sportIconMap.',
+    category: 'blocks',
+    tags: ['sports', 'live', 'upcoming', 'events', 'betting', 'odds', 'markets', 'score', 'in-play'],
+    filePath: 'app/sports/football/page.tsx (Live & Upcoming section)',
+    preview: <SportsOfferingsPreview />,
+    codeSnippet: `// Sports Live & Upcoming Events
+const [tab, setTab] = useState<'live' | 'upcoming'>('live')
+
+{/* Tab switcher */}
+<div className="flex items-center gap-2 mb-3">
+  <button onClick={() => setTab('live')}
+    className={cn('px-3 py-1.5 rounded-small text-xs font-medium',
+      tab === 'live' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white')}>
+    🔴 Live
+  </button>
+  <button onClick={() => setTab('upcoming')}
+    className={cn('px-3 py-1.5 rounded-small text-xs font-medium',
+      tab === 'upcoming' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white')}>
+    Upcoming
+  </button>
+</div>
+
+{/* Event card */}
+<div className="bg-white/5 border border-white/10 rounded-small">
+  {/* League header */}
+  <div className="px-2.5 py-1.5 flex items-center gap-2 bg-white/[0.02]">
+    <img src={sportIconMap[event.sport]} className="w-3.5 h-3.5" />
+    <span className="text-[10px] text-white/60 font-medium">{event.league}</span>
+    {event.isLive && (
+      <div className="ml-auto flex items-center gap-1">
+        <div className="bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5">
+          <div className="w-1 h-1 bg-[#ee3536] rounded-full animate-pulse" />
+          <span className="text-[8px] font-semibold text-[#ee3536]">LIVE</span>
+        </div>
+        <span className="text-[8px] text-white/50">{event.period} {event.time}</span>
+      </div>
+    )}
+  </div>
+
+  {/* Scores + Teams + Markets */}
+  <div className="px-2.5 py-2 flex items-center gap-3">
+    {/* Live scores */}
+    {event.isLive && (
+      <div className="flex flex-col items-center gap-0.5 w-10">
+        <span className="text-xs font-bold text-white">{event.score1}</span>
+        <span className="text-xs font-bold text-white">{event.score2}</span>
+      </div>
+    )}
+    {/* Team names */}
+    <div className="flex flex-col gap-1 w-[140px]">
+      <span className="text-[11px] font-semibold text-white truncate">{event.team1}</span>
+      <span className="text-[11px] font-semibold text-white truncate">{event.team2}</span>
+    </div>
+    {/* Markets carousel */}
+    <MarketsCarousel markets={event.markets} onSelect={addToBetslip} />
+  </div>
+</div>`,
+  },
+
+  // ── Balance Animation (NumberFlow) ─────────────────────
+  {
+    id: 'balance-animation',
+    name: 'Balance Animation (NumberFlow)',
+    description: 'Animated balance display using @number-flow/react. Shows the balance rolling up/down with spring physics when deposits, wins, or bets occur. Used in the main navigation header (avatar + balance pill) and account drawers. Supports formatted currency output with minimumFractionDigits. Also integrates with the useRainBalance hook which listens for rain:win custom events from the chat to animate balance changes with ease-out cubic easing.',
+    category: 'atoms',
+    tags: ['balance', 'animation', 'number', 'numberflow', 'currency', 'header', 'nav', 'spring'],
+    filePath: 'app/casino/page.tsx (nav header), hooks/use-rain-balance.ts',
+    preview: <BalanceAnimationPreview />,
+    codeSnippet: `import NumberFlow from "@number-flow/react"
+
+// ─ In the nav header (avatar + balance pill) ─
+<Button className="flex items-center gap-1.5 bg-white/5 rounded-small px-2 py-1">
+  <Avatar className="h-6 w-6 border border-white/20">
+    <AvatarFallback className="bg-white/10 text-white text-[10px] font-semibold">CH</AvatarFallback>
+  </Avatar>
+  <span className="text-xs font-medium text-white tabular-nums min-w-[70px] text-right">
+    {currentBrand.symbol}
+    <NumberFlow
+      value={displayBalance}
+      format={{ notation: 'standard', minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+    />
+  </span>
+</Button>
+
+// ─ useRainBalance hook (hooks/use-rain-balance.ts) ─
+// Listens for rain:win events from chat and animates the balance change
+import { useRainBalance } from '@/hooks/use-rain-balance'
+
+const [balance, setBalance] = useState(100)
+const [displayBalance, setDisplayBalance] = useState(100)
+useRainBalance(setBalance, setDisplayBalance)
+
+// The hook animates displayBalance from current → new using
+// requestAnimationFrame with cubic ease-out over 600ms
+
+// ─ NumberFlow format options ─
+<NumberFlow
+  value={amount}
+  format={{
+    notation: 'standard',        // 'compact' for 1.2K style
+    minimumFractionDigits: 2,    // always show cents
+    maximumFractionDigits: 2,
+  }}
+/>
+
+// ─ Also used in VIP Progress, Daily Races Timer, Total Rewards ─
+<NumberFlow value={Math.round(animatedValue)} />%  // VIP progress percentage
+
+// Timer countdown:
+<NumberFlow value={hours} />:<NumberFlow value={minutes} />:<NumberFlow value={seconds} />
+
+// Total rewards claimed:
+$<NumberFlow value={shouldAnimate ? 673.28 : 0}
+  format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />`,
+  },
 ]
 
 // ── Category Config ─────────────────────────────────────
@@ -1848,6 +3959,384 @@ const CATEGORIES = [
   { id: 'components', label: 'Components', icon: IconCode },
   { id: 'blocks', label: 'Blocks', icon: IconFilter },
 ] as const
+
+// ── Right Sidebar Data ──────────────────────────────────
+const SHADCN_COMPONENTS = [
+  { name: 'Accordion', file: 'accordion.tsx', description: 'Vertically collapsing content sections', radix: true },
+  { name: 'Avatar', file: 'avatar.tsx', description: 'Circular user/entity image with fallback', radix: true },
+  { name: 'Badge', file: 'badge.tsx', description: 'Status/label indicator pill', radix: false },
+  { name: 'Button', file: 'button.tsx', description: '6 variants: default, destructive, outline, secondary, ghost, link', radix: false },
+  { name: 'Card', file: 'card.tsx', description: 'Container with header, content, footer, title, description', radix: false },
+  { name: 'Carousel', file: 'carousel.tsx', description: 'Embla-powered horizontal carousel with prev/next', radix: false },
+  { name: 'Checkbox', file: 'checkbox.tsx', description: 'Toggle checkbox with indeterminate state', radix: true },
+  { name: 'Dotted Glow BG', file: 'dotted-glow-background.tsx', description: 'Animated dotted background with radial glow', radix: false },
+  { name: 'Drawer', file: 'drawer.tsx', description: 'Vaul-powered bottom sheet / side panel', radix: false },
+  { name: 'Dropdown Menu', file: 'dropdown-menu.tsx', description: 'Contextual action menu with sub-menus', radix: true },
+  { name: 'Empty State', file: 'empty.tsx', description: 'Placeholder for empty data views', radix: false },
+  { name: 'Family Drawer', file: 'family-drawer.tsx', description: 'Multi-view drawer with shared layout animations', radix: false },
+  { name: 'Input', file: 'input.tsx', description: 'Text input field with focus ring', radix: false },
+  { name: 'Label', file: 'label.tsx', description: 'Accessible form label', radix: true },
+  { name: 'Navigation Menu', file: 'navigation-menu.tsx', description: 'Top-level site navigation with dropdowns', radix: true },
+  { name: 'Pagination', file: 'pagination.tsx', description: 'Page navigation with prev/next/ellipsis', radix: false },
+  { name: 'Popover', file: 'popover.tsx', description: 'Floating content anchored to trigger', radix: true },
+  { name: 'Progress', file: 'progress.tsx', description: 'Horizontal progress bar indicator', radix: true },
+  { name: 'Select', file: 'select.tsx', description: 'Dropdown select with search and groups', radix: true },
+  { name: 'Separator', file: 'separator.tsx', description: 'Horizontal or vertical divider line', radix: true },
+  { name: 'Sheet', file: 'sheet.tsx', description: 'Slide-in panel from any edge', radix: true },
+  { name: 'Sidebar', file: 'sidebar.tsx', description: 'Collapsible sidebar with icon mode, mobile sheet, tooltip', radix: false },
+  { name: 'Skeleton', file: 'skeleton.tsx', description: 'Loading placeholder with pulse animation', radix: false },
+  { name: 'Sonner (Toast)', file: 'sonner.tsx', description: 'Toast notification system', radix: false },
+  { name: 'Table', file: 'table.tsx', description: 'Data table with header, body, footer, caption', radix: false },
+  { name: 'Tabs', file: 'tabs.tsx', description: 'Tabbed content switcher', radix: true },
+  { name: 'Toggle', file: 'toggle.tsx', description: 'Pressable on/off toggle button', radix: true },
+  { name: 'Tooltip', file: 'tooltip.tsx', description: 'Hover/focus content tooltip', radix: true },
+]
+
+const CUSTOM_COMPONENTS = [
+  { name: 'AnimateTabs', path: 'components/animate-ui/', description: 'Framer-motion animated tab switcher with spring physics' },
+  { name: 'ChatNavToggle', path: 'components/chat/chat-nav-toggle.tsx', description: 'Chat panel toggle with unread dot' },
+  { name: 'ChatPanel', path: 'components/chat/chat-panel.tsx', description: 'Full chat panel with messages, input, user list' },
+  { name: 'GlobalBetslip', path: 'components/betslip/global-betslip.tsx', description: 'Bottom betslip with number pad and stake input' },
+  { name: 'DesignCustomizer', path: 'components/design-customizer.tsx', description: 'Runtime theme/brand switching panel' },
+  { name: 'StreakCounter', path: 'components/vip/streak-counter.tsx', description: 'Animated daily login streak tracker' },
+  { name: 'BetAndGet', path: 'components/vip/bet-and-get.tsx', description: 'Wagering bonus reward card' },
+  { name: 'ReloadClaim', path: 'components/vip/reload-claim.tsx', description: 'Deposit reload bonus claim card' },
+  { name: 'CashDropCode', path: 'components/vip/cash-drop-code.tsx', description: 'Cash drop redemption code input' },
+  { name: 'JackpotOverlay', path: 'components/casino/jackpot-overlay.tsx', description: 'Progressive jackpot overlay display' },
+  { name: 'SportsTracker', path: 'components/sports-tracker-widget.tsx', description: 'Live sports tracking widget' },
+  { name: 'NumberFlow', path: '@number-flow/react', description: 'Animated number transitions with spring physics' },
+]
+
+const DESIGN_TOKENS = {
+  font: {
+    family: 'Figtree',
+    variable: '--font-figtree',
+    weights: ['300 Light', '400 Regular', '500 Medium', '600 SemiBold', '700 Bold', '800 ExtraBold', '900 Black'],
+    source: 'Google Fonts (next/font)',
+    tailwind: 'font-figtree',
+  },
+  colors: {
+    brand: [
+      { token: '--ds-primary', value: '#ee3536', label: 'Primary (BetOnline Red)' },
+      { token: '--ds-nav-bg', value: '#2D2E2C', label: 'Navigation BG' },
+      { token: '--ds-sidebar-bg', value: '#2d2d2d', label: 'Sidebar BG' },
+      { token: '--ds-page-bg', value: '#0a0a0a', label: 'Page BG' },
+    ],
+    semantic: [
+      { token: '--background', value: '#0a0a0a / #ffffff', label: 'Background' },
+      { token: '--foreground', value: '#ffffff / #0a0a0a', label: 'Foreground' },
+      { token: '--card', value: 'hsl(0 0% 3.9%)', label: 'Card' },
+      { token: '--primary', value: 'hsl(0 0% 98%)', label: 'Primary' },
+      { token: '--muted', value: 'hsl(0 0% 14.9%)', label: 'Muted' },
+      { token: '--accent', value: 'hsl(0 0% 14.9%)', label: 'Accent' },
+      { token: '--destructive', value: 'hsl(0 62.8% 30.6%)', label: 'Destructive' },
+    ],
+  },
+  radius: { small: '6px' },
+  spacing: '4px base unit',
+}
+
+const KEY_DEPENDENCIES = [
+  { name: 'Next.js', version: '14.x', type: 'Framework' },
+  { name: 'React', version: '18.x', type: 'Framework' },
+  { name: 'Tailwind CSS', version: '3.x', type: 'Styling' },
+  { name: 'Framer Motion', version: '11.x', type: 'Animation' },
+  { name: 'Radix UI', version: 'latest', type: 'Primitives' },
+  { name: 'shadcn/ui', version: 'default', type: 'Components' },
+  { name: 'Tabler Icons', version: '3.x', type: 'Icons' },
+  { name: 'Lucide React', version: '0.56x', type: 'Icons' },
+  { name: 'Embla Carousel', version: '8.x', type: 'Carousel' },
+  { name: 'Vaul', version: '1.x', type: 'Drawer' },
+  { name: 'Zustand', version: '4.x', type: 'State' },
+  { name: 'NumberFlow', version: '0.5.x', type: 'Animation' },
+  { name: 'Sonner', version: '2.x', type: 'Toast' },
+  { name: 'CVA', version: '0.7.x', type: 'Variants' },
+]
+
+// ── RightSidebar ────────────────────────────────────────
+function RightSidebar() {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    shadcn: true,
+    custom: false,
+    tokens: false,
+    deps: false,
+  })
+  const [sidebarSearch, setSidebarSearch] = useState('')
+
+  const toggle = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+
+  const filteredShadcn = SHADCN_COMPONENTS.filter(c =>
+    !sidebarSearch || c.name.toLowerCase().includes(sidebarSearch.toLowerCase()) || c.description.toLowerCase().includes(sidebarSearch.toLowerCase())
+  )
+  const filteredCustom = CUSTOM_COMPONENTS.filter(c =>
+    !sidebarSearch || c.name.toLowerCase().includes(sidebarSearch.toLowerCase()) || c.description.toLowerCase().includes(sidebarSearch.toLowerCase())
+  )
+
+  return (
+    <aside className="w-[280px] flex-shrink-0 border-l border-white/[0.06] bg-[#0a0a0a]/60 backdrop-blur-sm overflow-y-auto scrollbar-hide sticky top-[65px]" style={{ height: 'calc(100vh - 65px)' }}>
+      {/* Sidebar header */}
+      <div className="px-3 pt-4 pb-3 border-b border-white/[0.06]">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center">
+            <IconCode className="w-3 h-3 text-white/60" />
+          </div>
+          <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">Design System</span>
+        </div>
+        <div className="relative">
+          <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+          <input
+            type="text"
+            value={sidebarSearch}
+            onChange={(e) => setSidebarSearch(e.target.value)}
+            placeholder="Filter..."
+            className="w-full h-7 pl-8 pr-3 rounded-md bg-white/[0.04] border border-white/[0.08] text-[11px] text-white placeholder:text-white/30 outline-none focus:border-white/20 transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* ── shadcn/ui Components ── */}
+      <div className="border-b border-white/[0.06]">
+        <button onClick={() => toggle('shadcn')} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-white/10 flex items-center justify-center">
+              <span className="text-[8px] font-bold text-white/60">S</span>
+            </div>
+            <span className="text-[11px] font-semibold text-white/70">shadcn/ui</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40">{filteredShadcn.length}</span>
+          </div>
+          <IconChevronDown className={cn('w-3 h-3 text-white/40 transition-transform duration-200', openSections.shadcn && 'rotate-180')} />
+        </button>
+        <AnimatePresence initial={false}>
+          {openSections.shadcn && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-2 pb-2 space-y-0.5">
+                {filteredShadcn.map(comp => (
+                  <div key={comp.file} className="group flex items-start gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors cursor-default">
+                    <div className="w-1 h-1 rounded-full bg-white/20 mt-1.5 flex-shrink-0 group-hover:bg-white/40" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-medium text-white/80 group-hover:text-white transition-colors">{comp.name}</span>
+                        {comp.radix && (
+                          <span className="text-[8px] px-1 py-[1px] rounded bg-blue-500/15 border border-blue-500/25 text-blue-400/80 font-medium leading-none">Radix</span>
+                        )}
+                      </div>
+                      <p className="text-[9px] text-white/35 leading-tight mt-0.5">{comp.description}</p>
+                    </div>
+                  </div>
+                ))}
+                {filteredShadcn.length === 0 && <p className="text-[10px] text-white/30 px-2 py-2">No matches</p>}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Custom Components ── */}
+      <div className="border-b border-white/[0.06]">
+        <button onClick={() => toggle('custom')} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-emerald-500/15 flex items-center justify-center">
+              <span className="text-[8px] font-bold text-emerald-400/80">C</span>
+            </div>
+            <span className="text-[11px] font-semibold text-white/70">Custom Components</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40">{filteredCustom.length}</span>
+          </div>
+          <IconChevronDown className={cn('w-3 h-3 text-white/40 transition-transform duration-200', openSections.custom && 'rotate-180')} />
+        </button>
+        <AnimatePresence initial={false}>
+          {openSections.custom && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-2 pb-2 space-y-0.5">
+                {filteredCustom.map(comp => (
+                  <div key={comp.name} className="group flex items-start gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors cursor-default">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500/30 mt-1.5 flex-shrink-0 group-hover:bg-emerald-400/50" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[11px] font-medium text-white/80 group-hover:text-white transition-colors">{comp.name}</span>
+                      <p className="text-[9px] text-white/35 leading-tight mt-0.5">{comp.description}</p>
+                      <p className="text-[8px] text-white/25 font-mono mt-0.5 truncate">{comp.path}</p>
+                    </div>
+                  </div>
+                ))}
+                {filteredCustom.length === 0 && <p className="text-[10px] text-white/30 px-2 py-2">No matches</p>}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Typography & Tokens ── */}
+      <div className="border-b border-white/[0.06]">
+        <button onClick={() => toggle('tokens')} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-purple-500/15 flex items-center justify-center">
+              <IconPalette className="w-2.5 h-2.5 text-purple-400/80" />
+            </div>
+            <span className="text-[11px] font-semibold text-white/70">Tokens & Typography</span>
+          </div>
+          <IconChevronDown className={cn('w-3 h-3 text-white/40 transition-transform duration-200', openSections.tokens && 'rotate-180')} />
+        </button>
+        <AnimatePresence initial={false}>
+          {openSections.tokens && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pb-3 space-y-4">
+                {/* Font */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Font</span>
+                  </div>
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5">
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-lg font-bold text-white" style={{ fontFamily: 'var(--font-figtree)' }}>Figtree</span>
+                      <span className="text-[9px] text-white/40 font-mono">var(--font-figtree)</span>
+                    </div>
+                    <p className="text-[9px] text-white/40 mb-2.5">Google Fonts · next/font · Tailwind: <code className="text-[9px] px-1 py-0.5 bg-white/[0.06] rounded text-white/60">font-figtree</code></p>
+                    <div className="space-y-1">
+                      {DESIGN_TOKENS.font.weights.map(w => {
+                        const [num, name] = w.split(' ')
+                        return (
+                          <div key={w} className="flex items-center justify-between">
+                            <span className="text-[11px] text-white/70" style={{ fontFamily: 'var(--font-figtree)', fontWeight: parseInt(num) }}>{name}</span>
+                            <span className="text-[9px] text-white/30 font-mono">{num}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="mt-3 pt-2.5 border-t border-white/[0.06]">
+                      <p className="text-[11px] text-white/60 leading-relaxed" style={{ fontFamily: 'var(--font-figtree)' }}>
+                        The quick brown fox jumps over the lazy dog. 0123456789
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Brand colors */}
+                <div>
+                  <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Brand Colors</span>
+                  <div className="space-y-1.5">
+                    {DESIGN_TOKENS.colors.brand.map(c => (
+                      <div key={c.token} className="flex items-center gap-2.5 group">
+                        <div className="w-5 h-5 rounded-sm border border-white/10 flex-shrink-0" style={{ backgroundColor: c.value }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[10px] text-white/70 group-hover:text-white transition-colors">{c.label}</div>
+                          <div className="text-[8px] text-white/30 font-mono truncate">{c.token}: {c.value}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Semantic colors */}
+                <div>
+                  <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Semantic Colors (Dark)</span>
+                  <div className="space-y-1">
+                    {DESIGN_TOKENS.colors.semantic.map(c => (
+                      <div key={c.token} className="flex items-center gap-2.5 group">
+                        <div className="w-4 h-4 rounded-sm border border-white/10 flex-shrink-0" style={{ backgroundColor: c.value.startsWith('hsl') ? c.value : c.value.split(' / ')[0] }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[10px] text-white/60">{c.label}</div>
+                          <div className="text-[8px] text-white/25 font-mono truncate">{c.token}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Radius & spacing */}
+                <div>
+                  <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Radius & Spacing</span>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-lg p-2 text-center">
+                      <div className="w-8 h-8 rounded-small bg-white/10 border border-white/20 mx-auto mb-1" />
+                      <div className="text-[9px] text-white/50">rounded-small</div>
+                      <div className="text-[8px] text-white/30 font-mono">6px</div>
+                    </div>
+                    <div className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-lg p-2 text-center">
+                      <div className="flex items-end gap-[4px] justify-center h-8 mb-1">
+                        <div className="w-2 h-2 bg-white/20 rounded-[1px]" />
+                        <div className="w-2 h-4 bg-white/20 rounded-[1px]" />
+                        <div className="w-2 h-6 bg-white/20 rounded-[1px]" />
+                        <div className="w-2 h-8 bg-white/20 rounded-[1px]" />
+                      </div>
+                      <div className="text-[9px] text-white/50">Base unit</div>
+                      <div className="text-[8px] text-white/30 font-mono">4px</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Dependencies ── */}
+      <div>
+        <button onClick={() => toggle('deps')} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-amber-500/15 flex items-center justify-center">
+              <span className="text-[8px] font-bold text-amber-400/80">⚡</span>
+            </div>
+            <span className="text-[11px] font-semibold text-white/70">Dependencies</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40">{KEY_DEPENDENCIES.length}</span>
+          </div>
+          <IconChevronDown className={cn('w-3 h-3 text-white/40 transition-transform duration-200', openSections.deps && 'rotate-180')} />
+        </button>
+        <AnimatePresence initial={false}>
+          {openSections.deps && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-2 pb-3 space-y-0.5">
+                {KEY_DEPENDENCIES.map(dep => (
+                  <div key={dep.name} className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors group">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-amber-500/30 group-hover:bg-amber-400/50" />
+                      <span className="text-[11px] text-white/70 group-hover:text-white transition-colors">{dep.name}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[8px] px-1 py-[1px] rounded bg-white/[0.06] text-white/40">{dep.type}</span>
+                      <span className="text-[9px] text-white/30 font-mono">{dep.version}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Footer */}
+      <div className="px-3 py-3 border-t border-white/[0.06] mt-auto">
+        <div className="text-[9px] text-white/25 space-y-1">
+          <p>shadcn/ui · style: default · baseColor: neutral</p>
+          <p>Registries: animate-ui, billingsdk, limeplay, aceternity</p>
+          <p className="font-mono">components.json → @/components/ui</p>
+        </div>
+      </div>
+    </aside>
+  )
+}
 
 // ── Page Component ──────────────────────────────────────
 export default function LibraryPage() {
@@ -1917,60 +4406,66 @@ export default function LibraryPage() {
         </div>
       </header>
 
-      <div className="px-6 py-8">
-        {/* Category tabs */}
-        <div className="flex items-center gap-2 mb-8">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon
-            const isActive = activeCategory === cat.id
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={cn(
-                  'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  isActive
-                    ? 'bg-white/10 text-white border border-white/15'
-                    : 'text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent'
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {cat.label}
-                {cat.id !== 'all' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] ml-1">
-                    {cat.id === 'atoms' ? atomCount : cat.id === 'components' ? componentCount : blockCount}
-                  </span>
-                )}
-              </button>
-            )
-          })}
+      <div className="flex">
+        {/* Main content */}
+        <div className="flex-1 min-w-0 px-6 py-8">
+          {/* Category tabs */}
+          <div className="flex items-center gap-2 mb-8">
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon
+              const isActive = activeCategory === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                    isActive
+                      ? 'bg-white/10 text-white border border-white/15'
+                      : 'text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent'
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {cat.label}
+                  {cat.id !== 'all' && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] ml-1">
+                      {cat.id === 'atoms' ? atomCount : cat.id === 'components' ? componentCount : blockCount}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Results */}
+          <LibraryErrorBoundary>
+          <div className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((entry) => (
+                <motion.div
+                  key={entry.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ComponentCard entry={entry} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {filtered.length === 0 && (
+              <div className="py-20 text-center">
+                <p className="text-white/30 text-sm">No components match your search.</p>
+              </div>
+            )}
+          </div>
+          </LibraryErrorBoundary>
         </div>
 
-        {/* Results */}
-        <LibraryErrorBoundary>
-        <div className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((entry) => (
-              <motion.div
-                key={entry.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ComponentCard entry={entry} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {filtered.length === 0 && (
-            <div className="py-20 text-center">
-              <p className="text-white/30 text-sm">No components match your search.</p>
-            </div>
-          )}
-        </div>
-        </LibraryErrorBoundary>
+        {/* Right sidebar — design system reference */}
+        <RightSidebar />
       </div>
     </div>
   )

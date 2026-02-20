@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import React, { Suspense } from 'react'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTracking } from '@/hooks/use-tracking'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import {
@@ -2251,6 +2252,7 @@ function VipDrawerContent({
 function AccountPageContent() {
   const isMobile = useIsMobile()
   const router = useRouter()
+  const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('account')
   const { state: sidebarState, open: sidebarOpen, setOpen, openMobile, setOpenMobile, toggleSidebar } = useSidebar()
   const [activeSection, setActiveSection] = useState<AccountSection>('dashboard')
   const [mounted, setMounted] = useState(false)
@@ -2301,23 +2303,26 @@ function AccountPageContent() {
 
   // ─── Drawer open helpers (panel exclusivity) ───
   const openAccountDrawer = useCallback(() => {
+    trackClick('account-drawer', 'My Account')
     setVipDrawerOpen(false)
     setDepositDrawerOpen(false)
     setAccountDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openVipDrawer = useCallback(() => {
+    trackClick('vip-hub', 'VIP Hub')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
   const openDepositDrawer = useCallback(() => {
+    trackClick('deposit', 'Deposit')
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [])
+  }, [trackClick])
 
   const handleDepositDrawerOpenChange = useCallback((open: boolean) => {
     setDepositDrawerOpen(open)
@@ -2488,13 +2493,13 @@ function AccountPageContent() {
         >
           <div className="flex items-center h-full px-3 gap-2 min-w-max">
             {[
-              { label: 'Home', onClick: () => router.push('/') },
-              ...(visibleProducts.sports ? [{ label: 'Sports', onClick: () => router.push('/sports/football') }] : []),
-              ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', onClick: () => { window.location.href = '/live-betting' } }] : []),
-              ...(visibleProducts.casino ? [{ label: 'Casino', onClick: () => router.push('/casino') }] : []),
-              ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', onClick: () => router.push('/casino') }] : []),
-              ...(visibleProducts.poker ? [{ label: 'Poker', onClick: () => router.push('/casino') }] : []),
-              ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', onClick: () => router.push('/casino') }] : []),
+              { label: 'Home', onClick: () => { trackNav('home', 'Home'); router.push('/') } },
+              ...(visibleProducts.sports ? [{ label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football') } }] : []),
+              ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' } }] : []),
+              ...(visibleProducts.casino ? [{ label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino') } }] : []),
+              ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino') } }] : []),
+              ...(visibleProducts.poker ? [{ label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true') } }] : []),
+              ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') } }] : []),
             ].map((item) => (
               <button
                 key={item.label}
@@ -2602,7 +2607,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/sports/football') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('sports', 'Sports'); router.push('/sports/football') }}
                   >
                     <span className="relative z-10">Sports</span>
                   </SidebarMenuButton>
@@ -2617,7 +2622,7 @@ function AccountPageContent() {
                       "hover:bg-white/5 hover:text-white transition-colors",
                       "text-white/70 active:bg-white/10 cursor-pointer"
                     )}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = '/live-betting' }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' }}
                   >
                     Live Betting
                   </SidebarMenuButton>
@@ -2633,7 +2638,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/casino') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('casino', 'Casino'); router.push('/casino') }}
                   >
                     <span className="relative z-10">Casino</span>
                   </SidebarMenuButton>
@@ -2649,7 +2654,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/casino') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('casino', 'Live Casino'); router.push('/casino') }}
                   >
                     <span className="relative z-10">Live Casino</span>
                   </SidebarMenuButton>
@@ -2665,7 +2670,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/casino') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('poker', 'Poker'); router.push('/casino?poker=true') }}
                   >
                     <span className="relative z-10">Poker</span>
                   </SidebarMenuButton>
@@ -2681,7 +2686,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/casino') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') }}
                   >
                     <span className="relative z-10">VIP Rewards</span>
                   </SidebarMenuButton>
@@ -2959,6 +2964,7 @@ function AccountPageContent() {
                   <button
                     key={item.label}
                     onClick={() => {
+                      trackNav(item.page, item.label)
                       setOpenMobile(false)
                       if (item.page === 'sports') {
                         router.push('/sports/football')
@@ -2969,9 +2975,9 @@ function AccountPageContent() {
                       } else if (item.page === 'casino' || item.page === 'liveCasino') {
                         router.push('/casino')
                       } else if (item.page === 'poker') {
-                        router.push('/casino')
+                        router.push('/casino?poker=true')
                       } else if (item.page === 'vipRewards') {
-                        router.push('/casino')
+                        router.push('/casino?vip=true')
                       }
                     }}
                     className={cn(
@@ -3089,6 +3095,8 @@ function AccountPageContent() {
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
+                                  trackSidebar(item.id, item.label)
+                                  trackAction('account-section', item.label, { section: item.id, from: activeSection })
                                   setActiveSection(item.id)
                                   if (isMobile) setOpenMobile(false)
                                 }}
@@ -3141,7 +3149,7 @@ function AccountPageContent() {
                                   e.stopPropagation()
                                   if (isMobile) setOpenMobile(false)
                                   if (item.label === 'Loyalty Hub') {
-                                    router.push('/casino')
+                                    router.push('/casino?vip=true')
                                   } else if (item.label === 'Banking') {
                                     setActiveSection('payments')
                                   }
@@ -3187,7 +3195,7 @@ function AccountPageContent() {
             transition={{ type: "tween", ease: "linear", duration: 0.3 }}
           >
             <div>
-              <AnimateTabs value={activeSection} onValueChange={(v) => setActiveSection(v as AccountSection)} className="w-max">
+              <AnimateTabs value={activeSection} onValueChange={(v) => { trackClick('account-tab', v, { section: 'sub-nav', from: activeSection, to: v }); setActiveSection(v as AccountSection) }} className="w-max">
                 <AnimateTabsList className="bg-white/5 p-0.5 h-auto gap-1 rounded-3xl border-0 relative">
                   {sidebarItems.map((item) => (
                     <TabsTab
