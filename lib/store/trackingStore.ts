@@ -25,7 +25,7 @@ function detectDevice(): DeviceInfo {
   // ─── Browser detection ───
   let browser = 'unknown'
   // Use modern UA Client Hints if available
-  const uaData = (navigator as Record<string, unknown>).userAgentData as { brands?: { brand: string }[]; mobile?: boolean; platform?: string } | undefined
+  const uaData = (navigator as unknown as Record<string, unknown>).userAgentData as { brands?: { brand: string }[]; mobile?: boolean; platform?: string } | undefined
   if (uaData?.brands) {
     const brandNames = uaData.brands.map((b) => b.brand.toLowerCase())
     if (brandNames.some((b) => b.includes('firefox'))) browser = 'Firefox'
