@@ -9461,7 +9461,7 @@ function VipDrawerContent({
 function NavTestPageContent() {
   const isMobile = useIsMobile()
   const router = useRouter()
-  const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('sports')
+  const { trackNav, trackClick, trackAction, trackSidebar, trackPageView } = useTracking('sports')
   const [loadingNav, setLoadingNav] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [activeFilter, setActiveFilter] = useState('For You')
@@ -9504,20 +9504,23 @@ function NavTestPageContent() {
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
     trackClick('account-drawer', 'My Account')
+    trackPageView('account-drawer', 'My Account Drawer')
     setVipDrawerOpen(false)
     setDepositDrawerOpen(false)
     setAccountDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [trackClick])
+  }, [trackClick, trackPageView])
   const openVipDrawer = useCallback(() => {
     trackClick('vip-hub', 'VIP Hub')
+    trackPageView('vip-hub', 'VIP Hub Drawer')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [trackClick])
+  }, [trackClick, trackPageView])
   const openDepositDrawer = useCallback(() => {
     trackClick('deposit', 'Deposit')
+    trackPageView('deposit-drawer', 'Deposit Drawer')
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)
     setDepositDrawerOpen(true)
@@ -9985,13 +9988,13 @@ function NavTestPageContent() {
         >
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
                 {[
-                  { label: 'Home', onClick: () => { trackNav('home', 'Home'); router.push('/'); setQuickLinksOpen(false); } },
-                  { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
-                  { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
+                  { label: 'Home', onClick: () => { trackNav('home', 'Home'); trackPageView('home', 'Home'); router.push('/'); setQuickLinksOpen(false); } },
+                  { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
+                  { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
+                  { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
+                  { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
+                  { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); trackPageView('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
+                  { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); trackPageView('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -10122,6 +10125,7 @@ function NavTestPageContent() {
                         e.preventDefault()
                         e.stopPropagation()
                         trackNav('sports', 'Sports')
+                        trackPageView('sports', 'Sports')
                         setShowSports(true)
                         setShowVipRewards(false)
                         window.scrollTo(0, 0)
@@ -10174,6 +10178,7 @@ function NavTestPageContent() {
                         e.preventDefault()
                         e.stopPropagation()
                         trackNav('casino', 'Casino')
+                        trackPageView('casino', 'Casino')
                         router.push('/casino')
                       }}
                     >
@@ -10204,6 +10209,7 @@ function NavTestPageContent() {
                         e.preventDefault()
                         e.stopPropagation()
                         trackNav('casino', 'Live Casino')
+                        trackPageView('live-casino', 'Live Casino')
                         router.push('/casino?tab=live')
                       }}
                     >
@@ -10232,6 +10238,7 @@ function NavTestPageContent() {
                         e.preventDefault()
                         e.stopPropagation()
                         trackNav('poker', 'Poker')
+                        trackPageView('poker', 'Poker')
                         router.push('/casino?poker=true')
                       }}
                     >
@@ -10251,6 +10258,7 @@ function NavTestPageContent() {
                         e.preventDefault()
                         e.stopPropagation()
                         trackNav('vip-rewards', 'VIP Rewards')
+                        trackPageView('vip-rewards', 'VIP Rewards')
                         setShowVipRewards(true)
                         setShowSports(false)
                         window.scrollTo(0, 0)

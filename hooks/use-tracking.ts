@@ -80,5 +80,19 @@ export function useTracking(pageName: string) {
     [pageName, track]
   )
 
-  return { trackNav, trackClick, trackAction, trackSidebar }
+  // Track a sub-page view (e.g. Poker, VIP Rewards within Casino)
+  // This fires a page_view event so it shows up in session flows / journey maps
+  const trackPageView = useCallback(
+    (target: string, label?: string) => {
+      track({
+        type: 'page_view',
+        page: pageName,
+        target,
+        label: label || target,
+      })
+    },
+    [pageName, track]
+  )
+
+  return { trackNav, trackClick, trackAction, trackSidebar, trackPageView }
 }

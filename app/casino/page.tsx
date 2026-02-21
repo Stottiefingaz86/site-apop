@@ -7792,7 +7792,7 @@ function NavTestPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
-  const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('casino')
+  const { trackNav, trackClick, trackAction, trackSidebar, trackPageView } = useTracking('casino')
   const [activeFilter, setActiveFilter] = useState('For You')
   const [activeSubNav, setActiveSubNav] = useState('For You')
   const [gameSortFilter, setGameSortFilter] = useState<string>('popular')
@@ -7856,25 +7856,28 @@ function NavTestPageContent() {
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
     trackClick('account-drawer', 'My Account')
+    trackPageView('account-drawer', 'My Account Drawer')
     setVipDrawerOpen(false)
     setDepositDrawerOpen(false)
     setAccountDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [trackClick])
+  }, [trackClick, trackPageView])
   const openVipDrawer = useCallback(() => {
     trackClick('vip-hub', 'VIP Hub')
+    trackPageView('vip-hub', 'VIP Hub Drawer')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [trackClick])
+  }, [trackClick, trackPageView])
   const openDepositDrawer = useCallback(() => {
     trackClick('deposit', 'Deposit')
+    trackPageView('deposit-drawer', 'Deposit Drawer')
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
-  }, [trackClick])
+  }, [trackClick, trackPageView])
 
   // Panel exclusivity: when chat opens, close all drawers + collapse sidebar
   useEffect(() => {
@@ -7903,9 +7906,9 @@ function NavTestPageContent() {
   const [showSports, setShowSports] = useState(false) // Always false for casino page
   const [showVipRewards, setShowVipRewards] = useState(false)
   const [showPoker, setShowPoker] = useState(false)
-  // Track sub-page views
-  useEffect(() => { if (showVipRewards) trackAction('vip-rewards', 'Viewed VIP Rewards') }, [showVipRewards]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (showPoker) trackAction('poker', 'Viewed Poker') }, [showPoker]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Track sub-page views as page_view events so they appear in session flows
+  useEffect(() => { if (showVipRewards) trackPageView('vip-rewards', 'VIP Rewards') }, [showVipRewards]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (showPoker) trackPageView('poker', 'Poker') }, [showPoker]) // eslint-disable-line react-hooks/exhaustive-deps
   const [tournamentTab, setTournamentTab] = useState<'cash' | 'freeroll'>('cash')
   const [tournamentExpandedCard, setTournamentExpandedCard] = useState<number | null>(null)
   const [leaderboardTournament, setLeaderboardTournament] = useState<typeof cashTournamentsData[0] | null>(null)
@@ -8308,7 +8311,12 @@ function NavTestPageContent() {
   const [favoritedGames, setFavoritedGames] = useState<Set<number>>(new Set())
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [selectedGame, setSelectedGame] = useState<{ title: string; image: string; provider?: string; features?: string[] } | null>(null)
-  useEffect(() => { if (selectedGame) trackAction('game-launch', selectedGame.title, { provider: selectedGame.provider || 'unknown', category: activeSubNav, section: 'casino' }) }, [selectedGame]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (selectedGame) {
+      trackPageView('game-launch', `Game: ${selectedGame.title}`)
+      trackAction('game-launch', selectedGame.title, { provider: selectedGame.provider || 'unknown', category: activeSubNav, section: 'casino' })
+    }
+  }, [selectedGame]) // eslint-disable-line react-hooks/exhaustive-deps
   // Deep tracking: vendor filter changes
   useEffect(() => { if (selectedVendor) trackAction('casino-vendor-filter', selectedVendor, { section: 'vendor-select' }) }, [selectedVendor]) // eslint-disable-line react-hooks/exhaustive-deps
   // Deep tracking: game sort/filter changes
@@ -8781,11 +8789,11 @@ function NavTestPageContent() {
         >
           <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
                 {[
-                  { label: 'Home', product: null, onClick: () => { trackNav('home', 'Home'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setQuickLinksOpen(false); } },
-                  { label: 'Sports', product: 'sports' as const, onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', product: 'liveBetting' as const, onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', product: 'casino' as const, onClick: () => { trackNav('casino', 'Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', product: 'liveCasino' as const, onClick: () => { trackNav('casino', 'Live Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
+                  { label: 'Home', product: null, onClick: () => { trackNav('home', 'Home'); trackPageView('home', 'Home'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setQuickLinksOpen(false); } },
+                  { label: 'Sports', product: 'sports' as const, onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
+                  { label: 'Live Betting', product: 'liveBetting' as const, onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
+                  { label: 'Casino', product: 'casino' as const, onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
+                  { label: 'Live Casino', product: 'liveCasino' as const, onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', product: 'poker' as const, onClick: () => { trackNav('poker', 'Poker'); setShowPoker(true); setShowSports(false); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', product: 'vipRewards' as const, onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setShowSports(false); setShowPoker(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', product: null, onClick: () => { setQuickLinksOpen(false); } },
