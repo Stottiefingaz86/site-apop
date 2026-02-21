@@ -7904,11 +7904,17 @@ function NavTestPageContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedVendor, setSelectedVendor] = useState<string>('')
   const [showSports, setShowSports] = useState(false) // Always false for casino page
-  const [showVipRewards, setShowVipRewards] = useState(false)
-  const [showPoker, setShowPoker] = useState(false)
-  // Track sub-page views as page_view events so they appear in session flows
-  useEffect(() => { if (showVipRewards) trackPageView('vip-rewards', 'VIP Rewards') }, [showVipRewards]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (showPoker) trackPageView('poker', 'Poker') }, [showPoker]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [showVipRewards, _setShowVipRewards] = useState(false)
+  const [showPoker, _setShowPoker] = useState(false)
+  // Wrapper setters that fire page_view events for session flow tracking
+  const setShowVipRewards = useCallback((val: boolean) => {
+    _setShowVipRewards(val)
+    if (val) trackPageView('vip-rewards', 'VIP Rewards')
+  }, [trackPageView])
+  const setShowPoker = useCallback((val: boolean) => {
+    _setShowPoker(val)
+    if (val) trackPageView('poker', 'Poker')
+  }, [trackPageView])
   const [tournamentTab, setTournamentTab] = useState<'cash' | 'freeroll'>('cash')
   const [tournamentExpandedCard, setTournamentExpandedCard] = useState<number | null>(null)
   const [leaderboardTournament, setLeaderboardTournament] = useState<typeof cashTournamentsData[0] | null>(null)

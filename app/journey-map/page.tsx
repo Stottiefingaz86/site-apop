@@ -41,18 +41,21 @@ import { useTrackingStore, type FlowSnapshot, type FlowEdge, type PageStat, type
 // ─── Page color & icon map ───────────────────────────────────────────
 
 const PAGE_META: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  home:           { color: '#6366f1', icon: IconHome,             label: 'Home' },
-  casino:         { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Casino' },
-  sports:         { color: '#22c55e', icon: IconBallFootball,     label: 'Sports' },
-  account:        { color: '#06b6d4', icon: IconUser,             label: 'Account' },
-  poker:          { color: '#f97316', icon: IconCards,             label: 'Poker' },
-  'vip-rewards':  { color: '#fbbf24', icon: IconCrown,            label: 'VIP Rewards' },
-  'live-betting': { color: '#ef4444', icon: IconFlame,            label: 'Live Betting' },
-  deposit:        { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
-  'vip-hub':      { color: '#fbbf24', icon: IconCrown,            label: 'VIP Hub' },
-  'account-drawer': { color: '#06b6d4', icon: IconUser,           label: 'My Account' },
-  library:        { color: '#8b5cf6', icon: IconEye,              label: 'Library' },
-  'journey-map':  { color: '#ec4899', icon: IconClick,            label: 'Journey Map' },
+  home:             { color: '#6366f1', icon: IconHome,             label: 'Home' },
+  casino:           { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Casino' },
+  sports:           { color: '#22c55e', icon: IconBallFootball,     label: 'Sports' },
+  account:          { color: '#06b6d4', icon: IconUser,             label: 'Account' },
+  poker:            { color: '#f97316', icon: IconCards,             label: 'Poker' },
+  'vip-rewards':    { color: '#fbbf24', icon: IconCrown,            label: 'VIP Rewards' },
+  'live-betting':   { color: '#ef4444', icon: IconFlame,            label: 'Live Betting' },
+  'live-casino':    { color: '#ef4444', icon: IconFlame,            label: 'Live Casino' },
+  deposit:          { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
+  'deposit-drawer': { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
+  'vip-hub':        { color: '#fbbf24', icon: IconCrown,            label: 'VIP Hub' },
+  'account-drawer': { color: '#06b6d4', icon: IconUser,             label: 'My Account' },
+  'game-launch':    { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Game' },
+  library:          { color: '#8b5cf6', icon: IconEye,              label: 'Library' },
+  'journey-map':    { color: '#ec4899', icon: IconClick,            label: 'Journey Map' },
 }
 
 function getPageMeta(page: string) {
