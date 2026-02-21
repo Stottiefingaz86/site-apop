@@ -5592,7 +5592,6 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                   onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
-                                    trackSidebar(league.label.toLowerCase(), league.label)
                                     trackStore({ type: 'action', page: 'sports', target: 'league-select', label: league.label, meta: { league: league.label, sport: activeSport, section: 'sidebar' } })
                                     router.push(league.href)
                                   }}
@@ -5798,7 +5797,6 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                trackSidebar(sport.label.toLowerCase(), sport.label)
                                 trackStore({ type: 'action', page: 'sports', target: 'sport-select', label: sport.label, meta: { sport: sport.label, section: 'a-z-sidebar' } })
                                 setLoadingItem(sport.label)
                                 router.push(sport.href)
