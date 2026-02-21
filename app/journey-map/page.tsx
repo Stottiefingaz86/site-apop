@@ -42,6 +42,7 @@ import {
   IconDiamond,
   IconPlayCard,
   IconTarget,
+  IconUsers,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { useTrackingStore, type FlowSnapshot, type FlowEdge, type PageStat, type TrackingEvent, type DateRange, type DateRangeFilter, type DeviceInfo, filterEventsByDateRange, computePageStats, computeFlowEdges, computeTopActions, computeSessionFlows } from '@/lib/store/trackingStore'
@@ -128,76 +129,25 @@ function formatDate(ts: string) {
   })
 }
 
-// ─── Interactive Live Flow Canvas — draggable nodes, fluid tentacle lines ────
+// ─── Clustered Flow Diagram — parent nodes with orbiting sub-pages ────
 
-type LayoutPreset = 'tree' | 'radial' | 'grid'
+// Define which pages belong to which cluster
+function getCluster(page: string): string {
+  if (page === 'casino' || page === 'game-launch' || page === 'live-casino' || page.startsWith('casino/')) return 'casino'
+  if (page === 'sports' || page === 'my-bets' || page === 'bet-placed' || page === 'live-betting' || page.startsWith('sports/')) return 'sports'
+  if (page === 'account' || page === 'account-drawer') return 'account'
+  if (page === 'deposit' || page === 'deposit-drawer') return 'deposit'
+  if (page === 'vip-rewards' || page === 'vip-hub') return 'vip'
+  return page // standalone (home, poker, library, etc.)
+}
 
-const LAYOUT_PRESETS: { id: LayoutPreset; label: string }[] = [
-  { id: 'tree', label: 'Tree' },
-  { id: 'radial', label: 'Radial' },
-  { id: 'grid', label: 'Grid' },
-]
-
-function computePositions(pages: string[], preset: LayoutPreset, w: number, h: number) {
-  const positions: Record<string, { x: number; y: number }> = {}
-  const cx = w / 2
-  const cy = h / 2
-  const count = pages.length
-
-  if (preset === 'tree') {
-    // Home top-center, rest fanned below
-    const homeIdx = pages.indexOf('home')
-    if (homeIdx >= 0) {
-      positions['home'] = { x: cx, y: 60 }
-      const others = pages.filter((p) => p !== 'home')
-      const cols = others.length
-      const spacing = Math.min(140, (w - 120) / Math.max(1, cols - 1))
-      const startX = cx - ((cols - 1) * spacing) / 2
-      others.forEach((page, i) => {
-        positions[page] = { x: startX + i * spacing, y: 220 }
-      })
-    } else {
-      pages.forEach((page, i) => {
-        const cols = Math.ceil(Math.sqrt(count))
-        const col = i % cols
-        const row = Math.floor(i / cols)
-        positions[page] = { x: 80 + col * 130, y: 60 + row * 140 }
-      })
-    }
-  } else if (preset === 'radial') {
-    const homeIdx = pages.indexOf('home')
-    if (homeIdx >= 0) {
-      positions['home'] = { x: cx, y: cy }
-      const others = pages.filter((p) => p !== 'home')
-      const radius = Math.min(cx - 60, cy - 50)
-      others.forEach((page, i) => {
-        const angle = ((2 * Math.PI) / others.length) * i - Math.PI / 2
-        positions[page] = {
-          x: cx + Math.cos(angle) * radius,
-          y: cy + Math.sin(angle) * radius,
-        }
-      })
-    } else {
-      pages.forEach((page, i) => {
-        const angle = ((2 * Math.PI) / count) * i - Math.PI / 2
-        const radius = Math.min(cx - 60, cy - 50)
-        positions[page] = { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius }
-      })
-    }
-  } else {
-    // Grid
-    const cols = Math.ceil(Math.sqrt(count))
-    const spacingX = (w - 120) / Math.max(1, cols - 1)
-    const rows = Math.ceil(count / cols)
-    const spacingY = (h - 100) / Math.max(1, rows - 1)
-    pages.forEach((page, i) => {
-      const col = i % cols
-      const row = Math.floor(i / cols)
-      positions[page] = { x: 60 + col * spacingX, y: 50 + row * spacingY }
-    })
-  }
-
-  return positions
+// The "parent" page for each cluster (the big node)
+const CLUSTER_PARENTS: Record<string, string> = {
+  casino: 'casino',
+  sports: 'sports',
+  account: 'account',
+  deposit: 'deposit',
+  vip: 'vip-rewards',
 }
 
 function LiveFlowDiagram({
@@ -208,29 +158,166 @@ function LiveFlowDiagram({
   pageStats: PageStat[]
   events: TrackingEvent[]
 }) {
-  const canvasW = 820
-  const canvasH = 360
-  const [layout, setLayout] = useState<LayoutPreset>('tree')
+  const canvasW = 900
+  const canvasH = 560
   const [hovered, setHovered] = useState<string | null>(null)
-  const [hoveredEdge, setHoveredEdge] = useState<string | null>(null)
-  const pages = useMemo(() => pageStats.map((s) => s.page), [pageStats])
-  const totalViews = pageStats.reduce((s, p) => s + p.views, 0)
-  const maxEdge = Math.max(1, ...flowEdges.map((e) => e.count))
-
-  // Positions with drag support
-  const defaultPositions = useMemo(() => computePositions(pages, layout, canvasW, canvasH), [pages, layout])
-  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(defaultPositions)
+  const [expandedCluster, setExpandedCluster] = useState<string | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
   const dragging = useRef<string | null>(null)
   const dragOffset = useRef({ x: 0, y: 0 })
-  const svgRef = useRef<SVGSVGElement>(null)
 
-  // Sync positions when layout preset changes
-  useEffect(() => {
-    setPositions(computePositions(pages, layout, canvasW, canvasH))
-  }, [layout, pages])
+  const totalViews = pageStats.reduce((s, p) => s + p.views, 0)
+
+  // Build clusters from actual data
+  const { clusters, clusterList, standalonePages } = useMemo(() => {
+    const clusterMap = new Map<string, { parent: string; children: string[]; totalViews: number }>()
+    const standalone: string[] = []
+
+    for (const ps of pageStats) {
+      const cluster = getCluster(ps.page)
+      const parent = CLUSTER_PARENTS[cluster]
+
+      if (parent) {
+        if (!clusterMap.has(cluster)) {
+          clusterMap.set(cluster, { parent, children: [], totalViews: 0 })
+        }
+        const c = clusterMap.get(cluster)!
+        c.totalViews += ps.views
+        if (ps.page !== parent) {
+          c.children.push(ps.page)
+        }
+      } else {
+        standalone.push(ps.page)
+      }
+    }
+    return {
+      clusters: clusterMap,
+      clusterList: Array.from(clusterMap.entries()),
+      standalonePages: standalone,
+    }
+  }, [pageStats])
+
+  // Aggregate inter-cluster edges
+  const { interEdges, intraEdges } = useMemo(() => {
+    const inter = new Map<string, { from: string; to: string; count: number }>()
+    const intra: FlowEdge[] = []
+
+    for (const edge of flowEdges) {
+      const fromCluster = getCluster(edge.from)
+      const toCluster = getCluster(edge.to)
+
+      if (fromCluster === toCluster) {
+        intra.push(edge)
+      } else {
+        const fromParent = CLUSTER_PARENTS[fromCluster] || edge.from
+        const toParent = CLUSTER_PARENTS[toCluster] || edge.to
+        const key = `${fromParent}→${toParent}`
+        const existing = inter.get(key)
+        if (existing) existing.count += edge.count
+        else inter.set(key, { from: fromParent, to: toParent, count: edge.count })
+      }
+    }
+    return { interEdges: Array.from(inter.values()), intraEdges: intra }
+  }, [flowEdges])
+
+  const maxInterEdge = Math.max(1, ...interEdges.map((e) => e.count))
+
+  // Compute parent orb radii — compact, capped so they don't dominate
+  const parentOrbRadius = useMemo(() => {
+    const radii: Record<string, number> = {}
+    for (const [id, cluster] of clusterList) {
+      const childCount = cluster.children.length
+      // Compact scaling: starts at 40, grows slowly, hard cap at 90
+      radii[cluster.parent] = childCount > 0
+        ? Math.min(90, 40 + childCount * 4)
+        : 24
+    }
+    return radii
+  }, [clusterList])
+
+  // Position top-level nodes (parents + standalones)
+  // Children are positioned INSIDE the parent circle
+  const allNodes = useMemo(() => {
+    const topLevel = [
+      ...clusterList.map(([, c]) => c.parent),
+      ...standalonePages,
+    ]
+
+    const cx = canvasW / 2
+    const cy = canvasH / 2
+    const positions: Record<string, {
+      x: number; y: number; isChild: boolean
+      cluster: string | null; size: number; orbRadius?: number
+    }> = {}
+
+    // Home at center, others in a ring
+    const homeIdx = topLevel.indexOf('home')
+    const outerRadius = Math.min(cx - 100, cy - 90)
+
+    if (homeIdx >= 0) {
+      positions['home'] = { x: cx, y: cy, isChild: false, cluster: null, size: 28 }
+      const others = topLevel.filter((p) => p !== 'home')
+      others.forEach((page, i) => {
+        const angle = ((2 * Math.PI) / others.length) * i - Math.PI / 2
+        const orb = parentOrbRadius[page] || 22
+        positions[page] = {
+          x: cx + Math.cos(angle) * outerRadius,
+          y: cy + Math.sin(angle) * outerRadius,
+          isChild: false,
+          cluster: getCluster(page) !== page ? getCluster(page) : null,
+          size: orb, // size = the orb radius for parents
+          orbRadius: orb,
+        }
+      })
+    } else {
+      topLevel.forEach((page, i) => {
+        const angle = ((2 * Math.PI) / topLevel.length) * i - Math.PI / 2
+        const orb = parentOrbRadius[page] || 22
+        positions[page] = {
+          x: cx + Math.cos(angle) * outerRadius,
+          y: cy + Math.sin(angle) * outerRadius,
+          isChild: false,
+          cluster: null,
+          size: orb,
+          orbRadius: orb,
+        }
+      })
+    }
+
+    // Position children INSIDE their parent — tight ring
+    for (const [clusterId, cluster] of clusterList) {
+      const parentPos = positions[cluster.parent]
+      if (!parentPos || cluster.children.length === 0) continue
+
+      const orbR = parentPos.orbRadius || 50
+      // Children orbit at ~65% of orb radius so they stay well inside
+      const childRingR = orbR * 0.6
+
+      cluster.children.forEach((child, i) => {
+        const angle = ((2 * Math.PI) / cluster.children.length) * i - Math.PI / 2
+        // Small fixed size for children — just dots with labels
+        const childSize = 5 + Math.min(3, ((pageStats.find((s) => s.page === child)?.views || 0) / Math.max(1, totalViews)) * 20)
+
+        positions[child] = {
+          x: parentPos.x + Math.cos(angle) * childRingR,
+          y: parentPos.y + Math.sin(angle) * childRingR,
+          isChild: true,
+          cluster: clusterId,
+          size: childSize,
+        }
+      })
+    }
+
+    return positions
+  }, [clusterList, standalonePages, pageStats, totalViews, parentOrbRadius])
+
+  // Draggable positions
+  const [positions, setPositions] = useState(allNodes)
+  useEffect(() => { setPositions(allNodes) }, [allNodes])
 
   const handleMouseDown = useCallback((page: string, e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     dragging.current = page
     const pos = positions[page]
     if (!pos || !svgRef.current) return
@@ -245,10 +332,63 @@ function LiveFlowDiagram({
     const rect = svgRef.current.getBoundingClientRect()
     const scaleX = canvasW / rect.width
     const scaleY = canvasH / rect.height
-    const nx = e.clientX * scaleX - dragOffset.current.x
-    const ny = e.clientY * scaleY - dragOffset.current.y
-    setPositions((prev) => ({ ...prev, [dragging.current!]: { x: Math.max(30, Math.min(canvasW - 30, nx)), y: Math.max(20, Math.min(canvasH - 20, ny)) } }))
-  }, [])
+    let nx = e.clientX * scaleX - dragOffset.current.x
+    let ny = e.clientY * scaleY - dragOffset.current.y
+
+    setPositions((prev) => {
+      const draggedPage = dragging.current!
+      const node = prev[draggedPage]
+      if (!node) return prev
+
+      // ── Child being dragged: constrain inside parent orb ──
+      if (node.isChild && node.cluster) {
+        const parentPage = CLUSTER_PARENTS[node.cluster]
+        const parentPos = prev[parentPage]
+        if (parentPos) {
+          const orbR = parentPos.orbRadius || 50
+          const maxChildR = orbR - node.size - 3
+          const dx = nx - parentPos.x
+          const dy = ny - parentPos.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist > maxChildR) {
+            nx = parentPos.x + (dx / dist) * maxChildR
+            ny = parentPos.y + (dy / dist) * maxChildR
+          }
+        }
+        return { ...prev, [draggedPage]: { ...node, x: nx, y: ny } }
+      }
+
+      // ── Parent / standalone being dragged ──
+      nx = Math.max(80, Math.min(canvasW - 80, nx))
+      ny = Math.max(80, Math.min(canvasH - 80, ny))
+      const deltaX = nx - node.x
+      const deltaY = ny - node.y
+
+      // Move the parent itself
+      const updated: typeof prev = {
+        ...prev,
+        [draggedPage]: { ...node, x: nx, y: ny },
+      }
+
+      // If this is a cluster parent, move ALL children by the same delta
+      const clusterId = getCluster(draggedPage)
+      if (clusters.has(clusterId)) {
+        const cluster = clusters.get(clusterId)!
+        for (const childPage of cluster.children) {
+          const childPos = prev[childPage]
+          if (childPos) {
+            updated[childPage] = {
+              ...childPos,
+              x: childPos.x + deltaX,
+              y: childPos.y + deltaY,
+            }
+          }
+        }
+      }
+
+      return updated
+    })
+  }, [clusters])
 
   const handleMouseUp = useCallback(() => { dragging.current = null }, [])
 
@@ -268,7 +408,7 @@ function LiveFlowDiagram({
     <div className="rounded-xl border border-emerald-500/10 overflow-hidden relative" style={{ backgroundColor: '#1a1a1a', animation: 'live-border-glow 4s ease-in-out infinite' }}>
       {/* Scanning line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden live-scan-line z-10" />
-      {/* Header with layout presets */}
+      {/* Header */}
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -279,37 +419,27 @@ function LiveFlowDiagram({
           </div>
           <div>
             <h3 className="text-[11px] font-semibold text-white">Live Flow Map</h3>
-            <p className="text-[10px] text-white/25 mt-0.5">{pages.length} pages · {flowEdges.length} flows · drag nodes to rearrange</p>
+            <p className="text-[10px] text-white/25 mt-0.5">
+              {clusterList.length + standalonePages.length} nodes · {interEdges.length} cross-flows · click cluster to expand · drag to rearrange
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {LAYOUT_PRESETS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setLayout(p.id)}
-              className={cn(
-                'px-2.5 py-1 rounded-md text-[10px] font-medium transition-all cursor-pointer',
-                layout === p.id
-                  ? 'bg-white/10 text-white shadow-sm'
-                  : 'text-white/30 hover:text-white/50 hover:bg-white/[0.03]'
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+        {expandedCluster && (
+          <button
+            onClick={() => setExpandedCluster(null)}
+            className="text-[9px] px-2 py-1 rounded-md bg-white/[0.06] text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+          >
+            Collapse All
+          </button>
+        )}
       </div>
 
       {/* Canvas */}
       <div className="relative" style={{ cursor: dragging.current ? 'grabbing' : 'default' }}>
         <style>{`
           @keyframes tentacleFlow { to { stroke-dashoffset: -20; } }
-          @keyframes tentacleWave {
-            0%, 100% { d: path(attr(data-d1)); }
-            50% { d: path(attr(data-d2)); }
-          }
-          @keyframes pulseGlow { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }
-          @keyframes nodeFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2px); } }
+          @keyframes orbPulse { 0%, 100% { opacity: 0.04; } 50% { opacity: 0.08; } }
+          @keyframes childFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
         `}</style>
         <svg
           ref={svgRef}
@@ -321,131 +451,150 @@ function LiveFlowDiagram({
           onMouseLeave={handleMouseUp}
         >
           <defs>
-            {/* Glow filter */}
             <filter id="edgeGlow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
-            {/* Per-edge gradients */}
-            {flowEdges.map((edge) => {
-              const fromMeta = getPageMeta(edge.from)
-              const toMeta = getPageMeta(edge.to)
-              return (
-                <linearGradient key={`grad-${edge.from}-${edge.to}`} id={`eg-${edge.from}-${edge.to}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={fromMeta.color} stopOpacity="0.5" />
-                  <stop offset="100%" stopColor={toMeta.color} stopOpacity="0.5" />
-                </linearGradient>
-              )
-            })}
             {/* Node glows */}
-            {pages.map((page) => {
-              const meta = getPageMeta(page)
+            {Object.keys(positions).map((page) => {
+              const clId = getCluster(page)
+              const parentPage = CLUSTER_PARENTS[clId] || page
+              const color = getPageMeta(parentPage).color
               return (
                 <radialGradient key={`ng-${page}`} id={`ng-${page}`} cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor={meta.color} stopOpacity="0.2" />
-                  <stop offset="100%" stopColor={meta.color} stopOpacity="0" />
+                  <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+                  <stop offset="100%" stopColor={color} stopOpacity="0" />
                 </radialGradient>
               )
             })}
           </defs>
 
-          {/* ── Edges as fluid tentacle paths ── */}
-          {flowEdges.map((edge) => {
+          {/* ── Inter-cluster edges (aggregated parent→parent) ── */}
+          {interEdges.map((edge) => {
             const from = positions[edge.from]
             const to = positions[edge.to]
             if (!from || !to) return null
-            const edgeKey = `${edge.from}-${edge.to}`
-            const isHovered = hoveredEdge === edgeKey || hovered === edge.from || hovered === edge.to
-            const thickness = 0.8 + (edge.count / maxEdge) * 3
-            // Create organic bezier curve
+            const edgeKey = `inter-${edge.from}-${edge.to}`
+            const isHovered = hovered === edge.from || hovered === edge.to
+            const thickness = 1 + (edge.count / maxInterEdge) * 3.5
             const dx = to.x - from.x
             const dy = to.y - from.y
             const dist = Math.sqrt(dx * dx + dy * dy)
-            const curve = dist * 0.3
-            // Perpendicular offset for organic feel
+            // Start/end at edge of orb (not center)
+            const fromR = from.orbRadius || from.size || 22
+            const toR = to.orbRadius || to.size || 22
+            const fromX = from.x + (dx / (dist || 1)) * fromR
+            const fromY = from.y + (dy / (dist || 1)) * fromR
+            const toX = to.x - (dx / (dist || 1)) * toR
+            const toY = to.y - (dy / (dist || 1)) * toR
+            const curve = dist * 0.2
             const nx = -dy / (dist || 1)
-            const ny = dx / (dist || 1)
-            const wobble = Math.sin(edge.count * 1.7) * 15
-            const cpx1 = from.x + dx * 0.3 + nx * (curve * 0.2 + wobble)
-            const cpy1 = from.y + dy * 0.3 + ny * (curve * 0.2 + wobble)
-            const cpx2 = from.x + dx * 0.7 - nx * (curve * 0.15 - wobble * 0.5)
-            const cpy2 = from.y + dy * 0.7 - ny * (curve * 0.15 - wobble * 0.5)
-            const d = `M ${from.x} ${from.y} C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${to.x} ${to.y}`
-            const speed = Math.max(1.5, 4 - (edge.count / maxEdge) * 2.5)
+            const ny2 = dx / (dist || 1)
+            const wobble = Math.sin(edge.count * 1.3) * 8
+            const cpx1 = fromX + (toX - fromX) * 0.35 + nx * (curve * 0.2 + wobble)
+            const cpy1 = fromY + (toY - fromY) * 0.35 + ny2 * (curve * 0.2 + wobble)
+            const cpx2 = fromX + (toX - fromX) * 0.65 - nx * (curve * 0.15 - wobble * 0.5)
+            const cpy2 = fromY + (toY - fromY) * 0.65 - ny2 * (curve * 0.15 - wobble * 0.5)
+            const d = `M ${fromX} ${fromY} C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${toX} ${toY}`
+            const speed = Math.max(1.5, 4 - (edge.count / maxInterEdge) * 2.5)
+            const fromMeta = getPageMeta(edge.from)
 
             return (
-              <g
-                key={edgeKey}
-                onMouseEnter={() => setHoveredEdge(edgeKey)}
-                onMouseLeave={() => setHoveredEdge(null)}
-              >
-                {/* Glow background */}
+              <g key={edgeKey}>
+                <path d={d} fill="none" stroke={fromMeta.color} strokeWidth={thickness * 2.5} strokeLinecap="round" opacity={isHovered ? 0.08 : 0.02} style={{ filter: 'url(#edgeGlow)' }} />
                 <path
-                  d={d}
-                  fill="none"
-                  stroke={`url(#eg-${edge.from}-${edge.to})`}
-                  strokeWidth={thickness * 3}
-                  strokeLinecap="round"
-                  opacity={isHovered ? 0.12 : 0.04}
-                  style={{ transition: 'opacity 0.3s ease', filter: 'url(#edgeGlow)' }}
-                />
-                {/* Main tentacle line */}
-                <path
-                  d={d}
-                  fill="none"
-                  stroke={`url(#eg-${edge.from}-${edge.to})`}
+                  d={d} fill="none"
+                  stroke={isHovered ? 'rgba(255,255,255,0.35)' : `${fromMeta.color}40`}
                   strokeWidth={thickness}
                   strokeDasharray={`${4 + thickness} ${3 + thickness * 0.5}`}
                   strokeLinecap="round"
-                  opacity={isHovered ? 0.7 : 0.3}
-                  style={{
-                    animation: `tentacleFlow ${speed}s linear infinite`,
-                    transition: 'opacity 0.3s ease',
-                  }}
+                  opacity={isHovered ? 0.65 : 0.2}
+                  style={{ animation: `tentacleFlow ${speed}s linear infinite`, transition: 'opacity 0.3s' }}
                 />
-                {/* Count label on hover */}
                 {isHovered && (
                   <g>
-                    <rect
-                      x={(from.x + to.x) / 2 - 12}
-                      y={(from.y + to.y) / 2 - 8}
-                      width="24"
-                      height="16"
-                      rx="4"
-                      fill="#111"
-                      stroke="rgba(255,255,255,0.15)"
-                      strokeWidth="0.5"
-                    />
-                    <text
-                      x={(from.x + to.x) / 2}
-                      y={(from.y + to.y) / 2 + 3}
-                      textAnchor="middle"
-                      fill="white"
-                      fontSize="8"
-                      fontWeight="700"
-                      fontFamily="system-ui"
-                    >
-                      {edge.count}
-                    </text>
+                    <rect x={(fromX + toX) / 2 - 14} y={(fromY + toY) / 2 - 9} width="28" height="18" rx="4" fill="#111" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+                    <text x={(fromX + toX) / 2} y={(fromY + toY) / 2 + 3} textAnchor="middle" fill="white" fontSize="8" fontWeight="700" fontFamily="system-ui">{edge.count}×</text>
                   </g>
                 )}
               </g>
             )
           })}
 
-          {/* ── Nodes ── */}
-          {pages.map((page) => {
-            const pos = positions[page]
-            if (!pos) return null
+          {/* ── Parent orb backgrounds (the big circles that contain children) ── */}
+          {clusterList.map(([id, cluster]) => {
+            const parentPos = positions[cluster.parent]
+            if (!parentPos || cluster.children.length === 0) return null
+            const meta = getPageMeta(cluster.parent)
+            const orbR = parentPos.orbRadius || 50
+            const isExpanded = expandedCluster === id
+            const isHov = hovered === cluster.parent
+
+            return (
+              <g key={`orb-${id}`}>
+                {/* Outer glow */}
+                <circle cx={parentPos.x} cy={parentPos.y} r={orbR + 8} fill="none" stroke={meta.color} strokeWidth="0.3" opacity={isHov || isExpanded ? 0.3 : 0.08}>
+                  <animate attributeName="opacity" values={isHov ? '0.2;0.4;0.2' : '0.05;0.1;0.05'} dur="3s" repeatCount="indefinite" />
+                </circle>
+                {/* Main orb — semi-transparent fill */}
+                <circle
+                  cx={parentPos.x} cy={parentPos.y} r={orbR}
+                  fill={`${meta.color}${isExpanded ? '0a' : '06'}`}
+                  stroke={meta.color}
+                  strokeWidth={isHov || isExpanded ? 1.5 : 0.8}
+                  opacity={isHov || isExpanded ? 0.6 : 0.3}
+                  style={{ transition: 'all 0.3s ease', cursor: 'pointer' }}
+                />
+              </g>
+            )
+          })}
+
+          {/* ── Intra-cluster edges (always visible inside the orb) ── */}
+          {intraEdges.map((edge) => {
+            const from = positions[edge.from]
+            const to = positions[edge.to]
+            if (!from || !to) return null
+            const cluster = getCluster(edge.from)
+            const parentColor = getPageMeta(CLUSTER_PARENTS[cluster] || edge.from).color
+            const isHov = hovered === CLUSTER_PARENTS[cluster] || expandedCluster === cluster
+            const d = `M ${from.x} ${from.y} L ${to.x} ${to.y}`
+
+            return (
+              <path
+                key={`intra-${edge.from}-${edge.to}`}
+                d={d} fill="none"
+                stroke={parentColor}
+                strokeWidth="0.5"
+                strokeDasharray="1.5 2"
+                strokeLinecap="round"
+                opacity={isHov ? 0.3 : 0.12}
+                style={{ animation: 'tentacleFlow 3s linear infinite', transition: 'opacity 0.3s' }}
+              />
+            )
+          })}
+
+          {/* ── All nodes — parents first (so children render on top) ── */}
+          {/* Render non-children first */}
+          {Object.entries(positions)
+            .sort(([, a], [, b]) => (a.isChild ? 1 : 0) - (b.isChild ? 1 : 0))
+            .map(([page, pos]) => {
+            const clId = getCluster(page)
+            const parentPage = CLUSTER_PARENTS[clId] || page
+            const parentColor = getPageMeta(parentPage).color
             const meta = getPageMeta(page)
             const stat = pageStats.find((s) => s.page === page)
             const views = stat?.views || 0
             const viewPct = totalViews > 0 ? Math.round((views / totalViews) * 100) : 0
             const isHov = hovered === page
-            const nodeSize = 20 + Math.min(12, (views / Math.max(1, totalViews)) * 60)
+            const isChild = pos.isChild
+            const nodeSize = isChild ? pos.size : (pos.orbRadius ? 16 : pos.size) // parent "center dot" is smaller than orb
+            const nodeColor = parentColor
+
+            // Children always visible inside their parent orb
+            const childVisible = true
+
+            // For parents with children, the "node" is the center label (orb is drawn above)
+            const hasOrb = !isChild && clusters.has(clId) && clusters.get(clId)!.children.length > 0
 
             return (
               <g
@@ -453,63 +602,123 @@ function LiveFlowDiagram({
                 onMouseDown={(e) => handleMouseDown(page, e)}
                 onMouseEnter={() => setHovered(page)}
                 onMouseLeave={() => setHovered(null)}
-                style={{ cursor: 'grab' }}
+                onClick={() => {
+                  if (hasOrb) {
+                    setExpandedCluster(expandedCluster === clId ? null : clId)
+                  }
+                }}
+                style={{ cursor: isChild ? 'grab' : hasOrb ? 'pointer' : 'grab' }}
+                opacity={childVisible ? 1 : 0}
               >
-                {/* Outer glow */}
-                <circle cx={pos.x} cy={pos.y} r={nodeSize + 12} fill={`url(#ng-${page})`}>
-                  <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite" />
-                </circle>
-                {/* Node circle */}
-                <circle
-                  cx={pos.x} cy={pos.y} r={nodeSize}
-                  fill={`${meta.color}08`}
-                  stroke={meta.color}
-                  strokeWidth={isHov ? 2 : 1.2}
-                  style={{ transition: 'stroke-width 0.2s ease, r 0.3s ease' }}
-                />
-                {/* Inner dot */}
-                <circle cx={pos.x} cy={pos.y} r={nodeSize * 0.35} fill={meta.color} opacity={isHov ? 0.6 : 0.3}>
-                  <animate attributeName="opacity" values={isHov ? '0.5;0.8;0.5' : '0.2;0.4;0.2'} dur="2.5s" repeatCount="indefinite" />
-                </circle>
-                {/* View count inside */}
-                <text
-                  x={pos.x} y={pos.y + 1}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="white"
-                  fontSize={Math.max(8, nodeSize * 0.45)}
-                  fontWeight="700"
-                  fontFamily="system-ui"
-                  opacity={0.8}
-                >
-                  {views}
-                </text>
-                {/* Label below */}
-                <text
-                  x={pos.x} y={pos.y + nodeSize + 12}
-                  textAnchor="middle"
-                  fill={isHov ? meta.color : 'rgba(255,255,255,0.5)'}
-                  fontSize="9"
-                  fontWeight="600"
-                  fontFamily="system-ui"
-                  style={{ transition: 'fill 0.2s ease' }}
-                >
-                  {meta.label}
-                </text>
-                {/* Percentage below label */}
-                <text
-                  x={pos.x} y={pos.y + nodeSize + 22}
-                  textAnchor="middle"
-                  fill="rgba(255,255,255,0.2)"
-                  fontSize="7"
-                  fontFamily="system-ui"
-                >
-                  {viewPct}%
-                </text>
+                {/* Child node circle */}
+                {isChild && (
+                  <>
+                    <circle cx={pos.x} cy={pos.y} r={nodeSize + 2} fill={`url(#ng-${page})`} />
+                    <circle
+                      cx={pos.x} cy={pos.y} r={nodeSize}
+                      fill={`${nodeColor}18`}
+                      stroke={nodeColor}
+                      strokeWidth={isHov ? 1.2 : 0.5}
+                      style={{ transition: 'stroke-width 0.2s' }}
+                    />
+                    <text
+                      x={pos.x} y={pos.y + 1}
+                      textAnchor="middle" dominantBaseline="middle"
+                      fill="white" fontSize={Math.max(4.5, nodeSize * 0.7)} fontWeight="700" fontFamily="system-ui" opacity="0.85"
+                    >
+                      {views}
+                    </text>
+                    <text
+                      x={pos.x} y={pos.y + nodeSize + 6}
+                      textAnchor="middle" fill={isHov ? nodeColor : 'rgba(255,255,255,0.4)'}
+                      fontSize="5.5" fontWeight="600" fontFamily="system-ui"
+                      style={{ transition: 'fill 0.2s' }}
+                    >
+                      {meta.label}
+                    </text>
+                  </>
+                )}
+
+                {/* Parent node (center of orb OR standalone) */}
+                {!isChild && (
+                  <>
+                    {!hasOrb && (
+                      <>
+                        <circle cx={pos.x} cy={pos.y} r={nodeSize + 8} fill={`url(#ng-${page})`}>
+                          <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite" />
+                        </circle>
+                        <circle
+                          cx={pos.x} cy={pos.y} r={nodeSize}
+                          fill={`${nodeColor}08`}
+                          stroke={nodeColor}
+                          strokeWidth={isHov ? 2 : 1.2}
+                          style={{ transition: 'stroke-width 0.2s' }}
+                        />
+                        <circle cx={pos.x} cy={pos.y} r={nodeSize * 0.35} fill={nodeColor} opacity={isHov ? 0.5 : 0.25}>
+                          <animate attributeName="opacity" values={isHov ? '0.4;0.7;0.4' : '0.15;0.3;0.15'} dur="2.5s" repeatCount="indefinite" />
+                        </circle>
+                      </>
+                    )}
+                    {/* View count + label for parent */}
+                    <text
+                      x={pos.x} y={hasOrb ? pos.y - 4 : pos.y + 1}
+                      textAnchor="middle" dominantBaseline="middle"
+                      fill="white" fontSize={hasOrb ? '16' : Math.max(9, nodeSize * 0.5)}
+                      fontWeight="900" fontFamily="system-ui" opacity="0.9"
+                    >
+                      {views}
+                    </text>
+                    <text
+                      x={pos.x} y={hasOrb ? pos.y + 10 : pos.y + nodeSize + 12}
+                      textAnchor="middle"
+                      fill={isHov ? nodeColor : 'rgba(255,255,255,0.65)'}
+                      fontSize={hasOrb ? '10' : '9'} fontWeight="700" fontFamily="system-ui"
+                      style={{ transition: 'fill 0.2s' }}
+                    >
+                      {meta.label}
+                    </text>
+                    {/* Percentage */}
+                    <text
+                      x={pos.x}
+                      y={hasOrb ? pos.y + 20 : pos.y + nodeSize + 22}
+                      textAnchor="middle" fill="rgba(255,255,255,0.25)"
+                      fontSize="7" fontFamily="system-ui"
+                    >
+                      {viewPct}%
+                    </text>
+                    {/* Expand hint badge */}
+                    {hasOrb && (
+                      <g>
+                        <circle
+                          cx={pos.x + (pos.orbRadius || 50) * 0.65}
+                          cy={pos.y - (pos.orbRadius || 50) * 0.65}
+                          r="8" fill={nodeColor} opacity="0.85"
+                        />
+                        <text
+                          x={pos.x + (pos.orbRadius || 50) * 0.65}
+                          y={pos.y - (pos.orbRadius || 50) * 0.65 + 1}
+                          textAnchor="middle" dominantBaseline="middle"
+                          fill="white" fontSize="6.5" fontWeight="800" fontFamily="system-ui"
+                        >
+                          {clusters.get(clId)!.children.length}
+                        </text>
+                      </g>
+                    )}
+                  </>
+                )}
               </g>
             )
           })}
         </svg>
+      </div>
+
+      {/* Legend */}
+      <div className="px-4 py-2 border-t border-white/5 flex items-center gap-4 text-[9px] text-white/25">
+        <span>Click cluster to expand inner pages</span>
+        <span>·</span>
+        <span>Drag child nodes inside their parent</span>
+        <span>·</span>
+        <span>Hover for flow counts</span>
       </div>
     </div>
   )
@@ -641,31 +850,163 @@ function DeepActivityFeed({ events }: { events: TrackingEvent[] }) {
 
 // ─── Session Flow Trail ──────────────────────────────────────────────
 
+/** Simple inline trail for snapshot previews (max 3 trails, compact) */
 function SessionFlowTrail({ flow, index }: { flow: string[]; index: number }) {
+  const first = getPageMeta(flow[0])
+  const last = getPageMeta(flow[flow.length - 1])
+  const FirstIcon = first.icon
+  const LastIcon = last.icon
   return (
-    <div className="flex items-center gap-1 flex-wrap py-2">
-      <span className="text-[10px] text-white/30 font-mono mr-1">#{index + 1}</span>
-      {flow.map((page, i) => {
-        const meta = getPageMeta(page)
-        const Icon = meta.icon
+    <div className="flex items-center gap-1.5 py-1">
+      <span className="text-[9px] text-white/25 font-mono">#{index + 1}</span>
+      <div className="flex items-center gap-1">
+        <FirstIcon className="w-3 h-3" style={{ color: first.color }} />
+        <span className="text-[10px] font-medium" style={{ color: first.color }}>{first.label}</span>
+      </div>
+      <span className="text-[9px] text-white/20">→ {flow.length - 2 > 0 ? `${flow.length - 2} more →` : '→'}</span>
+      <div className="flex items-center gap-1">
+        <LastIcon className="w-3 h-3" style={{ color: last.color }} />
+        <span className="text-[10px] font-medium" style={{ color: last.color }}>{last.label}</span>
+      </div>
+    </div>
+  )
+}
+
+/** Group identical session flows, sort by frequency */
+function useGroupedFlows(sessionFlows: string[][]) {
+  return useMemo(() => {
+    const map = new Map<string, { flow: string[]; count: number }>()
+    for (const flow of sessionFlows) {
+      const key = flow.join('→')
+      const existing = map.get(key)
+      if (existing) existing.count++
+      else map.set(key, { flow, count: 1 })
+    }
+    return Array.from(map.values()).sort((a, b) => b.count - a.count)
+  }, [sessionFlows])
+}
+
+function SessionTrailsPanel({ sessionFlows }: { sessionFlows: string[][] }) {
+  const grouped = useGroupedFlows(sessionFlows)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [showAll, setShowAll] = useState(false)
+
+  const maxCount = Math.max(1, ...grouped.map((g) => g.count))
+  const visible = showAll ? grouped : grouped.slice(0, 8)
+  const hiddenCount = grouped.length - 8
+
+  if (grouped.length === 0) {
+    return <p className="text-[10px] text-white/25 text-center py-4">Navigate 2+ pages</p>
+  }
+
+  return (
+    <div className="space-y-1">
+      {visible.map((group) => {
+        const key = group.flow.join('→')
+        const isExpanded = expanded === key
+        const first = getPageMeta(group.flow[0])
+        const last = getPageMeta(group.flow[group.flow.length - 1])
+        const FirstIcon = first.icon
+        const LastIcon = last.icon
+        const barWidth = Math.max(8, (group.count / maxCount) * 100)
+
         return (
-          <React.Fragment key={`${page}-${i}`}>
-            {i > 0 && <IconChevronRight className="w-3 h-3 text-white/15 flex-shrink-0" />}
-            <div
-              className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium flex-shrink-0"
-              style={{
-                backgroundColor: `${meta.color}15`,
-                color: meta.color,
-                border: `1px solid ${meta.color}25`,
-              }}
+          <div key={key}>
+            {/* Compact summary row */}
+            <button
+              onClick={() => setExpanded(isExpanded ? null : key)}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition-colors cursor-pointer group text-left"
             >
-              <Icon className="w-3 h-3" />
-              {meta.label}
-            </div>
-          </React.Fragment>
+              {/* Rank / count badge */}
+              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-white/[0.04] flex-shrink-0">
+                <span className="text-[10px] font-bold text-white/50 tabular-nums">{group.count}×</span>
+              </div>
+
+              {/* First → Last summary */}
+              <div className="flex items-center gap-1 flex-1 min-w-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <FirstIcon className="w-3 h-3" style={{ color: first.color }} />
+                  <span className="text-[10px] font-medium text-white/70 truncate max-w-[60px]">{first.label}</span>
+                </div>
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <span className="text-[9px] text-white/20">···</span>
+                  <span className="text-[9px] text-white/25 tabular-nums">{group.flow.length}</span>
+                  <span className="text-[9px] text-white/20">···</span>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <LastIcon className="w-3 h-3" style={{ color: last.color }} />
+                  <span className="text-[10px] font-medium text-white/70 truncate max-w-[60px]">{last.label}</span>
+                </div>
+              </div>
+
+              {/* Frequency bar */}
+              <div className="w-16 h-3 rounded-full bg-white/[0.04] overflow-hidden flex-shrink-0">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${barWidth}%` }}
+                  transition={{ duration: 0.4 }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: `${last.color}60` }}
+                />
+              </div>
+
+              {/* Expand chevron */}
+              <IconChevronDown
+                className={cn(
+                  'w-3 h-3 text-white/20 transition-transform flex-shrink-0',
+                  isExpanded && 'rotate-180'
+                )}
+              />
+            </button>
+
+            {/* Expanded: full trail */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex items-center gap-1 flex-wrap px-2 py-2 ml-8 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                    {group.flow.map((page, i) => {
+                      const meta = getPageMeta(page)
+                      const Icon = meta.icon
+                      return (
+                        <React.Fragment key={`${page}-${i}`}>
+                          {i > 0 && <IconChevronRight className="w-2.5 h-2.5 text-white/15 flex-shrink-0" />}
+                          <div
+                            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium flex-shrink-0"
+                            style={{
+                              backgroundColor: `${meta.color}12`,
+                              color: meta.color,
+                              border: `1px solid ${meta.color}20`,
+                            }}
+                          >
+                            <Icon className="w-2.5 h-2.5" />
+                            {meta.label}
+                          </div>
+                        </React.Fragment>
+                      )
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )
       })}
-      <span className="text-[10px] text-white/20 ml-1">{flow.length} steps</span>
+
+      {/* Show more / less */}
+      {grouped.length > 8 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="w-full text-center py-1.5 text-[10px] font-medium text-white/30 hover:text-white/50 transition-colors cursor-pointer"
+        >
+          {showAll ? 'Show less' : `Show ${hiddenCount} more path${hiddenCount !== 1 ? 's' : ''}`}
+        </button>
+      )}
     </div>
   )
 }
@@ -1162,24 +1503,26 @@ function ActivityTimeline() {
 
 // ─── Quick Stats ─────────────────────────────────────────────────────
 
-function QuickStats({ events, pageStats, flowEdges, sessionFlows }: {
+function QuickStats({ events, pageStats, flowEdges, sessionFlows, uniqueUsers }: {
   events: TrackingEvent[]
   pageStats: PageStat[]
   flowEdges: FlowEdge[]
   sessionFlows: string[][]
+  uniqueUsers: number
 }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   const stats = [
     { label: 'Total Events', value: mounted ? events.length.toLocaleString() : '–', icon: IconBolt, color: '#6366f1' },
+    { label: 'Unique Users', value: mounted ? String(uniqueUsers) : '–', icon: IconUsers, color: '#06b6d4' },
     { label: 'Pages Tracked', value: mounted ? String(pageStats.length) : '–', icon: IconHome, color: '#22c55e' },
     { label: 'Flow Paths', value: mounted ? String(flowEdges.length) : '–', icon: IconArrowRight, color: '#f59e0b' },
     { label: 'Sessions', value: mounted ? String(sessionFlows.length) : '–', icon: IconClock, color: '#ee3536' },
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
       {stats.map((stat, i) => {
         const Icon = stat.icon
         return (
@@ -2756,6 +3099,184 @@ function PredictedFlowVisualizer({ hasData }: { hasData: boolean }) {
 
 // ─── Live Journey Visualizer — same step-by-step view but from real data ────
 
+function ScrollableStepFlow({ children, totalSteps }: { children: React.ReactNode; totalSteps: number }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 4)
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4)
+  }, [])
+
+  useEffect(() => {
+    checkScroll()
+    const el = scrollRef.current
+    if (!el) return
+    el.addEventListener('scroll', checkScroll, { passive: true })
+    const ro = new ResizeObserver(checkScroll)
+    ro.observe(el)
+    return () => { el.removeEventListener('scroll', checkScroll); ro.disconnect() }
+  }, [checkScroll, totalSteps])
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollBy({ left: dir === 'left' ? -270 : 270, behavior: 'smooth' })
+  }
+
+  return (
+    <div className="relative">
+      {/* Left fade + arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-0 bottom-0 z-10 w-12 flex items-center justify-start pl-1 cursor-pointer"
+          style={{ background: 'linear-gradient(to right, #1a1a1a 30%, transparent)' }}
+        >
+          <div className="w-7 h-7 rounded-full bg-white/[0.08] border border-white/10 flex items-center justify-center hover:bg-white/[0.12] transition-colors">
+            <IconChevronRight className="w-3.5 h-3.5 text-white/60 rotate-180" />
+          </div>
+        </button>
+      )}
+
+      {/* Scrollable content */}
+      <div
+        ref={scrollRef}
+        className="flex items-start gap-0 overflow-x-auto scrollbar-hide pb-2"
+      >
+        {children}
+      </div>
+
+      {/* Right fade + arrow */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-0 bottom-0 z-10 w-12 flex items-center justify-end pr-1 cursor-pointer"
+          style={{ background: 'linear-gradient(to left, #1a1a1a 30%, transparent)' }}
+        >
+          <div className="w-7 h-7 rounded-full bg-white/[0.08] border border-white/10 flex items-center justify-center hover:bg-white/[0.12] transition-colors">
+            <IconChevronRight className="w-3.5 h-3.5 text-white/60" />
+          </div>
+        </button>
+      )}
+
+      {/* Step counter hint */}
+      {(canScrollLeft || canScrollRight) && (
+        <div className="absolute bottom-0 right-2 text-[8px] text-white/20">
+          {totalSteps} steps total — scroll →
+        </div>
+      )}
+    </div>
+  )
+}
+
+function JourneySelector({
+  liveJourneys,
+  activeIndex,
+  onSelect,
+}: {
+  liveJourneys: { id: string; flow: string[]; count: number; color: string }[]
+  activeIndex: number
+  onSelect: (i: number) => void
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 4)
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4)
+  }, [])
+
+  useEffect(() => {
+    checkScroll()
+    const el = scrollRef.current
+    if (!el) return
+    el.addEventListener('scroll', checkScroll, { passive: true })
+    const ro = new ResizeObserver(checkScroll)
+    ro.observe(el)
+    return () => { el.removeEventListener('scroll', checkScroll); ro.disconnect() }
+  }, [checkScroll, liveJourneys.length])
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollBy({ left: dir === 'left' ? -220 : 220, behavior: 'smooth' })
+  }
+
+  return (
+    <div className="relative border-b border-white/5">
+      {/* Left fade + arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-0 bottom-0 z-10 w-10 flex items-center justify-start pl-1 cursor-pointer"
+          style={{ background: 'linear-gradient(to right, #1a1a1a 40%, transparent)' }}
+        >
+          <IconChevronRight className="w-4 h-4 text-white/50 rotate-180" />
+        </button>
+      )}
+
+      {/* Scrollable journey tabs */}
+      <div
+        ref={scrollRef}
+        className="flex items-center gap-1.5 px-4 py-3 overflow-x-auto scrollbar-hide"
+      >
+        {liveJourneys.map((j, i) => {
+          const firstMeta = getPageMeta(j.flow[0])
+          const lastMeta = getPageMeta(j.flow[j.flow.length - 1])
+          const Icon = lastMeta.icon
+          const isActive = i === activeIndex
+          return (
+            <button
+              key={j.id}
+              onClick={() => onSelect(i)}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all cursor-pointer flex-shrink-0',
+                isActive ? 'bg-white/[0.06] shadow-sm' : 'hover:bg-white/[0.03]'
+              )}
+              style={isActive ? { border: `1px solid ${j.color}30` } : { border: '1px solid transparent' }}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: `${j.color}${isActive ? '20' : '0a'}`, border: `1px solid ${j.color}${isActive ? '40' : '15'}` }}
+              >
+                <Icon className="w-3.5 h-3.5" style={{ color: j.color, opacity: isActive ? 1 : 0.5 }} />
+              </div>
+              <div className="min-w-0">
+                <div className={cn('text-[10px] font-semibold truncate max-w-[140px]', isActive ? 'text-white' : 'text-white/50')}>
+                  {firstMeta.label} → {lastMeta.label}
+                </div>
+                <div className="text-[9px] text-white/25 flex items-center gap-1.5">
+                  <span>{j.flow.length} steps</span>
+                  <span>·</span>
+                  <span>{j.count}× seen</span>
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Right fade + arrow */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-0 bottom-0 z-10 w-10 flex items-center justify-end pr-1 cursor-pointer"
+          style={{ background: 'linear-gradient(to left, #1a1a1a 40%, transparent)' }}
+        >
+          <IconChevronRight className="w-4 h-4 text-white/50" />
+        </button>
+      )}
+    </div>
+  )
+}
+
 function LiveJourneyVisualizer({ sessionFlows, events }: { sessionFlows: string[][]; events: TrackingEvent[] }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [animatingStep, setAnimatingStep] = useState(0)
@@ -2841,43 +3362,12 @@ function LiveJourneyVisualizer({ sessionFlows, events }: { sessionFlows: string[
         </div>
       </div>
 
-      {/* Journey selector */}
-      <div className="px-4 py-3 border-b border-white/5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-        {liveJourneys.map((j, i) => {
-          const firstMeta = getPageMeta(j.flow[0])
-          const lastMeta = getPageMeta(j.flow[j.flow.length - 1])
-          const Icon = lastMeta.icon
-          const isActive = i === activeIndex
-          return (
-            <button
-              key={j.id}
-              onClick={() => { setActiveIndex(i); setAnimatingStep(0) }}
-              className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all cursor-pointer flex-shrink-0',
-                isActive ? 'bg-white/[0.06] shadow-sm' : 'hover:bg-white/[0.03]'
-              )}
-              style={isActive ? { border: `1px solid ${j.color}30` } : { border: '1px solid transparent' }}
-            >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: `${j.color}${isActive ? '20' : '0a'}`, border: `1px solid ${j.color}${isActive ? '40' : '15'}` }}
-              >
-                <Icon className="w-3.5 h-3.5" style={{ color: j.color, opacity: isActive ? 1 : 0.5 }} />
-              </div>
-              <div className="min-w-0">
-                <div className={cn('text-[10px] font-semibold truncate max-w-[140px]', isActive ? 'text-white' : 'text-white/50')}>
-                  {firstMeta.label} → {lastMeta.label}
-                </div>
-                <div className="text-[9px] text-white/25 flex items-center gap-1.5">
-                  <span>{j.flow.length} steps</span>
-                  <span>·</span>
-                  <span>{j.count}× seen</span>
-                </div>
-              </div>
-            </button>
-          )
-        })}
-      </div>
+      {/* Journey selector — scrollable with arrow buttons */}
+      <JourneySelector
+        liveJourneys={liveJourneys}
+        activeIndex={activeIndex}
+        onSelect={(i) => { setActiveIndex(i); setAnimatingStep(0) }}
+      />
 
       {/* Active journey — animated step-by-step */}
       {activeJourney && (
@@ -2900,7 +3390,7 @@ function LiveJourneyVisualizer({ sessionFlows, events }: { sessionFlows: string[
             </div>
 
             {/* Step-by-step horizontal flow */}
-            <div className="flex items-start gap-0 overflow-x-auto scrollbar-hide pb-2">
+            <ScrollableStepFlow totalSteps={activeJourney.flow.length}>
               <style>{`
                 @keyframes flowPulseLive { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
                 @keyframes tentacleFlowLive { to { stroke-dashoffset: -20; } }
@@ -3000,7 +3490,7 @@ function LiveJourneyVisualizer({ sessionFlows, events }: { sessionFlows: string[
                   </React.Fragment>
                 )
               })}
-            </div>
+            </ScrollableStepFlow>
 
             {/* Step progress bar */}
             <div className="mt-4 flex items-center gap-1">
@@ -3347,6 +3837,333 @@ function DateRangeSelector({ value, onChange, eventCount, totalCount }: {
   )
 }
 
+function UserOverviewPanel({
+  userOverview,
+  selectedUserId,
+  onSelectUser,
+}: {
+  userOverview: ReturnType<typeof useTrackingStore.getState>['getUserOverview'] extends () => infer R ? R : never
+  selectedUserId: string | null
+  onSelectUser: (userId: string | null) => void
+}) {
+  const [showAll, setShowAll] = useState(false)
+  const displayedUsers = showAll ? userOverview.users : userOverview.users.slice(0, 8)
+
+  if (userOverview.totalUniqueUsers === 0) {
+    return (
+      <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="flex items-center gap-2 mb-1">
+          <IconUsers className="w-4 h-4 text-cyan-400" />
+          <h3 className="text-xs font-semibold text-white">Users</h3>
+        </div>
+        <p className="text-[10px] text-white/25 text-center py-4">No user data yet. Navigate the site to generate tracking data.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <IconUsers className="w-4 h-4 text-cyan-400" />
+          <h3 className="text-xs font-semibold text-white">Users</h3>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-bold">{userOverview.totalUniqueUsers}</span>
+        </div>
+        {selectedUserId && (
+          <button
+            onClick={() => onSelectUser(null)}
+            className="text-[9px] text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20"
+          >
+            ✕ Clear Filter
+          </button>
+        )}
+      </div>
+      <p className="text-[10px] text-white/30 mb-3">Each device/browser gets a persistent user ID. Click a user to filter all data to their sessions.</p>
+
+      <div className="space-y-1.5 max-h-[420px] overflow-y-auto scrollbar-hide">
+        {displayedUsers.map((user) => {
+          const isSelected = selectedUserId === user.userId
+          const deviceEmoji = user.device?.device === 'mobile' ? '📱' : user.device?.device === 'tablet' ? '📱' : '💻'
+          const shortId = user.userId.replace('user_', '').slice(0, 12)
+
+          return (
+            <button
+              key={user.userId}
+              onClick={() => onSelectUser(isSelected ? null : user.userId)}
+              className={cn(
+                'w-full text-left p-3 rounded-lg transition-all cursor-pointer border',
+                isSelected
+                  ? 'bg-cyan-500/[0.08] border-cyan-500/20'
+                  : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04] hover:border-white/[0.08]'
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm">{deviceEmoji}</span>
+                    <span className={cn('text-[11px] font-semibold font-mono', isSelected ? 'text-cyan-400' : 'text-white/70')}>
+                      {shortId}
+                    </span>
+                    {user.device && (
+                      <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/[0.05] text-white/35 font-medium">
+                        {user.device.browser} · {user.device.os}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stats row */}
+                  <div className="flex items-center gap-3 text-[9px] text-white/40">
+                    <span><strong className="text-white/55">{user.sessionCount}</strong> session{user.sessionCount !== 1 ? 's' : ''}</span>
+                    <span><strong className="text-white/55">{user.totalPageViews}</strong> page views</span>
+                    <span><strong className="text-white/55">{user.pagesVisited.length}</strong> unique pages</span>
+                    <span><strong className="text-white/55">{user.totalEvents}</strong> events</span>
+                  </div>
+
+                  {/* Top pages pills */}
+                  {user.topPages.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                      {user.topPages.slice(0, 4).map((tp) => {
+                        const meta = getPageMeta(tp.page)
+                        return (
+                          <span
+                            key={tp.page}
+                            className="text-[8px] px-1.5 py-0.5 rounded font-medium"
+                            style={{ backgroundColor: `${meta.color}12`, color: meta.color, border: `1px solid ${meta.color}20` }}
+                          >
+                            {meta.label} ({tp.views})
+                          </span>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Time info */}
+                <div className="text-right flex-shrink-0">
+                  <div className="text-[9px] text-white/25">Last seen</div>
+                  <div className="text-[10px] text-white/50 font-medium">{timeAgo(user.lastSeen)}</div>
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {userOverview.users.length > 8 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="w-full text-center py-2 mt-2 text-[10px] text-white/40 hover:text-white/60 transition-colors cursor-pointer"
+        >
+          {showAll ? 'Show less' : `Show ${userOverview.users.length - 8} more users`}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function FrustrationCard({
+  fs,
+  emoji,
+  color,
+  bg,
+  border,
+  hasDetail,
+}: {
+  fs: ReturnType<typeof useTrackingStore.getState>['getFrustrationScores'] extends () => (infer R)[] ? R : never
+  emoji: string
+  color: string
+  bg: string
+  border: string
+  hasDetail: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="rounded-lg overflow-hidden"
+      style={{ backgroundColor: bg, border: `1px solid ${border}` }}
+    >
+      {/* Clickable header */}
+      <button
+        onClick={() => hasDetail && setExpanded(!expanded)}
+        className={cn(
+          'w-full p-3 text-left transition-colors',
+          hasDetail && 'cursor-pointer hover:bg-white/[0.03]'
+        )}
+      >
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-semibold text-white capitalize">{fs.page}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm">{emoji}</span>
+            {hasDetail && (
+              <IconChevronDown
+                className={cn('w-3 h-3 text-white/30 transition-transform duration-200', expanded && 'rotate-180')}
+              />
+            )}
+          </div>
+        </div>
+        {/* Score bar */}
+        <div className="w-full h-1.5 rounded-full bg-white/[0.06] mb-1.5">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${fs.score}%` }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="h-full rounded-full"
+            style={{ backgroundColor: color }}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-bold tabular-nums" style={{ color }}>{fs.score}/100</span>
+          <span className="text-[8px] text-white/25 capitalize">{fs.label}</span>
+        </div>
+        {/* Summary pills */}
+        {hasDetail && (
+          <div className="mt-2 pt-2 border-t border-white/[0.04] flex flex-wrap gap-1.5">
+            {fs.rageClicks > 0 && (
+              <span className="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-medium">
+                {fs.rageClicks} rage
+              </span>
+            )}
+            {fs.loops > 0 && (
+              <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium">
+                {fs.loops} loops
+              </span>
+            )}
+            {fs.uTurns > 0 && (
+              <span className="text-[8px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 font-medium">
+                {fs.uTurns} U-turns
+              </span>
+            )}
+            {fs.deadClicks > 0 && (
+              <span className="text-[8px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium">
+                {fs.deadClicks} dead
+              </span>
+            )}
+            {!expanded && <span className="text-[8px] text-white/20 ml-auto">tap for details →</span>}
+          </div>
+        )}
+      </button>
+
+      {/* Expanded detail panel */}
+      <AnimatePresence>
+        {expanded && hasDetail && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 pb-3 space-y-3">
+              <div className="h-px bg-white/[0.06]" />
+
+              {/* Rage click targets */}
+              {fs.rageClickDetails.length > 0 && (
+                <div>
+                  <div className="text-[9px] text-red-400/70 font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <span>🖱️</span> Rage Click Targets
+                  </div>
+                  <div className="space-y-1">
+                    {fs.rageClickDetails.map((rc, i) => (
+                      <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-red-500/[0.06] border border-red-500/10">
+                        <div className="w-4 h-4 rounded flex items-center justify-center bg-red-500/15 flex-shrink-0">
+                          <span className="text-[8px] text-red-400 font-bold">{rc.count}</span>
+                        </div>
+                        <span className="text-[10px] text-white/70 font-medium flex-1 min-w-0 truncate">&quot;{rc.target}&quot;</span>
+                        <span className={cn(
+                          'text-[7px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0',
+                          rc.severity === 'extreme' ? 'bg-red-500/15 text-red-400' :
+                          rc.severity === 'moderate' ? 'bg-orange-500/15 text-orange-400' :
+                          'bg-amber-500/15 text-amber-400'
+                        )}>
+                          {rc.severity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Dead click targets */}
+              {fs.deadClickDetails.length > 0 && (
+                <div>
+                  <div className="text-[9px] text-purple-400/70 font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <span>💀</span> Dead Click Targets
+                  </div>
+                  <div className="space-y-1">
+                    {fs.deadClickDetails.map((dc, i) => (
+                      <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-purple-500/[0.06] border border-purple-500/10">
+                        <div className="w-4 h-4 rounded flex items-center justify-center bg-purple-500/15 flex-shrink-0">
+                          <span className="text-[8px] text-purple-400 font-bold">{dc.count}</span>
+                        </div>
+                        <span className="text-[10px] text-white/70 font-medium flex-1 min-w-0 truncate">&quot;{dc.target}&quot;</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* U-turn details */}
+              {fs.uTurnDetails.length > 0 && (
+                <div>
+                  <div className="text-[9px] text-orange-400/70 font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <span>↩️</span> U-Turn Routes
+                  </div>
+                  <div className="space-y-1">
+                    {fs.uTurnDetails.map((ut, i) => (
+                      <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-orange-500/[0.06] border border-orange-500/10">
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          <span className="text-[10px] font-medium capitalize" style={{ color: getPageMeta(ut.from).color }}>
+                            {getPageMeta(ut.from).label}
+                          </span>
+                          <span className="text-[9px] text-white/20">→</span>
+                          <span className="text-[10px] font-medium capitalize" style={{ color: getPageMeta(ut.to).color }}>
+                            {getPageMeta(ut.to).label}
+                          </span>
+                          <span className="text-[9px] text-white/20">→ back</span>
+                        </div>
+                        <span className="text-[9px] text-orange-400/70 font-semibold flex-shrink-0">{ut.count}×</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Loop details */}
+              {fs.loopDetails.length > 0 && (
+                <div>
+                  <div className="text-[9px] text-amber-400/70 font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <span>🔄</span> Navigation Loops
+                  </div>
+                  <div className="space-y-1">
+                    {fs.loopDetails.map((lp, i) => (
+                      <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-amber-500/[0.06] border border-amber-500/10">
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {lp.pages.map((p, pi) => (
+                            <React.Fragment key={pi}>
+                              {pi > 0 && <span className="text-[9px] text-amber-400/40">↔</span>}
+                              <span className="text-[10px] font-medium capitalize" style={{ color: getPageMeta(p).color }}>
+                                {getPageMeta(p).label}
+                              </span>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                        <span className="text-[9px] text-amber-400/70 font-semibold flex-shrink-0">{lp.occurrences}×</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 export default function JourneyMapPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('sitemap')
@@ -3357,6 +4174,7 @@ export default function JourneyMapPage() {
   const [dateFilter, setDateFilter] = useState<DateRangeFilter>({ range: 'all' })
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date())
   const [, setRefreshTick] = useState(0) // forces re-render for "ago" text
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null) // null = all users
 
   // Hydration guard — store is persisted in localStorage so SSR has empty state
   const [hydrated, setHydrated] = useState(false)
@@ -3418,12 +4236,20 @@ export default function JourneyMapPage() {
   const getDeadClicks = useTrackingStore((s) => s.getDeadClicks)
   const getUTurns = useTrackingStore((s) => s.getUTurns)
   const getFrustrationScores = useTrackingStore((s) => s.getFrustrationScores)
+  const getUserOverview = useTrackingStore((s) => s.getUserOverview)
 
-  // Apply date range filter to events
+  // User overview (always computed from all events, not filtered)
+  const userOverview = useMemo(() => hydrated ? getUserOverview() : { totalUniqueUsers: 0, users: [] }, [hydrated, allEvents, getUserOverview])
+
+  // Apply date range filter + optional user filter to events
   const events = useMemo(() => {
     if (!hydrated) return []
-    return filterEventsByDateRange(allEvents, dateFilter)
-  }, [hydrated, allEvents, dateFilter])
+    let filtered = filterEventsByDateRange(allEvents, dateFilter)
+    if (selectedUserId) {
+      filtered = filtered.filter((e) => e.userId === selectedUserId)
+    }
+    return filtered
+  }, [hydrated, allEvents, dateFilter, selectedUserId])
 
   // Compute filtered stats from filtered events
   const pageStats = useMemo(() => hydrated ? computePageStats(events) : [], [hydrated, events])
@@ -3582,13 +4408,71 @@ export default function JourneyMapPage() {
         </motion.div>
 
         <div className="mb-6">
-          <QuickStats events={events} pageStats={pageStats} flowEdges={flowEdges} sessionFlows={sessionFlows} />
+          <QuickStats events={events} pageStats={pageStats} flowEdges={flowEdges} sessionFlows={sessionFlows} uniqueUsers={userOverview.totalUniqueUsers} />
         </div>
 
-        {/* Global Date Range Filter */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Global Date Range Filter + User Filter */}
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <DateRangeSelector value={dateFilter} onChange={setDateFilter} eventCount={events.length} totalCount={allEvents.length} />
+
+          {/* User filter */}
+          {userOverview.totalUniqueUsers > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-[10px] text-white/40">
+                <IconUsers className="w-3.5 h-3.5" />
+                <span className="font-semibold text-white/60">{userOverview.totalUniqueUsers}</span>
+                <span>unique user{userOverview.totalUniqueUsers !== 1 ? 's' : ''}</span>
+              </div>
+              <select
+                value={selectedUserId || ''}
+                onChange={(e) => setSelectedUserId(e.target.value || null)}
+                className="h-7 px-2 rounded-md bg-white/[0.05] border border-white/10 text-[10px] text-white/70 outline-none focus:border-white/20 cursor-pointer appearance-none"
+                style={{ minWidth: 140 }}
+              >
+                <option value="">All Users</option>
+                {userOverview.users.map((u) => (
+                  <option key={u.userId} value={u.userId}>
+                    {u.device?.device === 'mobile' ? '📱' : u.device?.device === 'tablet' ? '📱' : '💻'}{' '}
+                    {u.userId.slice(0, 15)}… ({u.sessionCount} session{u.sessionCount !== 1 ? 's' : ''})
+                  </option>
+                ))}
+              </select>
+              {selectedUserId && (
+                <button
+                  onClick={() => setSelectedUserId(null)}
+                  className="text-[9px] text-white/30 hover:text-white/60 transition-colors cursor-pointer px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]"
+                >
+                  ✕ Clear
+                </button>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Active user filter banner */}
+        {selectedUserId && (() => {
+          const user = userOverview.users.find((u) => u.userId === selectedUserId)
+          if (!user) return null
+          const deviceEmoji = user.device?.device === 'mobile' ? '📱' : user.device?.device === 'tablet' ? '📱' : '💻'
+          return (
+            <div className="mb-4 flex items-center gap-3 px-4 py-2.5 rounded-lg bg-cyan-500/[0.06] border border-cyan-500/15">
+              <span className="text-sm">{deviceEmoji}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] font-semibold text-cyan-400">Viewing single user:</span>
+                <span className="text-[11px] text-white/60 ml-1.5 font-mono">{selectedUserId.replace('user_', '').slice(0, 12)}</span>
+                <span className="text-[10px] text-white/30 ml-2">
+                  {user.device?.browser} · {user.device?.os} · {user.sessionCount} session{user.sessionCount !== 1 ? 's' : ''} · {user.totalEvents} events
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedUserId(null)}
+                className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-medium"
+              >
+                Show All Users
+              </button>
+            </div>
+          )
+        })()}
 
         {/* Tabs */}
         <div className="flex items-center gap-1 mb-6 border-b border-white/10 pb-px">
@@ -3799,21 +4683,15 @@ export default function JourneyMapPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <ActivityTimeline />
 
-                {/* Session Trails */}
+                {/* Session Trails — grouped by frequency */}
                 <div className="rounded-xl border border-white/[0.06] p-4 flex flex-col" style={{ backgroundColor: '#1a1a1a' }}>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-[11px] font-semibold text-white">Session Trails</h3>
-                    <span className="text-[9px] text-white/25">{sessionFlows.length}</span>
+                    <h3 className="text-[11px] font-semibold text-white">Top Journeys</h3>
+                    <span className="text-[9px] text-white/25">{sessionFlows.length} session{sessionFlows.length !== 1 ? 's' : ''}</span>
                   </div>
-                  {sessionFlows.length === 0 ? (
-                    <p className="text-[10px] text-white/25 text-center py-4">Navigate 2+ pages</p>
-                  ) : (
-                    <div className="space-y-0 divide-y divide-white/5 flex-1 overflow-y-auto scrollbar-hide">
-                      {sessionFlows.slice(0, 20).map((flow, i) => (
-                        <SessionFlowTrail key={i} flow={flow} index={i} />
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex-1 overflow-y-auto scrollbar-hide max-h-[400px]">
+                    <SessionTrailsPanel sessionFlows={sessionFlows} />
+                  </div>
                 </div>
 
                 {/* Top Actions */}
@@ -3940,64 +4818,23 @@ export default function JourneyMapPage() {
                     {/* Score overview */}
                     <div>
                       <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2.5">Page Frustration Scores</div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="space-y-2">
                         {frustrationScores.map((fs) => {
                           const emojiMap = { happy: '😊', neutral: '😐', frustrated: '😣', rage: '🤬' }
                           const colorMap = { happy: '#22c55e', neutral: '#64748b', frustrated: '#f59e0b', rage: '#ef4444' }
                           const bgMap = { happy: 'rgba(34,197,94,0.06)', neutral: 'rgba(255,255,255,0.02)', frustrated: 'rgba(245,158,11,0.06)', rage: 'rgba(239,68,68,0.08)' }
                           const borderMap = { happy: 'rgba(34,197,94,0.15)', neutral: 'rgba(255,255,255,0.06)', frustrated: 'rgba(245,158,11,0.15)', rage: 'rgba(239,68,68,0.2)' }
+                          const hasDetail = fs.rageClicks > 0 || fs.loops > 0 || fs.uTurns > 0 || fs.deadClicks > 0
                           return (
-                            <motion.div
+                            <FrustrationCard
                               key={fs.page}
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="rounded-lg p-3"
-                              style={{ backgroundColor: bgMap[fs.label], border: `1px solid ${borderMap[fs.label]}` }}
-                            >
-                              <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[11px] font-semibold text-white capitalize">{fs.page}</span>
-                                <span className="text-sm">{emojiMap[fs.label]}</span>
-                              </div>
-                              {/* Score bar */}
-                              <div className="w-full h-1.5 rounded-full bg-white/[0.06] mb-1.5">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${fs.score}%` }}
-                                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                                  className="h-full rounded-full"
-                                  style={{ backgroundColor: colorMap[fs.label] }}
-                                />
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-[9px] font-bold tabular-nums" style={{ color: colorMap[fs.label] }}>{fs.score}/100</span>
-                                <span className="text-[8px] text-white/25 capitalize">{fs.label}</span>
-                              </div>
-                              {/* Breakdown */}
-                              {(fs.rageClicks > 0 || fs.loops > 0 || fs.uTurns > 0 || fs.deadClicks > 0) && (
-                                <div className="mt-2 pt-2 border-t border-white/[0.04] flex flex-wrap gap-1.5">
-                                  {fs.rageClicks > 0 && (
-                                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-medium">
-                                      {fs.rageClicks} rage
-                                    </span>
-                                  )}
-                                  {fs.loops > 0 && (
-                                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium">
-                                      {fs.loops} loops
-                                    </span>
-                                  )}
-                                  {fs.uTurns > 0 && (
-                                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 font-medium">
-                                      {fs.uTurns} U-turns
-                                    </span>
-                                  )}
-                                  {fs.deadClicks > 0 && (
-                                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium">
-                                      {fs.deadClicks} dead
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </motion.div>
+                              fs={fs}
+                              emoji={emojiMap[fs.label]}
+                              color={colorMap[fs.label]}
+                              bg={bgMap[fs.label]}
+                              border={borderMap[fs.label]}
+                              hasDetail={hasDetail}
+                            />
                           )
                         })}
                       </div>
@@ -4316,6 +5153,13 @@ export default function JourneyMapPage() {
 
               {/* Device & Browser Stats */}
               <DeviceBrowserStats />
+
+              {/* User Overview */}
+              <UserOverviewPanel
+                userOverview={userOverview}
+                selectedUserId={selectedUserId}
+                onSelectUser={setSelectedUserId}
+              />
 
               {/* Funnel Drop-Off */}
               <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>

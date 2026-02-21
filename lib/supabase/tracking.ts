@@ -26,10 +26,11 @@ export async function insertTrackingEvents(
     page: e.page,
     target: e.target,
     label: e.label || null,
-    // Store deviceInfo inside meta so it round-trips through Supabase
+    // Store deviceInfo and userId inside meta so they round-trip through Supabase
     meta: {
       ...(e.meta || {}),
       ...(e.deviceInfo ? { _deviceInfo: e.deviceInfo } : {}),
+      ...(e.userId ? { _userId: e.userId } : {}),
     },
     session_id: e.sessionId || extra?.sessionId || null,
     user_agent: e.deviceInfo?.userAgent || extra?.userAgent || null,
@@ -89,8 +90,9 @@ export async function queryTrackingEvents(options: {
   const events: TrackingEvent[] = (data || []).map((row) => {
     const meta = row.meta || {}
     const deviceInfo = meta._deviceInfo || undefined
-    // Remove internal _deviceInfo from meta so it doesn't leak into display
-    const { _deviceInfo, ...cleanMeta } = meta
+    const userId = meta._userId || undefined
+    // Remove internal fields from meta so they don't leak into display
+    const { _deviceInfo, _userId, ...cleanMeta } = meta
     return {
       id: row.id,
       ts: row.ts,
@@ -100,6 +102,7 @@ export async function queryTrackingEvents(options: {
       label: row.label || undefined,
       meta: Object.keys(cleanMeta).length > 0 ? cleanMeta : undefined,
       sessionId: row.session_id || undefined,
+      userId,
       deviceInfo,
     }
   })
@@ -126,7 +129,8 @@ export async function fetchAllRemoteEvents(limit = 5000): Promise<TrackingEvent[
   return data.map((row) => {
     const meta = row.meta || {}
     const deviceInfo = meta._deviceInfo || undefined
-    const { _deviceInfo, ...cleanMeta } = meta
+    const userId = meta._userId || undefined
+    const { _deviceInfo, _userId, ...cleanMeta } = meta
     return {
       id: row.id,
       ts: row.ts,
@@ -136,6 +140,7 @@ export async function fetchAllRemoteEvents(limit = 5000): Promise<TrackingEvent[
       label: row.label || undefined,
       meta: Object.keys(cleanMeta).length > 0 ? cleanMeta : undefined,
       sessionId: row.session_id || undefined,
+      userId,
       deviceInfo,
     }
   })

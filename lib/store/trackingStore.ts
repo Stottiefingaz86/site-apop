@@ -110,7 +110,7 @@ function detectDevice(): DeviceInfo {
   }
 }
 
-// Stable session ID (persists for browser tab lifetime)
+// Stable session ID (persists for browser tab lifetime — sessionStorage)
 let _sessionId: string | null = null
 function getSessionId(): string {
   if (!_sessionId) {
@@ -123,6 +123,21 @@ function getSessionId(): string {
       : 'server'
   }
   return _sessionId
+}
+
+// Persistent user ID (survives across sessions — localStorage)
+let _userId: string | null = null
+function getUserId(): string {
+  if (!_userId) {
+    _userId = typeof window !== 'undefined'
+      ? (localStorage.getItem('tracking_user_id') || (() => {
+          const id = `user_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+          localStorage.setItem('tracking_user_id', id)
+          return id
+        })())
+      : 'anonymous'
+  }
+  return _userId
 }
 
 // ─── Types ───────────────────────────────────────────────
@@ -144,6 +159,8 @@ export interface TrackingEvent {
   meta?: Record<string, string | number | boolean>
   /** Session ID for grouping events */
   sessionId?: string
+  /** Persistent user ID (survives across sessions) */
+  userId?: string
   /** Device info snapshot */
   deviceInfo?: DeviceInfo
 }
@@ -306,7 +323,7 @@ interface TrackingState {
   snapshots: FlowSnapshot[]
 
   // ── Actions ─────────────────────────────────────────
-  track: (event: Omit<TrackingEvent, 'id' | 'ts' | 'sessionId' | 'deviceInfo'>) => void
+  track: (event: Omit<TrackingEvent, 'id' | 'ts' | 'sessionId' | 'userId' | 'deviceInfo'>) => void
   setTracking: (on: boolean) => void
   clearEvents: () => void
   mergeRemoteEvents: (remoteEvents: TrackingEvent[]) => void
@@ -347,14 +364,39 @@ interface TrackingState {
   getDeadClicks: () => { target: string; page: string; count: number }[]
   /** Detect u-turns — user navigates to a page then immediately goes back */
   getUTurns: () => { from: string; to: string; count: number; pctOfTraffic: number }[]
-  /** Overall frustration score 0-100 per page */
-  getFrustrationScores: () => { page: string; score: number; rageClicks: number; loops: number; deadClicks: number; uTurns: number; label: 'happy' | 'neutral' | 'frustrated' | 'rage' }[]
+  /** Overall frustration score 0-100 per page, with element-level detail */
+  getFrustrationScores: () => {
+    page: string; score: number; rageClicks: number; loops: number; deadClicks: number; uTurns: number; label: 'happy' | 'neutral' | 'frustrated' | 'rage'
+    rageClickDetails: { target: string; count: number; severity: 'mild' | 'moderate' | 'extreme' }[]
+    deadClickDetails: { target: string; count: number }[]
+    uTurnDetails: { from: string; to: string; count: number }[]
+    loopDetails: { pages: string[]; occurrences: number }[]
+  }[]
 
   // ── Device & Session analytics ──────────────────────
   /** Breakdown of browsers, devices, and OS across sessions */
   getDeviceStats: () => { browsers: { name: string; count: number; pct: number }[]; devices: { name: string; count: number; pct: number }[]; os: { name: string; count: number; pct: number }[]; screens: { resolution: string; count: number }[] }
   /** Per-session details: pages visited, device, duration, event count */
   getSessionDetails: () => { sessionId: string; device: DeviceInfo | null; eventCount: number; pages: string[]; startTime: string; endTime: string; durationMs: number }[]
+
+  // ── User analytics ──────────────────────────────────
+  /** Get unique user overview: list of users with their sessions, pages, device, etc. */
+  getUserOverview: () => {
+    totalUniqueUsers: number
+    users: {
+      userId: string
+      sessionCount: number
+      totalEvents: number
+      totalPageViews: number
+      pagesVisited: string[]
+      topPages: { page: string; views: number }[]
+      device: DeviceInfo | null
+      firstSeen: string
+      lastSeen: string
+      lastPage: string
+      sessionFlows: string[][]
+    }[]
+  }
 }
 
 const MAX_EVENTS = 5000
@@ -425,6 +467,7 @@ export const useTrackingStore = create<TrackingState>()(
           id: `evt_${Date.now()}_${++eventCounter}`,
           ts: new Date().toISOString(),
           sessionId: getSessionId(),
+          userId: getUserId(),
           deviceInfo: detectDevice(),
         }
         // Store locally (localStorage via zustand persist)
@@ -1255,10 +1298,14 @@ export const useTrackingStore = create<TrackingState>()(
         const pageStats = state.getPageStats()
 
         return pageStats.map((ps) => {
-          const pageRage = rageClicks.filter((r) => r.page === ps.page).reduce((s, r) => s + r.count, 0)
-          const pageLoops = loops.filter((l) => l.pages.includes(ps.page)).reduce((s, l) => s + l.occurrences, 0)
-          const pageDead = deadClicks.filter((d) => d.page === ps.page).reduce((s, d) => s + d.count, 0)
-          const pageUTurns = uTurns.filter((u) => u.from === ps.page || u.to === ps.page).reduce((s, u) => s + u.count, 0)
+          const pageRageItems = rageClicks.filter((r) => r.page === ps.page)
+          const pageRage = pageRageItems.reduce((s, r) => s + r.count, 0)
+          const pageLoopItems = loops.filter((l) => l.pages.includes(ps.page))
+          const pageLoops = pageLoopItems.reduce((s, l) => s + l.occurrences, 0)
+          const pageDeadItems = deadClicks.filter((d) => d.page === ps.page)
+          const pageDead = pageDeadItems.reduce((s, d) => s + d.count, 0)
+          const pageUTurnItems = uTurns.filter((u) => u.from === ps.page || u.to === ps.page)
+          const pageUTurns = pageUTurnItems.reduce((s, u) => s + u.count, 0)
 
           // Weighted frustration score (0-100)
           const rawScore = (pageRage * 5) + (pageLoops * 10) + (pageDead * 3) + (pageUTurns * 4)
@@ -1266,7 +1313,15 @@ export const useTrackingStore = create<TrackingState>()(
 
           const label = score >= 70 ? 'rage' : score >= 40 ? 'frustrated' : score >= 15 ? 'neutral' : 'happy'
 
-          return { page: ps.page, score, rageClicks: pageRage, loops: pageLoops, deadClicks: pageDead, uTurns: pageUTurns, label: label as 'happy' | 'neutral' | 'frustrated' | 'rage' }
+          return {
+            page: ps.page, score, rageClicks: pageRage, loops: pageLoops, deadClicks: pageDead, uTurns: pageUTurns,
+            label: label as 'happy' | 'neutral' | 'frustrated' | 'rage',
+            // Element-level detail
+            rageClickDetails: pageRageItems.map((r) => ({ target: r.target, count: r.count, severity: r.severity })).sort((a, b) => b.count - a.count),
+            deadClickDetails: pageDeadItems.map((d) => ({ target: d.target, count: d.count })).sort((a, b) => b.count - a.count),
+            uTurnDetails: pageUTurnItems.map((u) => ({ from: u.from, to: u.to, count: u.count })).sort((a, b) => b.count - a.count),
+            loopDetails: pageLoopItems.map((l) => ({ pages: l.pages, occurrences: l.occurrences })).sort((a, b) => b.occurrences - a.occurrences),
+          }
         })
         .sort((a, b) => b.score - a.score)
       },
@@ -1344,6 +1399,70 @@ export const useTrackingStore = create<TrackingState>()(
             }
           })
           .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+      },
+
+      // ── User overview analytics ────────────────────
+      getUserOverview: () => {
+        const events = get().events
+
+        // Group events by userId
+        const userMap = new Map<string, TrackingEvent[]>()
+        for (const e of events) {
+          const uid = e.userId || 'unknown'
+          if (!userMap.has(uid)) userMap.set(uid, [])
+          userMap.get(uid)!.push(e)
+        }
+
+        const users = Array.from(userMap.entries()).map(([userId, userEvents]) => {
+          const sorted = [...userEvents].sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
+
+          // Count unique sessions
+          const sessionIds = new Set(sorted.map((e) => e.sessionId).filter(Boolean))
+
+          // Page views
+          const pageViews = sorted.filter((e) => e.type === 'page_view')
+          const pageCountMap = new Map<string, number>()
+          for (const pv of pageViews) {
+            pageCountMap.set(pv.target, (pageCountMap.get(pv.target) || 0) + 1)
+          }
+          const topPages = Array.from(pageCountMap.entries())
+            .map(([page, views]) => ({ page, views }))
+            .sort((a, b) => b.views - a.views)
+
+          // Session flows for this user
+          const sessionFlows: string[][] = [[]]
+          let lastTime = pageViews.length > 0 ? new Date(pageViews[0].ts).getTime() : 0
+          for (const e of pageViews) {
+            const t = new Date(e.ts).getTime()
+            if (t - lastTime > 5 * 60 * 1000) sessionFlows.push([])
+            const current = sessionFlows[sessionFlows.length - 1]
+            if (current[current.length - 1] !== e.target) current.push(e.target)
+            lastTime = t
+          }
+          const validFlows = sessionFlows.filter((s) => s.length > 1)
+
+          // Latest device info
+          const device = sorted.find((e) => e.deviceInfo)?.deviceInfo || null
+
+          return {
+            userId,
+            sessionCount: sessionIds.size,
+            totalEvents: userEvents.length,
+            totalPageViews: pageViews.length,
+            pagesVisited: [...new Set(pageViews.map((e) => e.target))],
+            topPages: topPages.slice(0, 5),
+            device,
+            firstSeen: sorted[0]?.ts || '',
+            lastSeen: sorted[sorted.length - 1]?.ts || '',
+            lastPage: pageViews.length > 0 ? pageViews[pageViews.length - 1].target : '',
+            sessionFlows: validFlows,
+          }
+        }).sort((a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime())
+
+        return {
+          totalUniqueUsers: users.length,
+          users,
+        }
       },
     }),
     {
