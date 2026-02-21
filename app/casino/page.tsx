@@ -9454,7 +9454,7 @@ function NavTestPageContent() {
                         setTimeout(() => {
                           setIsDepositLoading(false)
                           setShowDepositConfirmation(true)
-                          trackAction('deposit-complete', `Deposit $${useManualAmount ? manualAmountValue : depositAmount}`, { amount: useManualAmount ? Number(manualAmountValue) : depositAmount, method: selectedPaymentMethod, section: 'deposit-drawer' })
+                          trackAction('deposit-complete', `Deposit $${depositAmount}`, { amount: depositAmount, method: selectedPaymentMethod, section: 'deposit-drawer' })
                           
                           // Start with loading state for 'started'
                           setStepLoading({started: true, processing: false, almost: false, complete: false})
