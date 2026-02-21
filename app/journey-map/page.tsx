@@ -34,13 +34,22 @@ import {
   IconArrowDown,
   IconArrowUp,
   IconCalendar,
+  IconDeviceMobile,
+  IconDeviceDesktop,
+  IconBrowser,
+  IconReceipt,
+  IconStar,
+  IconDiamond,
+  IconPlayCard,
+  IconTarget,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
-import { useTrackingStore, type FlowSnapshot, type FlowEdge, type PageStat, type TrackingEvent, type DateRange, type DateRangeFilter, filterEventsByDateRange, computePageStats, computeFlowEdges, computeTopActions, computeSessionFlows } from '@/lib/store/trackingStore'
+import { useTrackingStore, type FlowSnapshot, type FlowEdge, type PageStat, type TrackingEvent, type DateRange, type DateRangeFilter, type DeviceInfo, filterEventsByDateRange, computePageStats, computeFlowEdges, computeTopActions, computeSessionFlows } from '@/lib/store/trackingStore'
 
 // ─── Page color & icon map ───────────────────────────────────────────
 
 const PAGE_META: Record<string, { color: string; icon: React.ElementType; label: string }> = {
+  // ── Core pages ──
   home:             { color: '#6366f1', icon: IconHome,             label: 'Home' },
   casino:           { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Casino' },
   sports:           { color: '#22c55e', icon: IconBallFootball,     label: 'Sports' },
@@ -56,10 +65,45 @@ const PAGE_META: Record<string, { color: string; icon: React.ElementType; label:
   'game-launch':    { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Game' },
   library:          { color: '#8b5cf6', icon: IconEye,              label: 'Library' },
   'journey-map':    { color: '#ec4899', icon: IconClick,            label: 'Journey Map' },
+  // ── Casino sub-nav ──
+  'casino/for-you':     { color: '#a855f7', icon: IconStar,              label: 'For You' },
+  'casino/slots':       { color: '#a855f7', icon: IconDeviceGamepad2,    label: 'Slots' },
+  'casino/bonus-buys':  { color: '#a855f7', icon: IconDiamond,           label: 'Bonus Buys' },
+  'casino/megaways':    { color: '#a855f7', icon: IconBolt,              label: 'Megaways' },
+  'casino/originals':   { color: '#a855f7', icon: IconStar,              label: 'Originals' },
+  'casino/blackjack':   { color: '#a855f7', icon: IconPlayCard,          label: 'Blackjack' },
+  'casino/live':        { color: '#ef4444', icon: IconFlame,             label: 'Live Casino' },
+  'casino/jackpots':    { color: '#fbbf24', icon: IconCrown,             label: 'Jackpots' },
+  'casino/new':         { color: '#22c55e', icon: IconBolt,              label: 'New Games' },
+  'casino/early':       { color: '#a855f7', icon: IconEye,               label: 'Early Access' },
+  'casino/staff-picks': { color: '#a855f7', icon: IconStar,              label: 'Staff Picks' },
+  'casino/exclusive':   { color: '#fbbf24', icon: IconDiamond,           label: 'Exclusive' },
+  // ── Sports sub-nav ──
+  'my-bets':            { color: '#06b6d4', icon: IconReceipt,           label: 'My Bets' },
+  'bet-placed':         { color: '#22c55e', icon: IconCheck,             label: 'Bet Placed' },
+  'sports/events':      { color: '#22c55e', icon: IconBallFootball,      label: 'Events' },
+  'sports/live':        { color: '#ef4444', icon: IconFlame,             label: 'Live' },
+  'sports/promos':      { color: '#fbbf24', icon: IconTicket,            label: 'Promos' },
+  'sports/boosts':      { color: '#f97316', icon: IconBolt,              label: 'Boosts' },
 }
 
+// ── Smart page meta lookup — handles exact matches and prefix/parent fallbacks ──
 function getPageMeta(page: string) {
-  return PAGE_META[page] || { color: '#64748b', icon: IconCircleCheck, label: page }
+  // Exact match
+  if (PAGE_META[page]) return PAGE_META[page]
+  // For dynamic sport sub-pages like "sports/football" — capitalize and use sports color
+  if (page.startsWith('sports/')) {
+    const sportName = page.split('/')[1]
+    const label = sportName.charAt(0).toUpperCase() + sportName.slice(1).replace(/-/g, ' ')
+    return { color: '#22c55e', icon: IconBallFootball, label }
+  }
+  // For dynamic casino sub-pages not in the map
+  if (page.startsWith('casino/')) {
+    const subName = page.split('/')[1]
+    const label = subName.charAt(0).toUpperCase() + subName.slice(1).replace(/-/g, ' ')
+    return { color: '#a855f7', icon: IconDeviceGamepad2, label }
+  }
+  return { color: '#64748b', icon: IconCircleCheck, label: page }
 }
 
 // ─── Relative time helper ────────────────────────────────────────────
@@ -3046,6 +3090,187 @@ function PredictedFlowsTab() {
 
 // ─── Main page tabs ──────────────────────────────────────────────────
 
+// ─── Device & Browser Stats Panel ─────────────────────────────────────
+
+function DeviceBrowserStats() {
+  const getDeviceStats = useTrackingStore((s) => s.getDeviceStats)
+  const getSessionDetails = useTrackingStore((s) => s.getSessionDetails)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const stats = mounted ? getDeviceStats() : null
+  const sessions = mounted ? getSessionDetails() : []
+  const totalSessions = sessions.length
+
+  if (!stats || totalSessions === 0) {
+    return (
+      <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="flex items-center gap-2 mb-2">
+          <IconDeviceMobile className="w-4 h-4 text-blue-400" />
+          <h3 className="text-xs font-semibold text-white">Device & Browser Analytics</h3>
+        </div>
+        <p className="text-[10px] text-white/25 text-center py-4">Browse the site to generate device data</p>
+      </div>
+    )
+  }
+
+  const deviceColors: Record<string, string> = { mobile: '#f97316', tablet: '#a855f7', desktop: '#22c55e' }
+  const browserColors: Record<string, string> = { Chrome: '#4285F4', Safari: '#06b6d4', Firefox: '#f97316', Edge: '#22c55e', Opera: '#ef4444', unknown: '#64748b' }
+  const osColors: Record<string, string> = { iOS: '#64748b', Android: '#22c55e', Windows: '#4285F4', macOS: '#a855f7', Linux: '#f97316', unknown: '#64748b' }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Device + Browser + OS Breakdown */}
+      <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="flex items-center gap-2 mb-1">
+          <IconDeviceMobile className="w-4 h-4 text-blue-400" />
+          <h3 className="text-xs font-semibold text-white">Device & Browser</h3>
+        </div>
+        <p className="text-[10px] text-white/30 mb-4">{totalSessions} session{totalSessions !== 1 ? 's' : ''} tracked</p>
+
+        {/* Device type bar */}
+        <div className="mb-4">
+          <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2">Device Type</div>
+          <div className="flex items-center gap-1 h-6 rounded-lg overflow-hidden bg-white/[0.03]">
+            {stats.devices.map((d) => (
+              <motion.div
+                key={d.name}
+                initial={{ width: 0 }}
+                animate={{ width: `${d.pct}%` }}
+                transition={{ duration: 0.5 }}
+                className="h-full flex items-center justify-center text-[9px] font-bold text-white/90"
+                style={{ backgroundColor: deviceColors[d.name] || '#64748b', minWidth: d.pct > 5 ? undefined : 0 }}
+                title={`${d.name}: ${d.pct}%`}
+              >
+                {d.pct > 10 && `${d.name} ${d.pct}%`}
+              </motion.div>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 mt-2">
+            {stats.devices.map((d) => (
+              <div key={d.name} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: deviceColors[d.name] || '#64748b' }} />
+                <span className="text-[10px] text-white/50 capitalize">{d.name}</span>
+                <span className="text-[10px] text-white/70 font-semibold">{d.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Browser breakdown */}
+        <div className="mb-4">
+          <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2">Browser</div>
+          <div className="space-y-1.5">
+            {stats.browsers.map((b) => (
+              <div key={b.name} className="flex items-center gap-2">
+                <IconBrowser className="w-3 h-3" style={{ color: browserColors[b.name] || '#64748b' }} />
+                <span className="text-[11px] text-white font-medium w-16">{b.name}</span>
+                <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${b.pct}%` }}
+                    transition={{ duration: 0.5 }}
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: browserColors[b.name] || '#64748b' }}
+                  />
+                </div>
+                <span className="text-[10px] text-white/50 tabular-nums w-12 text-right">{b.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* OS breakdown */}
+        <div>
+          <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2">Operating System</div>
+          <div className="space-y-1.5">
+            {stats.os.map((o) => (
+              <div key={o.name} className="flex items-center gap-2">
+                <IconDeviceDesktop className="w-3 h-3" style={{ color: osColors[o.name] || '#64748b' }} />
+                <span className="text-[11px] text-white font-medium w-16">{o.name}</span>
+                <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${o.pct}%` }}
+                    transition={{ duration: 0.5 }}
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: osColors[o.name] || '#64748b' }}
+                  />
+                </div>
+                <span className="text-[10px] text-white/50 tabular-nums w-12 text-right">{o.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Session Details */}
+      <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="flex items-center gap-2 mb-1">
+          <IconClock className="w-4 h-4 text-blue-400" />
+          <h3 className="text-xs font-semibold text-white">Session Details</h3>
+        </div>
+        <p className="text-[10px] text-white/30 mb-4">Per-session breakdown with device, pages visited, and duration</p>
+
+        <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
+          {sessions.slice(0, 20).map((sess, i) => {
+            const durationStr = sess.durationMs < 60000
+              ? `${Math.round(sess.durationMs / 1000)}s`
+              : `${Math.round(sess.durationMs / 60000)}m`
+            const deviceIcon = sess.device?.device === 'mobile' ? '📱' : sess.device?.device === 'tablet' ? '📱' : '🖥️'
+            return (
+              <motion.div
+                key={sess.sessionId}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="rounded-lg p-3 bg-white/[0.02] border border-white/[0.04]"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{deviceIcon}</span>
+                    <span className="text-[10px] text-white/50 font-mono">{sess.sessionId.slice(0, 16)}…</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-white/30">{sess.eventCount} events</span>
+                    <span className="text-[10px] text-white/50 font-semibold">{durationStr}</span>
+                  </div>
+                </div>
+                {/* Device info */}
+                {sess.device && (
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-white/50">{sess.device.browser}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-white/50">{sess.device.os}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-white/50">{sess.device.device}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-white/30">{sess.device.screenWidth}×{sess.device.screenHeight}</span>
+                  </div>
+                )}
+                {/* Pages visited */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  {sess.pages.map((page, pi) => {
+                    const meta = getPageMeta(page)
+                    return (
+                      <React.Fragment key={pi}>
+                        {pi > 0 && <span className="text-[8px] text-white/15">›</span>}
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded font-medium"
+                          style={{ backgroundColor: `${meta.color}15`, color: meta.color }}
+                        >
+                          {meta.label}
+                        </span>
+                      </React.Fragment>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 type Tab = 'sitemap' | 'journeys' | 'map' | 'insights' | 'data' | 'history'
 
 // ─── Date Range Selector ─────────────────────────────────────────────
@@ -3982,6 +4207,9 @@ export default function JourneyMapPage() {
                   )}
                 </div>
               </div>
+
+              {/* Device & Browser Stats */}
+              <DeviceBrowserStats />
 
               {/* Funnel Drop-Off */}
               <div className="rounded-xl border border-white/[0.06] p-5" style={{ backgroundColor: '#1a1a1a' }}>

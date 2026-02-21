@@ -1,6 +1,69 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// ─── Device / Browser Detection ────────────────────────────
+
+export interface DeviceInfo {
+  browser: string
+  os: string
+  device: 'mobile' | 'tablet' | 'desktop'
+  screenWidth: number
+  screenHeight: number
+  userAgent: string
+}
+
+function detectDevice(): DeviceInfo {
+  if (typeof window === 'undefined') {
+    return { browser: 'unknown', os: 'unknown', device: 'desktop', screenWidth: 0, screenHeight: 0, userAgent: '' }
+  }
+  const ua = navigator.userAgent
+
+  // Browser detection
+  let browser = 'unknown'
+  if (ua.includes('Firefox/')) browser = 'Firefox'
+  else if (ua.includes('Edg/')) browser = 'Edge'
+  else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera'
+  else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome'
+  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari'
+
+  // OS detection
+  let os = 'unknown'
+  if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
+  else if (ua.includes('Android')) os = 'Android'
+  else if (ua.includes('Windows')) os = 'Windows'
+  else if (ua.includes('Mac OS')) os = 'macOS'
+  else if (ua.includes('Linux')) os = 'Linux'
+
+  // Device type
+  let device: 'mobile' | 'tablet' | 'desktop' = 'desktop'
+  if (/iPhone|Android.*Mobile/i.test(ua)) device = 'mobile'
+  else if (/iPad|Android(?!.*Mobile)/i.test(ua) || (navigator.maxTouchPoints > 1 && window.innerWidth < 1200)) device = 'tablet'
+
+  return {
+    browser,
+    os,
+    device,
+    screenWidth: window.screen.width,
+    screenHeight: window.screen.height,
+    userAgent: ua,
+  }
+}
+
+// Stable session ID (persists for browser tab lifetime)
+let _sessionId: string | null = null
+function getSessionId(): string {
+  if (!_sessionId) {
+    _sessionId = typeof window !== 'undefined'
+      ? (sessionStorage.getItem('tracking_session_id') || (() => {
+          const id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+          sessionStorage.setItem('tracking_session_id', id)
+          return id
+        })())
+      : 'server'
+  }
+  return _sessionId
+}
+
 // ─── Types ───────────────────────────────────────────────
 
 export interface TrackingEvent {
@@ -18,6 +81,10 @@ export interface TrackingEvent {
   label?: string
   /** Optional extra metadata */
   meta?: Record<string, string | number | boolean>
+  /** Session ID for grouping events */
+  sessionId?: string
+  /** Device info snapshot */
+  deviceInfo?: DeviceInfo
 }
 
 export interface FlowEdge {
@@ -178,7 +245,7 @@ interface TrackingState {
   snapshots: FlowSnapshot[]
 
   // ── Actions ─────────────────────────────────────────
-  track: (event: Omit<TrackingEvent, 'id' | 'ts'>) => void
+  track: (event: Omit<TrackingEvent, 'id' | 'ts' | 'sessionId' | 'deviceInfo'>) => void
   setTracking: (on: boolean) => void
   clearEvents: () => void
 
@@ -220,6 +287,12 @@ interface TrackingState {
   getUTurns: () => { from: string; to: string; count: number; pctOfTraffic: number }[]
   /** Overall frustration score 0-100 per page */
   getFrustrationScores: () => { page: string; score: number; rageClicks: number; loops: number; deadClicks: number; uTurns: number; label: 'happy' | 'neutral' | 'frustrated' | 'rage' }[]
+
+  // ── Device & Session analytics ──────────────────────
+  /** Breakdown of browsers, devices, and OS across sessions */
+  getDeviceStats: () => { browsers: { name: string; count: number; pct: number }[]; devices: { name: string; count: number; pct: number }[]; os: { name: string; count: number; pct: number }[]; screens: { resolution: string; count: number }[] }
+  /** Per-session details: pages visited, device, duration, event count */
+  getSessionDetails: () => { sessionId: string; device: DeviceInfo | null; eventCount: number; pages: string[]; startTime: string; endTime: string; durationMs: number }[]
 }
 
 const MAX_EVENTS = 5000
@@ -289,6 +362,8 @@ export const useTrackingStore = create<TrackingState>()(
           ...event,
           id: `evt_${Date.now()}_${++eventCounter}`,
           ts: new Date().toISOString(),
+          sessionId: getSessionId(),
+          deviceInfo: detectDevice(),
         }
         // Store locally (localStorage via zustand persist)
         set((state) => {
@@ -1121,6 +1196,81 @@ export const useTrackingStore = create<TrackingState>()(
           return { page: ps.page, score, rageClicks: pageRage, loops: pageLoops, deadClicks: pageDead, uTurns: pageUTurns, label: label as 'happy' | 'neutral' | 'frustrated' | 'rage' }
         })
         .sort((a, b) => b.score - a.score)
+      },
+
+      // ── Device & Session analytics ──────────────────────
+
+      getDeviceStats: () => {
+        const events = get().events
+        // Use one event per session to avoid overcounting
+        const sessionMap = new Map<string, DeviceInfo>()
+        for (const e of events) {
+          if (e.sessionId && e.deviceInfo && !sessionMap.has(e.sessionId)) {
+            sessionMap.set(e.sessionId, e.deviceInfo)
+          }
+        }
+        const devices = Array.from(sessionMap.values())
+        const total = devices.length || 1
+
+        // Browser counts
+        const browserMap = new Map<string, number>()
+        const deviceTypeMap = new Map<string, number>()
+        const osMap = new Map<string, number>()
+        const screenMap = new Map<string, number>()
+
+        for (const d of devices) {
+          browserMap.set(d.browser, (browserMap.get(d.browser) || 0) + 1)
+          deviceTypeMap.set(d.device, (deviceTypeMap.get(d.device) || 0) + 1)
+          osMap.set(d.os, (osMap.get(d.os) || 0) + 1)
+          const res = `${d.screenWidth}×${d.screenHeight}`
+          screenMap.set(res, (screenMap.get(res) || 0) + 1)
+        }
+
+        const toArr = (map: Map<string, number>) =>
+          Array.from(map.entries())
+            .map(([name, count]) => ({ name, count, pct: Math.round((count / total) * 100) }))
+            .sort((a, b) => b.count - a.count)
+
+        return {
+          browsers: toArr(browserMap),
+          devices: toArr(deviceTypeMap),
+          os: toArr(osMap),
+          screens: Array.from(screenMap.entries())
+            .map(([resolution, count]) => ({ resolution, count }))
+            .sort((a, b) => b.count - a.count),
+        }
+      },
+
+      getSessionDetails: () => {
+        const events = get().events
+        const sessionMap = new Map<string, { device: DeviceInfo | null; events: TrackingEvent[] }>()
+
+        for (const e of events) {
+          const sid = e.sessionId || 'unknown'
+          if (!sessionMap.has(sid)) {
+            sessionMap.set(sid, { device: e.deviceInfo || null, events: [] })
+          }
+          sessionMap.get(sid)!.events.push(e)
+        }
+
+        return Array.from(sessionMap.entries())
+          .map(([sessionId, data]) => {
+            const sorted = data.events.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
+            const pages = [...new Set(sorted.filter((e) => e.type === 'page_view').map((e) => e.target))]
+            const startTime = sorted[0]?.ts || ''
+            const endTime = sorted[sorted.length - 1]?.ts || ''
+            const durationMs = startTime && endTime ? new Date(endTime).getTime() - new Date(startTime).getTime() : 0
+            return {
+              sessionId,
+              device: data.device,
+              eventCount: data.events.length,
+              pages,
+              startTime,
+              endTime,
+              durationMs,
+            }
+          })
+          .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
       },
     }),
     {

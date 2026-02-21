@@ -3331,9 +3331,12 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const isMobile = useIsMobile()
   const router = useRouter()
   const trackStore = useTrackingStore((s) => s.track)
-  // Deep tracking: sport changes
+  // Deep tracking: sport changes — fire page_view so journey shows Sports → Football → Basketball etc.
   useEffect(() => {
-    if (activeSport) trackStore({ type: 'action', page: 'sports', target: 'sport-view', label: activeSport, meta: { sport: activeSport } })
+    if (activeSport) {
+      trackStore({ type: 'page_view', page: 'sports', target: `sports/${activeSport.toLowerCase().replace(/\s+/g, '-')}`, label: activeSport })
+      trackStore({ type: 'action', page: 'sports', target: 'sport-view', label: activeSport, meta: { sport: activeSport } })
+    }
   }, [activeSport]) // eslint-disable-line react-hooks/exhaustive-deps
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
   const [loadingLeague, setLoadingLeague] = useState<string | null>(null)
@@ -5040,7 +5043,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         // Store bets for confirmation modal
                         const betsToPlace = [...bets]
 
-                        // Track bet placement with deep context
+                        // Track bet placement with deep context — also fire page_view for journey flow
+                        trackStore({ type: 'page_view', page: 'sports', target: 'bet-placed', label: `Placed ${betsToPlace.length} bet(s)` })
                         trackStore({ type: 'action', page: 'sports', target: 'place-bet', label: `Placed ${betsToPlace.length} bet(s)`, meta: { count: betsToPlace.length, stake: totalStake, potentialWin: totalPotentialWin, sport: activeSport } })
                         
                         // Immediately place bets to My Bets
@@ -9611,24 +9615,26 @@ function NavTestPageContent() {
     }
   }, [initialVipSidebarItem])
 
-  // Track sub-page views within sports
+  // Track sub-page views within sports — fire page_view for journey map
   const trackRef = useRef({ vip: false, myBets: false })
   useEffect(() => {
     if (showVipRewards && !trackRef.current.vip) {
       trackRef.current.vip = true
+      trackPageView('vip-rewards', 'VIP Rewards')
       trackAction('sub-page-view', 'VIP Rewards (from Sports)')
     } else if (!showVipRewards) {
       trackRef.current.vip = false
     }
-  }, [showVipRewards, trackAction])
+  }, [showVipRewards, trackAction, trackPageView])
   useEffect(() => {
     if (showMyBets && !trackRef.current.myBets) {
       trackRef.current.myBets = true
+      trackPageView('my-bets', 'My Bets')
       trackAction('sub-page-view', 'My Bets')
     } else if (!showMyBets) {
       trackRef.current.myBets = false
     }
-  }, [showMyBets, trackAction])
+  }, [showMyBets, trackAction, trackPageView])
   const [previousPageState, setPreviousPageState] = useState<{ showSports: boolean; showVipRewards: boolean; activeSubNav?: string } | null>(null)
   const [sportsActiveTab, setSportsActiveTab] = useState('Events')
   const [isPageTransitioning, setIsPageTransitioning] = useState(false)
@@ -11936,7 +11942,7 @@ function NavTestPageContent() {
                 >
               <SportsPage 
                 activeTab={sportsActiveTab}
-                onTabChange={(tab: string) => { trackClick('sports-tab', tab, { section: 'sub-nav', sport: activeSport, tab }); setSportsActiveTab(tab) }}
+                onTabChange={(tab: string) => { trackClick('sports-tab', tab, { section: 'sub-nav', sport: activeSport, tab }); trackPageView(`sports/${tab.toLowerCase().replace(/\s+/g, '-')}`, `Sports: ${tab}`); setSportsActiveTab(tab) }}
                 onBack={() => {
                   router.push('/casino')
                 }}

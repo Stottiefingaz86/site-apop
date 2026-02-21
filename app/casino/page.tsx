@@ -7794,7 +7794,18 @@ function NavTestPageContent() {
   const [mounted, setMounted] = useState(false)
   const { trackNav, trackClick, trackAction, trackSidebar, trackPageView } = useTracking('casino')
   const [activeFilter, setActiveFilter] = useState('For You')
-  const [activeSubNav, setActiveSubNav] = useState('For You')
+  const [activeSubNav, _setActiveSubNav] = useState('For You')
+  // Wrapper: fire page_view for sub-nav so journey map shows Casino → Slots → Live etc.
+  const setActiveSubNav = useCallback((val: string) => {
+    _setActiveSubNav((prev: string) => {
+      if (val && val !== prev) {
+        // Map sub-nav to a trackable page_view target
+        const target = `casino/${val.toLowerCase().replace(/\s+/g, '-')}`
+        trackPageView(target, val)
+      }
+      return val
+    })
+  }, [trackPageView])
   const [gameSortFilter, setGameSortFilter] = useState<string>('popular')
   const [activeIconTab, setActiveIconTab] = useState('search')
   const [quickLinksOpen, setQuickLinksOpen] = useState(false)
