@@ -26,9 +26,13 @@ export async function insertTrackingEvents(
     page: e.page,
     target: e.target,
     label: e.label || null,
-    meta: e.meta || {},
-    session_id: extra?.sessionId || null,
-    user_agent: extra?.userAgent || null,
+    // Store deviceInfo inside meta so it round-trips through Supabase
+    meta: {
+      ...(e.meta || {}),
+      ...(e.deviceInfo ? { _deviceInfo: e.deviceInfo } : {}),
+    },
+    session_id: e.sessionId || extra?.sessionId || null,
+    user_agent: e.deviceInfo?.userAgent || extra?.userAgent || null,
     ip: extra?.ip || null,
   }))
 
@@ -82,17 +86,59 @@ export async function queryTrackingEvents(options: {
     return { data: [], total: 0, error: error.message }
   }
 
-  const events: TrackingEvent[] = (data || []).map((row) => ({
-    id: row.id,
-    ts: row.ts,
-    type: row.type,
-    page: row.page,
-    target: row.target,
-    label: row.label || undefined,
-    meta: row.meta || undefined,
-  }))
+  const events: TrackingEvent[] = (data || []).map((row) => {
+    const meta = row.meta || {}
+    const deviceInfo = meta._deviceInfo || undefined
+    // Remove internal _deviceInfo from meta so it doesn't leak into display
+    const { _deviceInfo, ...cleanMeta } = meta
+    return {
+      id: row.id,
+      ts: row.ts,
+      type: row.type,
+      page: row.page,
+      target: row.target,
+      label: row.label || undefined,
+      meta: Object.keys(cleanMeta).length > 0 ? cleanMeta : undefined,
+      sessionId: row.session_id || undefined,
+      deviceInfo,
+    }
+  })
 
   return { data: events, total: count || 0 }
+}
+
+// ─── Read: Fetch all remote events (for journey map merge) ──────────
+
+export async function fetchAllRemoteEvents(limit = 5000): Promise<TrackingEvent[]> {
+  if (!isSupabaseConfigured() || !supabase) return []
+
+  const { data, error } = await supabase
+    .from('tracking_events')
+    .select('*')
+    .order('ts', { ascending: true })
+    .limit(limit)
+
+  if (error || !data) {
+    console.error('[Tracking] Fetch remote events error:', error?.message)
+    return []
+  }
+
+  return data.map((row) => {
+    const meta = row.meta || {}
+    const deviceInfo = meta._deviceInfo || undefined
+    const { _deviceInfo, ...cleanMeta } = meta
+    return {
+      id: row.id,
+      ts: row.ts,
+      type: row.type,
+      page: row.page,
+      target: row.target,
+      label: row.label || undefined,
+      meta: Object.keys(cleanMeta).length > 0 ? cleanMeta : undefined,
+      sessionId: row.session_id || undefined,
+      deviceInfo,
+    }
+  })
 }
 
 // ─── Read: Get page stats (aggregated from DB) ─────────────────────

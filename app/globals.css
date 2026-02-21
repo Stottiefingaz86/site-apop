@@ -1369,6 +1369,39 @@ button[data-active="true"][class*="SidebarMenuButton"],
 
 /* ─── Chat Component Styles ─────────────────────────────── */
 
+/* Live map scanning line */
+@keyframes live-scan {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+.live-scan-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #10b981, transparent);
+  animation: live-scan 3s ease-in-out infinite;
+}
+
+/* Live map glow border */
+@keyframes live-border-glow {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+  50% {
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.08);
+  }
+}
+
 /* Rain drop animation */
 @keyframes rain-drop {
   0% {

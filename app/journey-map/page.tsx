@@ -265,12 +265,22 @@ function LiveFlowDiagram({
   }
 
   return (
-    <div className="rounded-xl border border-white/[0.06] overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
+    <div className="rounded-xl border border-emerald-500/10 overflow-hidden relative" style={{ backgroundColor: '#1a1a1a', animation: 'live-border-glow 4s ease-in-out infinite' }}>
+      {/* Scanning line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden live-scan-line z-10" />
       {/* Header with layout presets */}
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-        <div>
-          <h3 className="text-[11px] font-semibold text-white">Live Flow Map</h3>
-          <p className="text-[10px] text-white/25 mt-0.5">{pages.length} pages · {flowEdges.length} flows · drag nodes to rearrange</p>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+            </span>
+          </div>
+          <div>
+            <h3 className="text-[11px] font-semibold text-white">Live Flow Map</h3>
+            <p className="text-[10px] text-white/25 mt-0.5">{pages.length} pages · {flowEdges.length} flows · drag nodes to rearrange</p>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {LAYOUT_PRESETS.map((p) => (
@@ -547,11 +557,19 @@ function DeepActivityFeed({ events }: { events: TrackingEvent[] }) {
   if (deepEvents.length === 0) return null
 
   return (
-    <div className="rounded-xl border border-white/[0.06] overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
+    <div className="rounded-xl border border-emerald-500/10 overflow-hidden relative" style={{ backgroundColor: '#1a1a1a', animation: 'live-border-glow 4s ease-in-out infinite' }}>
+      {/* Scanning line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden live-scan-line z-10" />
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-        <div>
-          <h3 className="text-[11px] font-semibold text-white">Deep Activity Feed</h3>
-          <p className="text-[10px] text-white/25 mt-0.5">{deepEvents.length} actions tracked · games, bets, categories, vendors</p>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+          </span>
+          <div>
+            <h3 className="text-[11px] font-semibold text-white">Deep Activity Feed</h3>
+            <p className="text-[10px] text-white/25 mt-0.5">{deepEvents.length} actions tracked · games, bets, categories, vendors</p>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {pages.map(p => (
@@ -1115,9 +1133,9 @@ function ActivityTimeline() {
   return (
     <div className="rounded-xl border border-white/[0.06] p-4" style={{ backgroundColor: '#1a1a1a' }}>
       <h3 className="text-[11px] font-semibold text-white mb-3">Activity Timeline</h3>
-      <div className="flex items-end gap-[2px] h-16">
+      <div className="flex items-end gap-[2px] h-20">
         {timeline.map((t, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5 group relative">
+          <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5 group relative h-full">
             <motion.div
               className="w-full rounded-sm min-h-[2px]"
               style={{ backgroundColor: '#6366f1' }}
@@ -2803,12 +2821,24 @@ function LiveJourneyVisualizer({ sessionFlows, events }: { sessionFlows: string[
   }
 
   return (
-    <div className="rounded-xl border border-white/[0.06] overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
-      <div className="px-4 py-3 border-b border-white/5">
-        <h3 className="text-xs font-semibold text-white">Real User Journeys</h3>
-        <p className="text-[10px] text-white/30 mt-0.5">
-          Built from live tracking data — {liveJourneys.length} unique journey{liveJourneys.length !== 1 ? 's' : ''} recorded across {sessionFlows.length} session{sessionFlows.length !== 1 ? 's' : ''}
-        </p>
+    <div className="rounded-xl border border-emerald-500/10 overflow-hidden relative" style={{ backgroundColor: '#1a1a1a', animation: 'live-border-glow 4s ease-in-out infinite' }}>
+      {/* Scanning line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden live-scan-line" />
+
+      <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <h3 className="text-xs font-semibold text-white">Real User Journeys</h3>
+          <p className="text-[10px] text-white/30 mt-0.5">
+            Built from live tracking data — {liveJourneys.length} unique journey{liveJourneys.length !== 1 ? 's' : ''} recorded across {sessionFlows.length} session{sessionFlows.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+          </span>
+          <span className="text-[9px] font-semibold text-emerald-400/70 uppercase tracking-wider">Listening</span>
+        </div>
       </div>
 
       {/* Journey selector */}
@@ -3115,8 +3145,8 @@ function DeviceBrowserStats() {
   }
 
   const deviceColors: Record<string, string> = { mobile: '#f97316', tablet: '#a855f7', desktop: '#22c55e' }
-  const browserColors: Record<string, string> = { Chrome: '#4285F4', Safari: '#06b6d4', Firefox: '#f97316', Edge: '#22c55e', Opera: '#ef4444', unknown: '#64748b' }
-  const osColors: Record<string, string> = { iOS: '#64748b', Android: '#22c55e', Windows: '#4285F4', macOS: '#a855f7', Linux: '#f97316', unknown: '#64748b' }
+  const browserColors: Record<string, string> = { Chrome: '#4285F4', 'Chrome (iOS)': '#4285F4', Safari: '#06b6d4', Firefox: '#f97316', 'Firefox (iOS)': '#f97316', Edge: '#22c55e', 'Edge (iOS)': '#22c55e', Opera: '#ef4444', 'Samsung Internet': '#6366f1', Brave: '#f97316', unknown: '#64748b' }
+  const osColors: Record<string, string> = { iOS: '#64748b', iPadOS: '#a855f7', Android: '#22c55e', Windows: '#4285F4', macOS: '#a855f7', ChromeOS: '#f97316', Linux: '#f97316', unknown: '#64748b' }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3325,22 +3355,47 @@ export default function JourneyMapPage() {
   const [showSaveInput, setShowSaveInput] = useState(false)
   const [comparingSnapshotId, setComparingSnapshotId] = useState<string | null>(null)
   const [dateFilter, setDateFilter] = useState<DateRangeFilter>({ range: 'all' })
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date())
+  const [, setRefreshTick] = useState(0) // forces re-render for "ago" text
 
   // Hydration guard — store is persisted in localStorage so SSR has empty state
   const [hydrated, setHydrated] = useState(false)
   useEffect(() => setHydrated(true), [])
 
-  // Sync local events to Supabase on mount (if Supabase is configured)
+  // Auto-refresh the "last updated" label every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(() => setRefreshTick((t) => t + 1), 15_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Update lastRefreshed when events change
+  const eventCount = useTrackingStore((s) => s.events.length)
+  useEffect(() => {
+    if (eventCount > 0) setLastRefreshed(new Date())
+  }, [eventCount])
+
+  // Bi-directional Supabase sync on mount:
+  // 1. Push local events → Supabase (so this device's data is in the cloud)
+  // 2. Pull remote events → local store (so other devices' data is visible here)
   const [supabaseSynced, setSupabaseSynced] = useState(false)
   useEffect(() => {
     if (!hydrated || supabaseSynced) return
     setSupabaseSynced(true)
-    import('@/lib/supabase/tracking').then(({ syncLocalEventsToSupabase }) => {
+
+    import('@/lib/supabase/tracking').then(async ({ syncLocalEventsToSupabase, fetchAllRemoteEvents }) => {
+      // Push local → Supabase
       const localEvents = useTrackingStore.getState().events
       if (localEvents.length > 0) {
-        syncLocalEventsToSupabase(localEvents).then((count) => {
-          if (count > 0) console.log(`[Tracking] Synced ${count} local events to Supabase`)
-        })
+        const pushed = await syncLocalEventsToSupabase(localEvents)
+        if (pushed > 0) console.log(`[Tracking] Pushed ${pushed} local events to Supabase`)
+      }
+
+      // Pull Supabase → local (merges in events from other devices/sessions)
+      const remoteEvents = await fetchAllRemoteEvents()
+      if (remoteEvents.length > 0) {
+        useTrackingStore.getState().mergeRemoteEvents(remoteEvents)
+        console.log(`[Tracking] Merged ${remoteEvents.length} remote events from Supabase`)
+        setLastRefreshed(new Date())
       }
     }).catch(() => { /* Supabase not configured */ })
   }, [hydrated, supabaseSynced])
@@ -3550,6 +3605,14 @@ export default function JourneyMapPage() {
               >
                 <Icon className="w-3.5 h-3.5" />
                 {tab.label}
+                {tab.id === 'map' && activeTab === 'map' && (
+                  <span className="flex items-center gap-1 ml-0.5">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                    </span>
+                  </span>
+                )}
                 {tab.id === 'history' && snapshots.length > 0 && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/40">
                     {snapshots.length}
@@ -3625,38 +3688,79 @@ export default function JourneyMapPage() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* View toggle */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-white/[0.06] w-fit">
-                <button
-                  onClick={() => setLiveMapView('journeys')}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                    liveMapView === 'journeys'
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
-                  }`}
-                >
-                  Journey Steps
-                </button>
-                <button
-                  onClick={() => setLiveMapView('diagram')}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                    liveMapView === 'diagram'
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
-                  }`}
-                >
-                  Flow Diagram
-                </button>
-                <button
-                  onClick={() => setLiveMapView('activity')}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                    liveMapView === 'activity'
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
-                  }`}
-                >
-                  Activity Feed
-                </button>
+              {/* Live status bar */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* View toggle */}
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-white/[0.06] w-fit">
+                    <button
+                      onClick={() => setLiveMapView('journeys')}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                        liveMapView === 'journeys'
+                          ? 'bg-white/10 text-white shadow-sm'
+                          : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      Journey Steps
+                    </button>
+                    <button
+                      onClick={() => setLiveMapView('diagram')}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                        liveMapView === 'diagram'
+                          ? 'bg-white/10 text-white shadow-sm'
+                          : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      Flow Diagram
+                    </button>
+                    <button
+                      onClick={() => setLiveMapView('activity')}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                        liveMapView === 'activity'
+                          ? 'bg-white/10 text-white shadow-sm'
+                          : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      Activity Feed
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live indicator + last updated + refresh */}
+                <div className="flex items-center gap-3">
+                  {/* Live badge */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/[0.08] border border-emerald-500/20">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Live</span>
+                  </div>
+
+                  {/* Last updated */}
+                  <div className="flex items-center gap-1.5 text-[10px] text-white/35">
+                    <IconClock className="w-3 h-3" />
+                    <span>Updated {timeAgo(lastRefreshed.toISOString())}</span>
+                  </div>
+
+                  {/* Refresh button — pulls latest from Supabase */}
+                  <button
+                    onClick={() => {
+                      setLastRefreshed(new Date())
+                      import('@/lib/supabase/tracking').then(async ({ fetchAllRemoteEvents }) => {
+                        const remoteEvents = await fetchAllRemoteEvents()
+                        if (remoteEvents.length > 0) {
+                          useTrackingStore.getState().mergeRemoteEvents(remoteEvents)
+                          setLastRefreshed(new Date())
+                        }
+                      }).catch(() => {})
+                    }}
+                    className="group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-white/40 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+                  >
+                    <IconRefresh className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" />
+                    Refresh
+                  </button>
+                </div>
               </div>
 
               {/* Comparison banner */}
@@ -3696,7 +3800,7 @@ export default function JourneyMapPage() {
                 <ActivityTimeline />
 
                 {/* Session Trails */}
-                <div className="rounded-xl border border-white/[0.06] p-4" style={{ backgroundColor: '#1a1a1a' }}>
+                <div className="rounded-xl border border-white/[0.06] p-4 flex flex-col" style={{ backgroundColor: '#1a1a1a' }}>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-[11px] font-semibold text-white">Session Trails</h3>
                     <span className="text-[9px] text-white/25">{sessionFlows.length}</span>
@@ -3704,8 +3808,8 @@ export default function JourneyMapPage() {
                   {sessionFlows.length === 0 ? (
                     <p className="text-[10px] text-white/25 text-center py-4">Navigate 2+ pages</p>
                   ) : (
-                    <div className="space-y-0 divide-y divide-white/5 max-h-[200px] overflow-y-auto scrollbar-hide">
-                      {sessionFlows.slice(0, 8).map((flow, i) => (
+                    <div className="space-y-0 divide-y divide-white/5 flex-1 overflow-y-auto scrollbar-hide">
+                      {sessionFlows.slice(0, 20).map((flow, i) => (
                         <SessionFlowTrail key={i} flow={flow} index={i} />
                       ))}
                     </div>
@@ -3713,12 +3817,14 @@ export default function JourneyMapPage() {
                 </div>
 
                 {/* Top Actions */}
-                <div className="rounded-xl border border-white/[0.06] p-4" style={{ backgroundColor: '#1a1a1a' }}>
+                <div className="rounded-xl border border-white/[0.06] p-4 flex flex-col" style={{ backgroundColor: '#1a1a1a' }}>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-[11px] font-semibold text-white">Top Actions</h3>
                     <span className="text-[9px] text-white/25">{topActions.length}</span>
                   </div>
-                  <TopActionsTable actions={topActions} />
+                  <div className="flex-1 overflow-y-auto scrollbar-hide">
+                    <TopActionsTable actions={topActions} />
+                  </div>
                 </div>
               </div>
             </motion.div>

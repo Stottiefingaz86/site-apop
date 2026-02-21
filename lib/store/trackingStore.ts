@@ -17,34 +17,95 @@ function detectDevice(): DeviceInfo {
     return { browser: 'unknown', os: 'unknown', device: 'desktop', screenWidth: 0, screenHeight: 0, userAgent: '' }
   }
   const ua = navigator.userAgent
+  const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+  const sw = window.screen.width
+  const sh = window.screen.height
+  const minDim = Math.min(sw, sh)
 
-  // Browser detection
+  // ─── Browser detection ───
   let browser = 'unknown'
-  if (ua.includes('Firefox/')) browser = 'Firefox'
-  else if (ua.includes('Edg/')) browser = 'Edge'
-  else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera'
-  else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome'
-  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari'
+  // Use modern UA Client Hints if available
+  const uaData = (navigator as Record<string, unknown>).userAgentData as { brands?: { brand: string }[]; mobile?: boolean; platform?: string } | undefined
+  if (uaData?.brands) {
+    const brandNames = uaData.brands.map((b) => b.brand.toLowerCase())
+    if (brandNames.some((b) => b.includes('firefox'))) browser = 'Firefox'
+    else if (brandNames.some((b) => b.includes('edge') || b.includes('edg'))) browser = 'Edge'
+    else if (brandNames.some((b) => b.includes('opera') || b.includes('opr'))) browser = 'Opera'
+    else if (brandNames.some((b) => b.includes('samsung'))) browser = 'Samsung Internet'
+    else if (brandNames.some((b) => b.includes('brave'))) browser = 'Brave'
+    else if (brandNames.some((b) => b.includes('chrome') || b.includes('chromium'))) browser = 'Chrome'
+  }
+  if (browser === 'unknown') {
+    // Fallback to UA string parsing
+    if (/CriOS/i.test(ua)) browser = 'Chrome (iOS)'
+    else if (/FxiOS/i.test(ua)) browser = 'Firefox (iOS)'
+    else if (/EdgiOS/i.test(ua)) browser = 'Edge (iOS)'
+    else if (ua.includes('Firefox/')) browser = 'Firefox'
+    else if (ua.includes('Edg/')) browser = 'Edge'
+    else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera'
+    else if (ua.includes('SamsungBrowser/')) browser = 'Samsung Internet'
+    else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome'
+    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari'
+  }
 
-  // OS detection
+  // ─── OS detection ───
   let os = 'unknown'
-  if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
-  else if (ua.includes('Android')) os = 'Android'
-  else if (ua.includes('Windows')) os = 'Windows'
-  else if (ua.includes('Mac OS')) os = 'macOS'
-  else if (ua.includes('Linux')) os = 'Linux'
+  if (uaData?.platform) {
+    const p = uaData.platform.toLowerCase()
+    if (p === 'ios') os = 'iOS'
+    else if (p === 'android') os = 'Android'
+    else if (p === 'windows') os = 'Windows'
+    else if (p === 'macos' || p === 'mac os x') os = 'macOS'
+    else if (p === 'linux') os = 'Linux'
+    else if (p === 'chromeos' || p === 'chrome os') os = 'ChromeOS'
+    else os = p
+  }
+  if (os === 'unknown') {
+    if (ua.includes('iPhone') || ua.includes('iPad') || ua.includes('iPod')) os = 'iOS'
+    else if (ua.includes('Android')) os = 'Android'
+    else if (ua.includes('Windows')) os = 'Windows'
+    else if (ua.includes('CrOS')) os = 'ChromeOS'
+    else if (ua.includes('Mac OS') || ua.includes('Macintosh')) os = 'macOS'
+    else if (ua.includes('Linux')) os = 'Linux'
+  }
 
-  // Device type
+  // ─── Device type detection ───
+  // iPadOS 13+ sends macOS user agent — detect via touch + screen size
   let device: 'mobile' | 'tablet' | 'desktop' = 'desktop'
-  if (/iPhone|Android.*Mobile/i.test(ua)) device = 'mobile'
-  else if (/iPad|Android(?!.*Mobile)/i.test(ua) || (navigator.maxTouchPoints > 1 && window.innerWidth < 1200)) device = 'tablet'
+
+  // Check UA Client Hints first (most reliable on supported browsers)
+  if (uaData?.mobile === true) {
+    device = 'mobile'
+  } else if (uaData?.mobile === false && hasTouch) {
+    // Touch-capable non-mobile hint = likely tablet
+    device = minDim >= 600 ? 'tablet' : 'mobile'
+  }
+
+  // Fallback to UA string + heuristics
+  if (device === 'desktop') {
+    if (/iPhone|iPod/i.test(ua)) {
+      device = 'mobile'
+    } else if (/iPad/i.test(ua)) {
+      device = 'tablet'
+    } else if (/Android/i.test(ua)) {
+      device = /Mobile/i.test(ua) ? 'mobile' : 'tablet'
+    } else if (hasTouch && os === 'macOS' && navigator.maxTouchPoints > 1) {
+      // iPadOS 13+ masquerades as macOS Safari — detect via touch support
+      device = 'tablet'
+      os = 'iPadOS'
+    } else if (hasTouch && minDim < 600) {
+      device = 'mobile'
+    } else if (hasTouch && minDim < 1024) {
+      device = 'tablet'
+    }
+  }
 
   return {
     browser,
     os,
     device,
-    screenWidth: window.screen.width,
-    screenHeight: window.screen.height,
+    screenWidth: sw,
+    screenHeight: sh,
     userAgent: ua,
   }
 }
@@ -248,6 +309,7 @@ interface TrackingState {
   track: (event: Omit<TrackingEvent, 'id' | 'ts' | 'sessionId' | 'deviceInfo'>) => void
   setTracking: (on: boolean) => void
   clearEvents: () => void
+  mergeRemoteEvents: (remoteEvents: TrackingEvent[]) => void
 
   // ── Snapshot actions ────────────────────────────────
   saveSnapshot: (name: string) => void
@@ -377,6 +439,17 @@ export const useTrackingStore = create<TrackingState>()(
       setTracking: (on) => set({ isTracking: on }),
 
       clearEvents: () => set({ events: [] }),
+
+      /** Merge remote events from Supabase (deduplicates by id) */
+      mergeRemoteEvents: (remoteEvents) => {
+        set((state) => {
+          const existingIds = new Set(state.events.map((e) => e.id))
+          const newEvents = remoteEvents.filter((e) => !existingIds.has(e.id))
+          if (newEvents.length === 0) return state
+          const merged = [...state.events, ...newEvents].sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
+          return { events: merged.length > MAX_EVENTS ? merged.slice(-MAX_EVENTS) : merged }
+        })
+      },
 
       // ── Snapshot: save current flow state ──────────
       saveSnapshot: (name) => {
