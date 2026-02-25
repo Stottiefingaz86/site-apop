@@ -1710,6 +1710,22 @@ function VipDrawerContent({
   onBoostClaimed: (amount: number) => void
 }) {
   const isMobile = useIsMobile()
+
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      setProfitBoostOptedIn(localStorage.getItem('profitBoostOptedIn') === 'true')
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem('profitBoostOptedIn', profitBoostOptedIn ? 'true' : 'false')
+    } catch {}
+  }, [profitBoostOptedIn])
   const checkScroll = useCallback(() => {
     const container = vipTabsContainerRef.current
     if (!container) {
@@ -1751,7 +1767,7 @@ function VipDrawerContent({
     if (!vipDrawerOpen) return
     const container = vipTabsContainerRef.current
     if (!container) return
-    const tabs = ['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
     const activeIndex = tabs.indexOf(vipActiveTab)
     if (activeIndex === -1) return
     const tabButtons = container.querySelectorAll('button')
@@ -1835,7 +1851,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab) => (
+            {['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -2273,6 +2289,24 @@ function AccountPageContent() {
   const [depositDrawerOpen, setDepositDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)
   const [vipActiveTab, setVipActiveTab] = useState('VIP Hub')
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(false)
+  const profitBoostRequiredBetMarket = 'Premier League'
+  const profitBoostRequiredBetStake = 50
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      setProfitBoostOptedIn(localStorage.getItem('profitBoostOptedIn') === 'true')
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem('profitBoostOptedIn', profitBoostOptedIn ? 'true' : 'false')
+    } catch {}
+  }, [profitBoostOptedIn])
+
   const [canScrollVipLeft, setCanScrollVipLeft] = useState(false)
   const [canScrollVipRight, setCanScrollVipRight] = useState(false)
   const vipTabsContainerRef = useRef<HTMLDivElement>(null)

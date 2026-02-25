@@ -696,6 +696,23 @@ function TotalRewardsCard() {
 // Levels Carousel Component with Timeline
 function LevelsCarousel() {
   const isMobile = useIsMobile()
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      setProfitBoostOptedIn(localStorage.getItem('profitBoostOptedIn') === 'true')
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem('profitBoostOptedIn', profitBoostOptedIn ? 'true' : 'false')
+    } catch {}
+  }, [profitBoostOptedIn])
+
+
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   
@@ -8713,6 +8730,22 @@ function VipDrawerContent({
   onBoostClaimed: (amount: number) => void
 }) {
   const isMobile = useIsMobile()
+
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      setProfitBoostOptedIn(localStorage.getItem('profitBoostOptedIn') === 'true')
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem('profitBoostOptedIn', profitBoostOptedIn ? 'true' : 'false')
+    } catch {}
+  }, [profitBoostOptedIn])
   const checkScroll = useCallback(() => {
     const container = vipTabsContainerRef.current
     if (!container) {
@@ -8772,7 +8805,7 @@ function VipDrawerContent({
     const container = vipTabsContainerRef.current
     if (!container) return
 
-    const tabs = ['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
     const activeIndex = tabs.indexOf(vipActiveTab)
     
     if (activeIndex === -1) return
@@ -8876,7 +8909,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
+            {['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -9432,6 +9465,74 @@ function VipDrawerContent({
           </div>
         )}
         
+
+        {vipActiveTab === 'Profit Boost' && (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-white/10 bg-[#232323] overflow-hidden">
+              <div className="relative h-28 w-full border-b border-white/10">
+                <Image
+                  src="/banners/sports_league/premier_banner_bg.png"
+                  alt="Premier League"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+                <div className="absolute left-3 bottom-2.5">
+                  <div className="text-[10px] uppercase tracking-[0.12em] text-white/70 font-semibold">Profit Boost Offer</div>
+                  <div className="text-base font-bold text-white">Premier League</div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-amber-300 flex-shrink-0 mt-1">
+                      <IconBolt className="h-3 w-3 text-black fill-black" strokeWidth={2.6} />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white">Profit Boost</div>
+                      <div className="text-xs text-white/70 mt-0.5">Opt in to activate this offer.</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const next = !profitBoostOptedIn
+                      setProfitBoostOptedIn(next)
+                      try {
+                        localStorage.setItem('profitBoostOptedIn', next ? 'true' : 'false')
+                      } catch {}
+                      window.dispatchEvent(new Event('profit-boost-updated'))
+                      window.dispatchEvent(new CustomEvent('profit-boost-optin-toggled', { detail: { optedIn: next } }))
+                    }}
+                    className={`relative w-12 h-7 rounded-full border transition-colors flex-shrink-0 ${
+                      profitBoostOptedIn
+                        ? 'bg-emerald-500/25 border-emerald-400/40'
+                        : 'bg-white/10 border-white/20'
+                    }`}
+                    aria-label="Toggle Profit Boost opt in"
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
+                        profitBoostOptedIn ? 'left-6' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="rounded-md border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-white/55">League</div>
+                    <div className="text-sm font-semibold text-white mt-0.5">Premier League</div>
+                  </div>
+                  <div className="rounded-md border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-white/55">Required Bet</div>
+                    <div className="text-sm font-semibold text-white mt-0.5">$50</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {vipActiveTab === 'Bet & Get' && (
           <BetAndGet />
         )}
@@ -9485,6 +9586,20 @@ function NavTestPageContent() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [toastAction, setToastAction] = useState<{ label: string; onClick: () => void } | null>(null)
+
+  useEffect(() => {
+    const handleProfitBoostOptInToggled = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ optedIn?: boolean }>).detail
+      if (!detail?.optedIn) return
+      setToastMessage('Profit Boost opted in. Odds boost activates after $50 risk on Premier League.')
+      setToastAction(null)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2200)
+    }
+    window.addEventListener('profit-boost-optin-toggled', handleProfitBoostOptInToggled as EventListener)
+    return () => window.removeEventListener('profit-boost-optin-toggled', handleProfitBoostOptInToggled as EventListener)
+  }, [setShowToast, setToastMessage, setToastAction])
+
   
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)

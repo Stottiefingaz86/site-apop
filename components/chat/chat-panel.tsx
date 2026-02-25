@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useMemo, useCallback } from "react"
+import { usePathname } from "next/navigation"
 import { useChatStore } from "@/lib/store/chatStore"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { motion, AnimatePresence, useMotionValue, useDragControls, PanInfo } from "framer-motion"
@@ -16,6 +17,8 @@ import ChatUserProfile from "./chat-user-profile"
 // ─── Desktop Chat Panel ──────────────────────────────────
 function DesktopChatPanel() {
   const { isOpen, setIsOpen, activeRoom, casinoMessages, sportsMessages, openUserProfile } = useChatStore()
+  const pathname = usePathname()
+  const isCommunityPage = pathname?.startsWith('/community')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isNearBottomRef = useRef(true)
@@ -69,7 +72,7 @@ function DesktopChatPanel() {
           style={{
             pointerEvents: 'auto',
             backgroundColor: 'var(--ds-page-bg, #222222)',
-            top: 64,
+            top: isCommunityPage ? 0 : 64,
           }}
         >
           <div className="flex flex-col h-full w-[340px]">

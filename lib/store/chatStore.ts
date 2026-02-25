@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { addCommunityForumPost, createBetShareCommunityPost } from '@/lib/community/forum'
 
 // ─── Types ───────────────────────────────────────────────
 export type ChatRoom = 'casino' | 'sports'
@@ -125,6 +126,7 @@ interface ChatState {
 
   // Share bet to chat
   shareBetToChat: (bets: { eventName: string; selection: string; odds: string; stake: number }[]) => void
+  shareBetToForum: (bets: { eventName: string; selection: string; odds: string; stake?: number }[]) => void
 
   // Copy parlay from chat to betslip (dispatches event for page to handle)
   copyBetToSlip: (legs: { event: string; selection: string; odds: string }[]) => void
@@ -676,6 +678,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('panel:chat-opened'))
     }
+  },
+
+  shareBetToForum: (bets) => {
+    if (bets.length === 0) return
+    const post = createBetShareCommunityPost({
+      author: 'You',
+      legs: bets.map((b) => ({
+        eventName: b.eventName,
+        selection: b.selection,
+        odds: b.odds,
+      })),
+      stake: bets.reduce((sum, b) => sum + (b.stake || 0), 0),
+    })
+    addCommunityForumPost(post)
   },
 
   // Copy parlay from chat to betslip — dispatches a CustomEvent for pages to handle

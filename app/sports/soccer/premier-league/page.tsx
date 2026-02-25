@@ -3456,6 +3456,62 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   }, [])
   const [eventOrderBy, setEventOrderBy] = useState<string>('Popularity')
   const [selectedLeague, setSelectedLeague] = useState<number>(1) // Default to Premier League (id: 1)
+  const profitBoostRequiredStake = 50
+  const profitBoostPercent = 10
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      return localStorage.getItem('profitBoostOptedIn') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [profitBoostOptInHydrated, setProfitBoostOptInHydrated] = useState(false)
+  const [profitBoostQualifiedStake, setProfitBoostQualifiedStake] = useState(0)
+
+  useEffect(() => {
+    const syncProfitBoostState = () => {
+      try {
+        setProfitBoostOptedIn(localStorage.getItem('profitBoostOptedIn') === 'true')
+        setProfitBoostQualifiedStake(parseFloat(localStorage.getItem('profitBoostQualifiedStake') || '0') || 0)
+      } catch {}
+      setProfitBoostOptInHydrated(true)
+    }
+    syncProfitBoostState()
+    window.addEventListener('profit-boost-updated', syncProfitBoostState as EventListener)
+    window.addEventListener('storage', syncProfitBoostState as EventListener)
+    return () => {
+      window.removeEventListener('profit-boost-updated', syncProfitBoostState as EventListener)
+      window.removeEventListener('storage', syncProfitBoostState as EventListener)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!profitBoostOptInHydrated) return
+    try {
+      localStorage.setItem('profitBoostOptedIn', profitBoostOptedIn ? 'true' : 'false')
+      localStorage.setItem('profitBoostQualifiedStake', String(profitBoostQualifiedStake))
+    } catch {}
+  }, [profitBoostOptedIn, profitBoostQualifiedStake, profitBoostOptInHydrated])
+
+  const getBoostedOdds = useCallback((odds: string) => {
+    const raw = odds.trim()
+    const american = parseFloat(raw)
+    if (!Number.isFinite(american) || american === 0) return odds
+    const decimal = american > 0 ? american / 100 + 1 : 100 / Math.abs(american) + 1
+    const boostedDecimal = 1 + (decimal - 1) * (1 + profitBoostPercent / 100)
+    if (!Number.isFinite(boostedDecimal) || boostedDecimal <= 1) return odds
+    if (boostedDecimal >= 2) {
+      return `+${Math.round((boostedDecimal - 1) * 100)}`
+    }
+    return `${Math.round(-100 / (boostedDecimal - 1))}`
+  }, [profitBoostPercent])
+
+  const isPremierLeagueBet = useCallback((bet: { eventName: string; marketTitle: string }) => {
+    return bet.eventName.includes(' v ') && bet.marketTitle !== 'Bet Boost'
+  }, [])
+
+  const profitBoostActive = profitBoostOptedIn && profitBoostQualifiedStake >= profitBoostRequiredStake
 
   // Sportsbook settings state
   const [sportsbookSettingsOpen, setSportsbookSettingsOpen] = useState(false)
@@ -4221,7 +4277,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
       selection,
       odds,
         stake: 0
-    }
+      }
+
       
       // Open betslip if closed, but preserve minimized state if already open
       // On mobile, only auto-open on the FIRST bet (when betslip was never manually closed)
@@ -4243,7 +4300,17 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
       
       return [...prev, newBet]
     })
-  }, [setBets, setBetslipOpen, betslipOpen, betslipMinimized, isMobile, betslipManuallyClosed])
+  }, [
+    setBets,
+    setBetslipOpen,
+    betslipOpen,
+    betslipMinimized,
+    isMobile,
+    betslipManuallyClosed,
+    profitBoostOptedIn,
+    profitBoostActive,
+    isPremierLeagueBet,
+  ])
 
   // Helper function to update bet stake
   const updateBetStake = (betId: string, stake: number) => {
@@ -4268,21 +4335,23 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   // Calculate straight bets (one per game, or multiple if same game)
   const straightBets = Object.values(betsByEvent).flat()
   const straightStake = straightBets.reduce((sum, bet) => sum + bet.stake, 0)
+  const currentSlipQualifyingStake = useMemo(() => {
+    return bets.reduce((sum, bet) => sum + (isPremierLeagueBet(bet) ? Math.max(0, bet.stake) : 0), 0)
+  }, [bets, isPremierLeagueBet])
+  const profitBoostActiveInSlip =
+    profitBoostOptedIn && (profitBoostQualifiedStake + currentSlipQualifyingStake) >= profitBoostRequiredStake
   
   // Helper function to convert odds to decimal multiplier
   const oddsToDecimal = (oddsStr: string): number => {
-    const cleaned = oddsStr.replace('+', '').trim()
-    const oddsValue = parseFloat(cleaned)
-    
-    // If odds are >= 2.0, assume decimal format (e.g., 3.25, 2.10)
-    // If odds are < 2.0 or start with +, assume American format (e.g., +350, +150)
-    if (oddsStr.startsWith('+') || (oddsValue < 2.0 && oddsValue > 0)) {
-      // American odds: +350 means bet $100 to win $350
-      return oddsValue / 100 + 1
-    } else {
-      // Decimal odds: 3.25 means bet $1 to win $3.25 total
-      return oddsValue
+    const trimmed = oddsStr.trim()
+    const oddsValue = parseFloat(trimmed)
+    if (!Number.isFinite(oddsValue) || oddsValue === 0) return 1
+    // Treat signed values (e.g. -110, +280) as American odds.
+    if (trimmed.startsWith('+') || trimmed.startsWith('-')) {
+      return oddsValue > 0 ? oddsValue / 100 + 1 : 100 / Math.abs(oddsValue) + 1
     }
+    // Fallback for decimal odds format.
+    return oddsValue >= 1 ? oddsValue : 1
   }
   
   // Calculate parlay (only if multiple games)
@@ -4290,7 +4359,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const calculateParlayOdds = () => {
     if (!hasParlay) return 0
     const oddsMultiplier = bets.reduce((product, bet) => {
-      return product * oddsToDecimal(bet.odds)
+      const effectiveOdds = profitBoostActiveInSlip && isPremierLeagueBet(bet) ? getBoostedOdds(bet.odds) : bet.odds
+      return product * oddsToDecimal(effectiveOdds)
     }, 1)
     return oddsMultiplier
   }
@@ -4301,7 +4371,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   // Calculate total stake (straights + parlay)
   const totalStake = straightStake + parlayStake
   const totalPotentialWin = bets.reduce((sum, bet) => {
-    const decimalMultiplier = oddsToDecimal(bet.odds)
+    const effectiveOdds = profitBoostActiveInSlip && isPremierLeagueBet(bet) ? getBoostedOdds(bet.odds) : bet.odds
+    const decimalMultiplier = oddsToDecimal(effectiveOdds)
     const toWin = bet.stake * decimalMultiplier - bet.stake
     return sum + toWin
   }, 0) + parlayPotentialWin
@@ -4310,6 +4381,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const currencySymbol = '$'
   const [bsIsScrolled, setBsIsScrolled] = useState(false)
   const [nudgeKey, setNudgeKey] = useState(0)
+  const profitBoostActivationShownRef = useRef(false)
   const bsScrollContainerRef = useRef<HTMLDivElement>(null)
   const previousBetsLengthRef = useRef(bets.length)
   const [localStakes, setLocalStakes] = useState<Record<string, string>>({})
@@ -4319,6 +4391,33 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
   const setNumpadTarget = (val: string | null) => { numpadTargetRef.current = val; _setNumpadTarget(val) }
   const inputRefs = useRef<Record<string, HTMLInputElement>>({})
   const focusedInputRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!profitBoostOptedIn) {
+      profitBoostActivationShownRef.current = false
+      return
+    }
+    if (profitBoostActiveInSlip && !profitBoostActivationShownRef.current) {
+      setToastMessage('Profit Boost activated. Eligible betslip odds are now boosted.')
+      setToastAction(null)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2200)
+      profitBoostActivationShownRef.current = true
+    }
+  }, [profitBoostOptedIn, profitBoostActiveInSlip, setShowToast, setToastMessage, setToastAction])
+
+  useEffect(() => {
+    const handleOptInToggle = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ optedIn?: boolean }>).detail
+      if (!detail?.optedIn) return
+      setToastMessage('Profit Boost opted in. Odds boost activates after $50 risk on Premier League.')
+      setToastAction(null)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2200)
+    }
+    window.addEventListener('profit-boost-optin-toggled', handleOptInToggle as EventListener)
+    return () => window.removeEventListener('profit-boost-optin-toggled', handleOptInToggle as EventListener)
+  }, [setShowToast, setToastMessage, setToastAction])
 
   // ── Betslip numpad handlers (parent scope so they survive re-renders) ──
   const handleNumpadDigit = useCallback((digit: string) => {
@@ -4566,6 +4665,20 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               {/* Straight Bets - Scrollable list in middle section - Tighter, cleaner design */}
                 {bets.length > 0 && (
                 <div className="px-2" style={{ minHeight: 'fit-content' }}>
+                  {profitBoostOptedIn && (
+                    <div className="mb-1.5 rounded-lg border border-amber-300/40 bg-[#fff8e6] px-2.5 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-amber-300 flex-shrink-0">
+                          <IconBolt className="h-3 w-3 text-black fill-black" strokeWidth={2.6} />
+                        </span>
+                        <span className="text-[10px] font-semibold text-[#4a3a10] leading-tight">
+                          {profitBoostActiveInSlip
+                            ? 'Profit Boost Activated - eligible odds updated'
+                            : `Profit Boost Pending - risk $${Math.max(0, profitBoostRequiredStake - (profitBoostQualifiedStake + currentSlipQualifyingStake)).toFixed(2)} more`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between mb-1.5 pt-2">
                     <div className="text-[10px] font-medium text-black/50 uppercase tracking-wide">
                       {hasMultipleGames ? `${bets.length} Selections` : 'Straight Bet'}
@@ -4614,12 +4727,15 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                     return oddsValue
                   }
                 }
-                const decimalMultiplier = oddsToDecimal(bet.odds)
+                const boostedOdds = getBoostedOdds(bet.odds)
+                const showBoostedOdds = profitBoostActiveInSlip && isPremierLeagueBet(bet)
+                const effectiveOdds = showBoostedOdds ? boostedOdds : bet.odds
+                const effectiveDecimalMultiplier = oddsToDecimal(effectiveOdds)
                 // Use local stake value if typing, otherwise use bet.stake
                 const currentStake = localStakes[bet.id] !== undefined 
                   ? (localStakes[bet.id] === '' || localStakes[bet.id] === '.' ? 0 : parseFloat(localStakes[bet.id]) || 0)
                   : bet.stake
-                const toWin = currentStake * decimalMultiplier - currentStake
+                const toWin = currentStake * effectiveDecimalMultiplier - currentStake
 
                 return (
                   <motion.div
@@ -4762,8 +4878,15 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                     </div>
 
                       {/* Odds badge */}
-                    <div className="flex-shrink-0 bg-black/[0.06] rounded-md px-2 py-1 mr-1">
-                          <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">{bet.odds}</span>
+                    <div className="flex-shrink-0 bg-black/[0.06] rounded-md px-2 py-1 mr-1 min-w-[56px] text-center">
+                          {showBoostedOdds ? (
+                            <div className="flex flex-col items-center leading-none gap-0.5">
+                              <span className="text-[10px] text-black/35 line-through whitespace-nowrap">{bet.odds}</span>
+                              <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">{boostedOdds}</span>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">{bet.odds}</span>
+                          )}
                         </div>
 
                     {/* Stake Input - Smaller, tighter */}
@@ -4990,6 +5113,16 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                           placedAt: new Date()
                         }))
                         setPlacedBets(prev => [...prev, ...newPlacedBets])
+
+                        if (profitBoostOptedIn) {
+                          const qualifyingStake = betsToPlace.reduce((sum, bet) => {
+                            return sum + (isPremierLeagueBet(bet) ? Math.max(0, bet.stake) : 0)
+                          }, 0)
+                          if (qualifyingStake > 0) {
+                            setProfitBoostQualifiedStake(prev => prev + qualifyingStake)
+                            window.dispatchEvent(new Event('profit-boost-updated'))
+                          }
+                        }
                         
                         // Increment alert count for My Bets tab immediately
                         setMyBetsAlertCount(prev => prev + betsToPlace.length)
@@ -6981,6 +7114,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                       const isTeam1 = optionIndex === 0
                                       const isTeam2 = optionIndex === 1
                                       const isSelected = isBetSelected(event.id, market.title, option.label)
+                                      const shownOdds = option.odds
                                       return (
                                         <button
                                           key={`${event.id}-${market.title}-${option.label}-${optionIndex}`}
@@ -7025,7 +7159,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                           }}
                                         >
                                           <div className="text-[10px] text-white/70 leading-none mb-0.5 truncate w-full text-center">{option.label}</div>
-                                          <div className="text-xs font-bold leading-none">{option.odds}</div>
+                                          <div className="text-xs font-bold leading-none">{shownOdds}</div>
                                         </button>
                                       )
                                     })}
@@ -7034,6 +7168,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 <div className="flex gap-1 h-[38px] items-center">
                                   {market.options.map((option, optionIndex) => {
                                     const isSelected = isBetSelected(event.id, market.title, option.label)
+                                    const shownOdds = option.odds
                                     return (
                                       <button
                                         key={optionIndex}
@@ -7066,7 +7201,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                         }}
                                       >
                                         <div className="text-[10px] text-white/70 leading-none mb-0.5 truncate w-full text-center">{option.label}</div>
-                                        <div className="text-xs font-bold leading-none">{option.odds}</div>
+                                        <div className="text-xs font-bold leading-none">{shownOdds}</div>
                                       </button>
                                     )
                                   })}
@@ -7133,6 +7268,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       >
                         <IconVideo className="w-3 h-3" />
                         Watch
+                        {profitBoostOptedIn && activeSport !== 'Football' && (
+                          <span className="inline-flex h-4 w-4 items-center justify-center rounded bg-amber-300 ml-1">
+                            <IconBolt className="h-2.5 w-2.5 text-black fill-black" strokeWidth={2.6} />
+                          </span>
+                        )}
                       </button>
                     </div>
                     
@@ -8719,6 +8859,15 @@ function VipDrawerContent({
   onBoostClaimed: (amount: number) => void
 }) {
   const isMobile = useIsMobile()
+
+  const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      return localStorage.getItem('profitBoostOptedIn') === 'true'
+    } catch {
+      return false
+    }
+  })
   const checkScroll = useCallback(() => {
     const container = vipTabsContainerRef.current
     if (!container) {
@@ -8778,7 +8927,7 @@ function VipDrawerContent({
     const container = vipTabsContainerRef.current
     if (!container) return
 
-    const tabs = ['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
     const activeIndex = tabs.indexOf(vipActiveTab)
     
     if (activeIndex === -1) return
@@ -8882,7 +9031,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Cash Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
+            {['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -9438,6 +9587,74 @@ function VipDrawerContent({
           </div>
         )}
         
+
+        {vipActiveTab === 'Profit Boost' && (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-white/10 bg-[#232323] overflow-hidden">
+              <div className="relative h-28 w-full border-b border-white/10">
+                <Image
+                  src="/banners/sports_league/premier_banner_bg.png"
+                  alt="Premier League"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+                <div className="absolute left-3 bottom-2.5">
+                  <div className="text-[10px] uppercase tracking-[0.12em] text-white/70 font-semibold">Profit Boost Offer</div>
+                  <div className="text-base font-bold text-white">Premier League</div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-amber-300 flex-shrink-0 mt-1">
+                      <IconBolt className="h-3 w-3 text-black fill-black" strokeWidth={2.6} />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white">Profit Boost</div>
+                      <div className="text-xs text-white/70 mt-0.5">Opt in to activate this offer.</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const next = !profitBoostOptedIn
+                      setProfitBoostOptedIn(next)
+                      try {
+                        localStorage.setItem('profitBoostOptedIn', next ? 'true' : 'false')
+                      } catch {}
+                      window.dispatchEvent(new Event('profit-boost-updated'))
+                      window.dispatchEvent(new CustomEvent('profit-boost-optin-toggled', { detail: { optedIn: next } }))
+                    }}
+                    className={`relative w-12 h-7 rounded-full border transition-colors flex-shrink-0 ${
+                      profitBoostOptedIn
+                        ? 'bg-emerald-500/25 border-emerald-400/40'
+                        : 'bg-white/10 border-white/20'
+                    }`}
+                    aria-label="Toggle Profit Boost opt in"
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
+                        profitBoostOptedIn ? 'left-6' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="rounded-md border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-white/55">League</div>
+                    <div className="text-sm font-semibold text-white mt-0.5">Premier League</div>
+                  </div>
+                  <div className="rounded-md border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-white/55">Required Bet</div>
+                    <div className="text-sm font-semibold text-white mt-0.5">$50</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {vipActiveTab === 'Bet & Get' && (
           <BetAndGet />
         )}
