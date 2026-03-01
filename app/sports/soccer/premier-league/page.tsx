@@ -121,7 +121,7 @@ import {
   IconExternalLink,
   IconMaximize,
   IconShare
-, IconMessageCircle2, IconTrash, IconBrandTelegram, IconRefresh, IconParachute, IconTargetArrow} from '@tabler/icons-react'
+, IconMessageCircle2, IconTrash, IconBrandTelegram, IconRefresh, IconParachute, IconTargetArrow, IconEye, IconEyeOff, IconFingerprint} from '@tabler/icons-react'
 import { SportsTrackerWidget } from '@/components/sports-tracker-widget'
 import { useWidgetDockStore } from '@/lib/store/widgetDockStore'
 import { colorTokenMap } from '@/lib/agent/designSystem'
@@ -4891,7 +4891,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                     {/* Stake Input - Smaller, tighter */}
                     <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === bet.id ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === bet.id ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                           <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                           <input
                             data-vaul-no-drag=""
@@ -5014,7 +5014,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                   {/* Parlay Stake Input - Smaller */}
                   <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                    <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === 'parlay' ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                    <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === 'parlay' ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                       <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                       <input
                         type="text"
@@ -5147,7 +5147,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       className={cn(
                   "w-full py-3 rounded-lg transition-all flex flex-col items-center justify-center font-medium shadow-sm",
                         totalStake > 0 
-                    ? "bg-[#8BC34A] text-white hover:bg-[#7CB342] active:scale-[0.98]" 
+                    ? "bg-[#059669] text-white hover:bg-[#10b981] active:scale-[0.98]" 
                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       )}
                     >
@@ -5202,7 +5202,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
         <div className="flex flex-col items-center justify-center px-6 py-6">
           {/* Success Icon */}
           <div className="mb-4">
-            <div className="w-16 h-16 rounded-full bg-[#8BC34A] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#059669] flex items-center justify-center">
               <IconCheck className="w-8 h-8 text-white" strokeWidth={3} />
             </div>
           </div>
@@ -9711,7 +9711,68 @@ function NavTestPageContent() {
   
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)
-  const [accountDrawerView, setAccountDrawerView] = useState<'account' | 'notifications'>('account')
+  const [accountDrawerView, setAccountDrawerView] = useState<'account' | 'notifications' | 'createAccount' | 'createAccountConfirmation' | 'login'>('account')
+  const [createAccountForm, setCreateAccountForm] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    countryCode: '+1',
+    phone: '',
+    dob: '',
+  })
+  const [createAccountAlias, setCreateAccountAlias] = useState('')
+  const [createAccountTouched, setCreateAccountTouched] = useState(false)
+  const [createAccountPasswordVisible, setCreateAccountPasswordVisible] = useState(false)
+  const [loginForm, setLoginForm] = useState({ identifier: '', password: '', keepLoggedIn: false })
+  const [loginPasswordVisible, setLoginPasswordVisible] = useState(false)
+  const [createAccountDob, setCreateAccountDob] = useState({ day: '', month: '', year: '' })
+  const dobDayRef = useRef<HTMLInputElement>(null)
+  const dobMonthRef = useRef<HTMLInputElement>(null)
+  const dobYearRef = useRef<HTMLInputElement>(null)
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
+    if (typeof window === 'undefined') return true
+    try {
+      const stored = localStorage.getItem('bol-auth-logged-in')
+      return stored === null ? true : stored === 'true'
+    } catch {
+      return true
+    }
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem('bol-auth-logged-in', isUserLoggedIn ? 'true' : 'false')
+    } catch {
+      // ignore storage failures in private browsing
+    }
+  }, [isUserLoggedIn])
+
+  const createAccountErrors = {
+    fullName: createAccountForm.fullName.trim().length >= 2 ? '' : 'Please enter your full name',
+    email: /\S+@\S+\.\S+/.test(createAccountForm.email.trim()) ? '' : 'Please enter a valid email',
+    password: createAccountForm.password.trim().length >= 6 ? '' : 'Use at least 6 characters',
+    phone: createAccountForm.phone.trim().length >= 7 ? '' : 'Please enter a valid phone number',
+    dob: createAccountForm.dob.trim().length > 0 ? '' : 'Please add your date of birth',
+  }
+  const createAccountDobDayNum = Number(createAccountDob.day)
+  const createAccountDobMonthNum = Number(createAccountDob.month)
+  const createAccountDobYearNum = Number(createAccountDob.year)
+  const currentYear = new Date().getFullYear()
+  const isCreateAccountDobValid = createAccountDob.day.length === 2
+    && createAccountDob.month.length === 2
+    && createAccountDob.year.length === 4
+    && createAccountDobDayNum >= 1
+    && createAccountDobDayNum <= 31
+    && createAccountDobMonthNum >= 1
+    && createAccountDobMonthNum <= 12
+    && createAccountDobYearNum >= 1900
+    && createAccountDobYearNum <= currentYear
+  createAccountErrors.dob = isCreateAccountDobValid ? '' : 'Please add a valid date of birth'
+  const createAccountInputClass = "h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill:hover]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill:focus]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+  const createAccountSelectClass = "h-11 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+  const canSubmitLogin = loginForm.identifier.trim().length > 0 && loginForm.password.trim().length >= 6
+  const isCreateAccountStepValid = Object.values(createAccountErrors).every((value) => value === '')
 
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
@@ -10503,7 +10564,7 @@ function NavTestPageContent() {
             isMobile ? "gap-2" : "gap-3"
           )} style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative' }}>
             {/* VIP Crown Button - After theme toggle on desktop, after balance on mobile */}
-            {!isMobile ? (
+            {!isMobile && isUserLoggedIn ? (
               <button
                 onClick={(e) => {
                   e.preventDefault()
@@ -10525,52 +10586,89 @@ function NavTestPageContent() {
             ) : null}
             
             {/* Separator - Hide on mobile */}
-            {!isMobile && (
+            {!isMobile && isUserLoggedIn && (
               <div className="h-6 w-px bg-white/20" />
             )}
             
-            {/* Balance and Avatar Button */}
-            <Button
-              variant="ghost"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                console.log('Account button clicked')
-                openAccountDrawer()
-              }}
-              className={cn(
-                "flex items-center rounded-small transition-colors group",
-                "bg-white/5 hover:bg-white/10",
-                "active:bg-gray-500/20",
-                accountDrawerOpen && "text-white",
-                accountDrawerOpen && { backgroundColor: 'var(--ds-primary, #ee3536)' },
-                isMobile ? "gap-1 px-1.5 py-1" : "gap-1.5 px-2 py-1"
-              )}
-              style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
-            >
-              <div className="relative">
-              <Avatar className={cn(
-                "border border-white/20 group-hover:border-white/40 transition-colors",
-                isMobile ? "h-5 w-5" : "h-6 w-6"
-              )}>
-                <AvatarFallback className="bg-white/10 text-white flex items-center justify-center font-semibold tracking-tight" style={{ fontSize: isMobile ? '9px' : '10px' }}>
-                  CH
-                </AvatarFallback>
-              </Avatar>
-                {/* Red dot indicator for notifications */}
-                <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+            {isUserLoggedIn ? (
+              <>
+                {/* Balance and Avatar Button */}
+                <Button
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('Account button clicked')
+                    openAccountDrawer()
+                  }}
+                  className={cn(
+                    "flex items-center rounded-small transition-colors group",
+                    "bg-white/5 hover:bg-white/10",
+                    "active:bg-gray-500/20",
+                    accountDrawerOpen && "text-white",
+                    accountDrawerOpen && { backgroundColor: 'var(--ds-primary, #ee3536)' },
+                    isMobile ? "gap-1 px-1.5 py-1" : "gap-1.5 px-2 py-1"
+                  )}
+                  style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
+                >
+                  <div className="relative">
+                  <Avatar className={cn(
+                    "border border-white/20 group-hover:border-white/40 transition-colors",
+                    isMobile ? "h-5 w-5" : "h-6 w-6"
+                  )}>
+                    <AvatarFallback className="bg-white/10 text-white flex items-center justify-center font-semibold tracking-tight" style={{ fontSize: isMobile ? '9px' : '10px' }}>
+                      CH
+                    </AvatarFallback>
+                  </Avatar>
+                    {/* Red dot indicator for notifications */}
+                    <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+                  </div>
+                  <span className={cn(
+                    "font-medium text-white text-right tabular-nums transition-all duration-300",
+                    isMobile ? "text-[10px] min-w-[60px]" : "text-xs min-w-[70px]"
+                  )}>
+                    {currentBrand.symbol}
+                    <NumberFlow value={displayBalance} format={{ notation: 'standard', minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+                  </span>
+                </Button>
+              </>
+            ) : (
+              <div className={cn("flex items-center", isMobile ? "gap-1.5" : "gap-2")}>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    openAccountDrawer()
+                    setAccountDrawerView('login')
+                  }}
+                  className={cn(
+                    "rounded-small border border-white/45 bg-transparent text-white font-semibold",
+                    "hover:bg-white/10",
+                    isMobile ? "h-8 px-2.5 text-[11px]" : "h-9 px-3 text-xs"
+                  )}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    openAccountDrawer()
+                    setAccountDrawerView('createAccount')
+                  }}
+                  className={cn(
+                    "rounded-small border border-emerald-600 bg-emerald-600 text-white font-semibold",
+                    "hover:bg-emerald-500 hover:border-emerald-500",
+                    isMobile ? "h-8 px-2.5 text-[11px]" : "h-9 px-3 text-xs"
+                  )}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  Create Account
+                </Button>
               </div>
-              <span className={cn(
-                "font-medium text-white text-right tabular-nums transition-all duration-300",
-                isMobile ? "text-[10px] min-w-[60px]" : "text-xs min-w-[70px]"
-              )}>
-                {currentBrand.symbol}
-                <NumberFlow value={displayBalance} format={{ notation: 'standard', minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
-              </span>
-            </Button>
+            )}
             
             {/* VIP Crown Button - After balance on mobile only */}
-            {isMobile && (
+            {isMobile && isUserLoggedIn && (
               <button
                 onClick={(e) => {
                   e.preventDefault()
@@ -10592,7 +10690,7 @@ function NavTestPageContent() {
             )}
             
 {/* Deposit Button - Desktop only */}
-            {!isMobile && (
+            {!isMobile && isUserLoggedIn && (
               <Button
                 variant="ghost"
                 onClick={(e) => {
@@ -11082,7 +11180,7 @@ function NavTestPageContent() {
                         }, 1000)
                       }}
                       disabled={depositAmount < 25 || depositAmount > 10000 || isDepositLoading}
-                      className={cn("w-full bg-[#8BC34A] text-white hover:bg-[#7CB342] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
+                      className={cn("w-full bg-[#059669] text-white hover:bg-[#10b981] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
                       style={{ pointerEvents: 'auto', zIndex: 10 }}
                     >
                       {isDepositLoading ? (
@@ -11161,7 +11259,7 @@ function NavTestPageContent() {
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.started ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -11175,7 +11273,7 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Processing Step */}
@@ -11184,7 +11282,7 @@ function NavTestPageContent() {
                                 depositStep === 'processing'
                                   ? 'bg-white border-2 border-gray-300 shadow-sm' 
                                   : depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm'
+                                  ? 'bg-[#059669] shadow-sm'
                                   : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.processing ? (
@@ -11206,14 +11304,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Almost Done Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.almost ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -11230,14 +11328,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Complete Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.complete ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -13624,10 +13722,10 @@ function NavTestPageContent() {
               isMobile && "rounded-t-[10px]"
             )}
             style={isMobile ? {
-              height: '80vh',
-              maxHeight: '80vh',
-              top: 'auto',
-              bottom: 0,
+              height: '100dvh',
+              maxHeight: '100dvh',
+              top: 0,
+              bottom: 'auto',
             } : undefined}
           >
             {isMobile && <DrawerHandle />}
@@ -13644,7 +13742,24 @@ function NavTestPageContent() {
                     </Button>
                     <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
                   </div>
-                ) : (
+                ) : accountDrawerView === 'createAccount' || accountDrawerView === 'createAccountConfirmation' || accountDrawerView === 'login' ? (
+                  <div className="flex items-center gap-3 flex-1">
+                    {accountDrawerView === 'createAccount' || accountDrawerView === 'login' ? (
+                      <Button
+                        variant="ghost"
+                        onClick={() => setAccountDrawerView('account')}
+                        className="h-8 w-8 p-0 hover:bg-gray-100 -ml-2"
+                      >
+                        <IconChevronLeft className="h-5 w-5 text-gray-600" />
+                      </Button>
+                    ) : (
+                      <div className="w-6" />
+                    )}
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {accountDrawerView === 'createAccount' ? 'Create Account' : accountDrawerView === 'login' ? 'Log In' : 'Confirm Your Email'}
+                    </h2>
+                  </div>
+                ) : isUserLoggedIn ? (
                   <div className="flex items-center gap-3 flex-1">
                     <Avatar className="h-10 w-10 border border-gray-200">
                       <AvatarFallback className="bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-semibold">
@@ -13656,9 +13771,21 @@ function NavTestPageContent() {
                       <div className="text-xs text-gray-500 text-left">b1767721</div>
                     </div>
                   </div>
+                ) : (
+                  <div className="flex items-center gap-3 flex-1">
+                    <Avatar className="h-10 w-10 border border-gray-200">
+                      <AvatarFallback className="bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-semibold">
+                        G
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <div className="text-sm font-medium text-gray-900 text-left">Guest</div>
+                      <div className="text-xs text-gray-500 text-left">Not signed in</div>
+                    </div>
+                  </div>
                 )}
                 <div className="flex items-center gap-2">
-                  {accountDrawerView === 'notifications' ? null : (
+                  {accountDrawerView !== 'account' || !isUserLoggedIn ? null : (
                     <button 
                       onClick={() => setAccountDrawerView('notifications')}
                       className={cn(
@@ -13681,9 +13808,14 @@ function NavTestPageContent() {
               </div>
             </DrawerHeader>
             
-            <div className={cn("flex-1 overflow-y-auto", isMobile ? "px-4 pt-4 pb-4" : "px-4 pt-6 pb-4")}>
+            <div
+              className={cn("flex-1 overflow-y-auto overscroll-contain", isMobile ? "px-4 pt-4 pb-4" : "px-4 pt-6 pb-4")}
+              style={isMobile ? { WebkitOverflowScrolling: 'touch', paddingBottom: 'max(env(safe-area-inset-bottom), 14px)' } : undefined}
+            >
               {accountDrawerView === 'account' ? (
                 <>
+                  {isUserLoggedIn ? (
+                    <>
                   {/* Balance Information */}
                   <div className="mb-4">
                     <div className="bg-gray-50 rounded-lg px-3 py-3 space-y-3">
@@ -13811,10 +13943,417 @@ function NavTestPageContent() {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-600 h-10 px-2 min-w-0"
+                    onClick={() => {
+                      setIsUserLoggedIn(false)
+                      setAccountDrawerView('account')
+                    }}
                   >
                     <span className="text-sm">Log out</span>
                   </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-4">
+                        <p className="text-sm font-semibold text-gray-900">You are logged out</p>
+                        <p className="mt-1 text-xs text-gray-600">Log back in or create an account to place bets and access your wallet.</p>
+                      </div>
+
+                      <div className="mb-4 grid grid-cols-2 gap-2">
+                        <Button
+                          variant="ghost"
+                          onClick={() => setAccountDrawerView('login')}
+                          className="h-10 rounded-small border border-gray-300 bg-white !text-gray-900 hover:bg-gray-100 hover:!text-gray-900"
+                        >
+                          Login
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setAccountDrawerView('createAccount')}
+                          className="h-10 rounded-small border border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-500 hover:border-emerald-500"
+                        >
+                          Create Account
+                        </Button>
+                      </div>
+
+                      <Separator className="bg-gray-200 mb-3" />
+
+                      <div className="space-y-1 w-full mb-2">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-11 px-3"
+                          onClick={() => {
+                            openDepositDrawer()
+                          }}
+                        >
+                          <IconWallet className="w-5 h-5 mr-3 text-gray-700" />
+                          <span className="flex-1 text-left text-gray-900">Banking</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-11 px-3"
+                        >
+                          <IconLifebuoy className="w-5 h-5 mr-3 text-gray-700" />
+                          <span className="flex-1 text-left text-gray-900">Help Center</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-11 px-3"
+                          onClick={() => {
+                            openVipDrawer()
+                          }}
+                        >
+                          <IconCrown className="w-5 h-5 mr-3 text-gray-700" />
+                          <span className="flex-1 text-left text-gray-900">VIP Rewards</span>
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </>
+              ) : accountDrawerView === 'login' ? (
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-700">Email or Account Number</label>
+                      <input
+                        value={loginForm.identifier}
+                        onChange={(e) => setLoginForm((prev) => ({ ...prev, identifier: e.target.value }))}
+                        placeholder="Email or Account Number"
+                        className={createAccountInputClass}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-medium text-gray-700">Password</label>
+                        <button type="button" className="text-xs font-semibold text-gray-600 hover:text-gray-900">Forgot Password?</button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={loginPasswordVisible ? 'text' : 'password'}
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                          placeholder="Password"
+                          className={`${createAccountInputClass} pr-10`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setLoginPasswordVisible((prev) => !prev)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          aria-label={loginPasswordVisible ? 'Hide password' : 'Show password'}
+                        >
+                          {loginPasswordVisible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                      <Checkbox
+                        checked={loginForm.keepLoggedIn}
+                        onCheckedChange={(checked) => setLoginForm((prev) => ({ ...prev, keepLoggedIn: checked === true }))}
+                        className="h-5 w-5 rounded-[4px] border-gray-300 bg-white data-[state=checked]:bg-[#ee3536] data-[state=checked]:border-[#ee3536]"
+                      />
+                      <span className="text-sm text-gray-700">Keep me logged in</span>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button type="button" className="text-gray-500 hover:text-gray-700">
+                            <IconInfoCircle className="h-4 w-4" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="center" side="top" className="w-[320px] bg-white border border-gray-300 text-gray-700 p-4 shadow-xl">
+                          <p className="text-sm leading-relaxed">
+                            Choosing <span className="font-semibold">"Keep me logged in"</span> reduces the number of times you&apos;re asked to Log-In on this device.
+                          </p>
+                          <p className="text-sm leading-relaxed mt-3">
+                            To keep your account secure, use this option only on your personal devices (do not use on shared or public devices).
+                          </p>
+                        </PopoverContent>
+                      </Popover>
+                    </label>
+                  </div>
+
+                  {isMobile && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full h-11 rounded-small border border-gray-300 bg-white text-gray-900 hover:bg-gray-100"
+                      onClick={() => {
+                        setLoginForm((prev) => ({ ...prev, identifier: 'face-id@betonline.com', password: '******' }))
+                        setIsUserLoggedIn(true)
+                        setAccountDrawerOpen(false)
+                        setAccountDrawerView('account')
+                      }}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <IconFingerprint className="h-4 w-4" />
+                        <span>Use Biometrics</span>
+                      </span>
+                    </Button>
+                  )}
+
+                  <Button
+                    type="button"
+                    disabled={!canSubmitLogin}
+                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white disabled:bg-gray-300 disabled:text-gray-500"
+                    onClick={() => {
+                      setIsUserLoggedIn(true)
+                      setAccountDrawerOpen(false)
+                      setAccountDrawerView('account')
+                    }}
+                  >
+                    Log In
+                  </Button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-gray-700 hover:text-gray-900"
+                      onClick={() => setAccountDrawerView('createAccount')}
+                    >
+                      Don&apos;t have an account yet? <span className="text-[#ee3536] font-semibold">Sign Up!</span>
+                    </button>
+                  </div>
+                </div>
+              ) : accountDrawerView === 'createAccount' ? (
+                <div className="space-y-4">
+                  <div className="overflow-hidden rounded-xl">
+                    <Image
+                      src="/banners/casino/casino_banner1.svg"
+                      alt="Signup offer banner"
+                      width={1200}
+                      height={360}
+                      className="w-full h-auto"
+                      sizes="(max-width: 768px) 100vw, 600px"
+                    />
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-700">Full Name *</label>
+                      <input
+                        value={createAccountForm.fullName}
+                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                        placeholder="Your full name"
+                        className={createAccountInputClass}
+                      />
+                      {createAccountTouched && createAccountErrors.fullName && (
+                        <p className="text-xs text-[#ee3536]">{createAccountErrors.fullName}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-700">Email *</label>
+                      <input
+                        type="email"
+                        value={createAccountForm.email}
+                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="Email"
+                        className={createAccountInputClass}
+                      />
+                      {createAccountTouched && createAccountErrors.email && (
+                        <p className="text-xs text-[#ee3536]">{createAccountErrors.email}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-700">Password *</label>
+                      <div className="relative">
+                        <input
+                          type={createAccountPasswordVisible ? 'text' : 'password'}
+                          value={createAccountForm.password}
+                          onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, password: e.target.value }))}
+                          placeholder="Password"
+                          className={`${createAccountInputClass} pr-10`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setCreateAccountPasswordVisible((prev) => !prev)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          aria-label={createAccountPasswordVisible ? 'Hide password' : 'Show password'}
+                        >
+                          {createAccountPasswordVisible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {createAccountTouched && createAccountErrors.password && (
+                        <p className="text-xs text-[#ee3536]">{createAccountErrors.password}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-700">Phone Number *</label>
+                      <div className="grid grid-cols-[120px_1fr] gap-2 mt-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button type="button" className={`${createAccountSelectClass} flex items-center justify-between`}>
+                              <span className="flex items-center gap-2">
+                                <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200">
+                                  {createAccountForm.countryCode === '+1' ? '🇺🇸' : createAccountForm.countryCode === '+44' ? '🇬🇧' : createAccountForm.countryCode === '+34' ? '🇪🇸' : '🇦🇺'}
+                                </span>
+                                <span>
+                                  {createAccountForm.countryCode === '+1' ? 'US +1' : createAccountForm.countryCode === '+44' ? 'UK +44' : createAccountForm.countryCode === '+34' ? 'ES +34' : 'AU +61'}
+                                </span>
+                              </span>
+                              <IconChevronDown className="h-4 w-4 text-gray-600" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-[150px] bg-white border border-gray-200">
+                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+1' }))} className="text-gray-900 hover:bg-gray-100">
+                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇺🇸</span>
+                              US +1
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+44' }))} className="text-gray-900 hover:bg-gray-100">
+                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇬🇧</span>
+                              UK +44
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+34' }))} className="text-gray-900 hover:bg-gray-100">
+                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇪🇸</span>
+                              ES +34
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+61' }))} className="text-gray-900 hover:bg-gray-100">
+                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇦🇺</span>
+                              AU +61
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <input
+                          type="tel"
+                          value={createAccountForm.phone}
+                          onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, phone: e.target.value }))}
+                          placeholder="Phone Number"
+                          className={createAccountInputClass}
+                        />
+                      </div>
+                      {createAccountTouched && createAccountErrors.phone && (
+                        <p className="text-xs text-[#ee3536] mt-1">{createAccountErrors.phone}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-700">Date of Birth *</label>
+                      <div className="grid grid-cols-3 gap-2 mt-1">
+                        <input
+                          ref={dobDayRef}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={2}
+                          value={createAccountDob.day}
+                          onChange={(e) => {
+                            const next = e.target.value.replace(/\D/g, '').slice(0, 2)
+                            setCreateAccountDob((prev) => ({ ...prev, day: next }))
+                            if (next.length === 2) dobMonthRef.current?.focus()
+                          }}
+                          placeholder="DD"
+                          className={createAccountInputClass}
+                        />
+                        <input
+                          ref={dobMonthRef}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={2}
+                          value={createAccountDob.month}
+                          onChange={(e) => {
+                            const next = e.target.value.replace(/\D/g, '').slice(0, 2)
+                            setCreateAccountDob((prev) => ({ ...prev, month: next }))
+                            if (next.length === 2) dobYearRef.current?.focus()
+                          }}
+                          placeholder="MM"
+                          className={createAccountInputClass}
+                        />
+                        <input
+                          ref={dobYearRef}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={4}
+                          value={createAccountDob.year}
+                          onChange={(e) => {
+                            const next = e.target.value.replace(/\D/g, '').slice(0, 4)
+                            setCreateAccountDob((prev) => ({ ...prev, year: next }))
+                          }}
+                          placeholder="YYYY"
+                          className={createAccountInputClass}
+                        />
+                      </div>
+                      {createAccountTouched && createAccountErrors.dob && (
+                        <p className="text-xs text-[#ee3536] mt-1">{createAccountErrors.dob}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setCreateAccountTouched(true)
+                      if (!isCreateAccountStepValid) return
+                      setAccountDrawerView('createAccountConfirmation')
+                    }}
+                    disabled={!isCreateAccountStepValid}
+                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white disabled:bg-gray-300 disabled:text-gray-500"
+                  >
+                    Continue
+                  </Button>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2"
+                      onClick={() => setAccountDrawerView('login')}
+                    >
+                      Already have an account? Log in
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center text-gray-600 gap-1.5">
+                          <IconShield className="text-green-600 w-3.5 h-3.5" />
+                          <span className="text-xs font-medium">SAFE &amp; SECURE</span>
+                        </div>
+                        <div className="w-px h-3.5 bg-gray-300" />
+                        <div className="flex items-center text-gray-600 gap-1.5">
+                          <IconLock className="text-blue-600 w-3.5 h-3.5" />
+                          <span className="text-xs font-medium">TRUSTED EXPERIENCE</span>
+                        </div>
+                      </div>
+                      <p className="text-gray-500 text-center text-xs">
+                        Your details are encrypted and protected.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : accountDrawerView === 'createAccountConfirmation' ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#ee3536]" />
+                    <div className="flex-1 h-1.5 rounded-full bg-[#ee3536]" />
+                  </div>
+                  <div className="text-xs text-gray-500">Step 2 of 2: Verify your email</div>
+
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="h-5 w-5 rounded-full bg-[#059669] flex items-center justify-center">
+                        <IconCheck className="h-3.5 w-3.5 text-white" />
+                      </span>
+                      <p className="text-sm font-semibold text-gray-900">Account created</p>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-600">
+                      We sent an activation email to <span className="font-medium text-gray-900">{createAccountForm.email || 'your email'}</span>. Activate your account from that email to start betting.
+                    </p>
+                    <div className="mt-3 space-y-1">
+                      <label className="text-xs font-medium text-gray-700">Alias / Nickname (optional)</label>
+                      <input
+                        value={createAccountAlias}
+                        onChange={(e) => setCreateAccountAlias(e.target.value)}
+                        placeholder="How should we display your name?"
+                        className={createAccountInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setAccountDrawerView('account')
+                      setCreateAccountTouched(false)
+                      setCreateAccountPasswordVisible(false)
+                      setCreateAccountDob({ day: '', month: '', year: '' })
+                      setCreateAccountAlias('')
+                      setCreateAccountForm({ fullName: '', email: '', password: '', countryCode: '+1', phone: '', dob: '' })
+                    }}
+                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white"
+                  >
+                    Done
+                  </Button>
+                </div>
               ) : (
                 <>
                   {/* Notifications Page */}
@@ -14714,7 +15253,7 @@ function NavTestPageContent() {
                   width: '20px', 
                   height: '20px', 
                   borderRadius: '50%', 
-                  backgroundColor: '#8BC34A', 
+                  backgroundColor: '#059669', 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',

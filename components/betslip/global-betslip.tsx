@@ -62,7 +62,7 @@ function BetslipConfirmationView() {
       <div className="flex flex-col items-center justify-center px-6 py-6">
         {/* Success Icon */}
         <div className="mb-4">
-          <div className="w-16 h-16 rounded-full bg-[#8BC34A] flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-[#059669] flex items-center justify-center">
             <IconCheck className="w-8 h-8 text-white" strokeWidth={3} />
           </div>
         </div>
@@ -559,7 +559,7 @@ function BetslipDefaultView() {
                           <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">{bet.odds}</span>
                         </div>
                     <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === bet.id ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === bet.id ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                         <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                         <input
                           data-vaul-no-drag=""
@@ -652,7 +652,7 @@ function BetslipDefaultView() {
                     </div>
                     <div className="flex-shrink-0 text-xs font-medium text-black mr-1.5">{parlayOdds}</div>
                     <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === 'parlay' ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === 'parlay' ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                         <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                         <input
                           data-vaul-no-drag=""
@@ -729,7 +729,7 @@ function BetslipDefaultView() {
             disabled={totalStake === 0}
             className={cn(
               "w-full py-3 rounded-lg transition-all flex flex-col items-center justify-center font-medium shadow-sm",
-              totalStake > 0 ? "bg-[#8BC34A] text-white hover:bg-[#7CB342] active:scale-[0.98]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              totalStake > 0 ? "bg-[#059669] text-white hover:bg-[#10b981] active:scale-[0.98]" : "bg-gray-100 text-gray-400 cursor-not-allowed"
             )}
           >
             <span className="text-xs font-medium uppercase tracking-wide">

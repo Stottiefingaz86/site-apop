@@ -5144,7 +5144,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                     {/* Stake Input - Smaller, tighter */}
                     <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === bet.id ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                      <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === bet.id ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                           <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                           <input
                             data-vaul-no-drag=""
@@ -5262,7 +5262,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
                   {/* Parlay Stake Input - Smaller */}
                   <div className="flex-shrink-0 w-[100px] min-w-[100px]">
-                    <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#8BC34A] focus-within:ring-1 focus-within:ring-[#8BC34A]/30 transition-all", numpadTarget === 'parlay' ? "border-[#8BC34A] ring-1 ring-[#8BC34A]/30" : "border-black/10")}>
+                    <div className={cn("border rounded-lg h-[38px] flex items-center justify-end px-2 relative bg-white focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669]/30 transition-all", numpadTarget === 'parlay' ? "border-[#059669] ring-1 ring-[#059669]/30" : "border-black/10")}>
                       <span className="absolute left-2 text-xs text-black/50 z-10">$</span>
                       <input
                         data-vaul-no-drag=""
@@ -5376,7 +5376,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       className={cn(
                   "w-full py-3 rounded-lg transition-all flex flex-col items-center justify-center font-medium shadow-sm",
                         totalStake > 0 
-                    ? "bg-[#8BC34A] text-white hover:bg-[#7CB342] active:scale-[0.98]" 
+                    ? "bg-[#059669] text-white hover:bg-[#10b981] active:scale-[0.98]" 
                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       )}
                     >
@@ -5431,7 +5431,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
         <div className="flex flex-col items-center justify-center px-6 py-6">
           {/* Success Icon */}
           <div className="mb-4">
-            <div className="w-16 h-16 rounded-full bg-[#8BC34A] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#059669] flex items-center justify-center">
               <IconCheck className="w-8 h-8 text-white" strokeWidth={3} />
             </div>
           </div>
@@ -10645,7 +10645,7 @@ function NavTestPageContent() {
                         }, 1000)
                       }}
                       disabled={depositAmount < 25 || depositAmount > 10000 || isDepositLoading}
-                      className={cn("w-full bg-[#8BC34A] text-white hover:bg-[#7CB342] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
+                      className={cn("w-full bg-[#059669] text-white hover:bg-[#10b981] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
                       style={{ pointerEvents: 'auto', zIndex: 10 }}
                     >
                       {isDepositLoading ? (
@@ -10724,7 +10724,7 @@ function NavTestPageContent() {
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.started ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -10738,7 +10738,7 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Processing Step */}
@@ -10747,7 +10747,7 @@ function NavTestPageContent() {
                                 depositStep === 'processing'
                                   ? 'bg-white border-2 border-gray-300 shadow-sm' 
                                   : depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm'
+                                  ? 'bg-[#059669] shadow-sm'
                                   : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.processing ? (
@@ -10769,14 +10769,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Almost Done Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.almost ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -10793,14 +10793,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Complete Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.complete ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -14137,7 +14137,7 @@ function NavTestPageContent() {
                   width: '20px', 
                   height: '20px', 
                   borderRadius: '50%', 
-                  backgroundColor: '#8BC34A', 
+                  backgroundColor: '#059669',
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',

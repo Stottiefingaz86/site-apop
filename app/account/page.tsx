@@ -474,10 +474,10 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
       {/* Filter tabs */}
       <div className="flex items-center gap-1 mb-3 overflow-x-auto scrollbar-hide">
         {filterTabs.map((tab) => (
-          <button
+            <button
             key={tab.key}
             onClick={() => { setActiveFilter(tab.key); setExpandedBetId(null) }}
-            className={cn(
+              className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0",
               activeFilter === tab.key
                 ? "bg-white/10 text-white border border-white/20"
@@ -492,9 +492,9 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
               )}>
                 {tab.count}
               </span>
-            )}
-          </button>
-        ))}
+              )}
+            </button>
+          ))}
       </div>
 
       {/* Bet list */}
@@ -546,7 +546,7 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
                 {/* Expanded details */}
                 <AnimatePresence>
                   {expandedBetId === bet.id && (
-                    <motion.div
+          <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -630,9 +630,9 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
                           </span>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
               </div>
             ))
           )}
@@ -671,7 +671,7 @@ function PaymentLogo({ method, className }: { method: string; className?: string
       ) : (
         <span className="text-xs font-semibold text-white/70">{method}</span>
       )}
-    </div>
+      </div>
   )
 }
 
@@ -693,7 +693,7 @@ function SecurityBadge({ name, iconPath, className }: { name: string; iconPath: 
       ) : (
         <span className="text-xs font-semibold text-white/70">{name}</span>
       )}
-    </div>
+          </div>
   )
 }
 
@@ -732,14 +732,14 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
                   <AvatarFallback className="bg-[#2d2d2d] text-white text-sm font-semibold">C</AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#1a1a1a]" />
-              </div>
+            </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-white">Christopher</span>
                   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-400">
                     <IconCrown className="w-2.5 h-2.5" /> VIP Gold
                   </span>
-                </div>
+            </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-xs text-white/40">ID: B3375823</span>
                   <button
@@ -749,16 +749,16 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
                   >
                     <IconCopy className="h-3 w-3 text-white/30 hover:text-white/60" />
                   </button>
-                </div>
-              </div>
+          </div>
+        </div>
             </div>
-            <button
+          <button
               onClick={() => onNavigate('profile')}
               className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors flex-shrink-0"
             >
               <IconSettings className="w-4 h-4 text-white/40" />
-            </button>
-          </div>
+          </button>
+      </div>
 
           {/* Balance section — darker inset */}
           <div className="bg-white/[0.03] border-t border-white/[0.06] px-4 md:px-5 py-4">
@@ -766,12 +766,12 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
               <div className="bg-[#2d2d2d] rounded-lg p-3 border border-white/[0.06]">
                 <div className="text-[11px] text-white/40 mb-1">Available Balance</div>
                 <div className="text-xl font-bold text-white tabular-nums leading-tight">$100,000.00</div>
-              </div>
+            </div>
               <div className="bg-[#2d2d2d] rounded-lg p-3 border border-white/[0.06]">
                 <div className="text-[11px] text-white/40 mb-1">Free Bet</div>
                 <div className="text-xl font-bold text-emerald-400 tabular-nums leading-tight">$25.00</div>
-              </div>
-            </div>
+        </div>
+      </div>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 size="sm"
@@ -1000,7 +1000,7 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
     const potentialReturns = getPotentialReturns(bet.amount, bet.odds)
     const isGraded = bet.status === 'won' || bet.status === 'lost' || bet.status === 'void'
 
-    return (
+  return (
       <motion.div
         initial={{ height: 0, opacity: 0 }}
         animate={{ height: 'auto', opacity: 1 }}
@@ -1136,13 +1136,13 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
       {/* Sub-Nav Tabs — animated pill style matching site sub-navs */}
       <div className={cn("mb-5", isMobile && "overflow-x-auto scrollbar-hide -mx-2 px-2")}>
         <div className="bg-white/5 p-0.5 rounded-3xl inline-flex items-center gap-1" style={isMobile ? { minWidth: 'max-content' } : undefined}>
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.key}
+        {filterTabs.map((tab) => (
+          <button
+            key={tab.key}
               onClick={() => { setActiveFilter(tab.key); setCurrentPage(1); setExpandedBetId(null) }}
-              className={cn(
+            className={cn(
                 "relative px-4 py-1.5 h-8 text-xs font-medium rounded-2xl whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 z-10 transition-colors duration-200",
-                activeFilter === tab.key
+              activeFilter === tab.key
                   ? "text-white"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               )}
@@ -1161,16 +1161,16 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                 />
               )}
               <span className="relative z-10">{tab.label}</span>
-              {tab.count !== null && (
-                <span className={cn(
+            {tab.count !== null && (
+              <span className={cn(
                   "relative z-10 px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none",
                   activeFilter === tab.key ? "bg-white/20 text-white" : "bg-white/10 text-white/50"
                 )}>
                   {tab.count}
                 </span>
-              )}
-            </button>
-          ))}
+            )}
+          </button>
+        ))}
         </div>
       </div>
 
@@ -1208,7 +1208,7 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                         alt={bet.sport}
                         className="w-3.5 h-3.5 object-contain opacity-70"
                       />
-                    </div>
+                </div>
 
                     {/* Bet Info */}
                     <div className="flex-1 min-w-0">
@@ -1221,13 +1221,13 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                         {bet.legCount && (
                           <span className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
                             <span className="text-[9px] text-white/60 font-medium">+{bet.legCount}</span>
-                          </span>
-                        )}
-                      </div>
+                      </span>
+                    )}
+                  </div>
                       {bet.type !== 'parlay' && bet.team1 && bet.team2 && (
                         <div className="text-[11px] text-white/40 mt-0.5 truncate">
                           {bet.team1} v {bet.team2} · {bet.league}
-                        </div>
+                  </div>
                       )}
                       {bet.isLive && bet.liveInfo && bet.type !== 'parlay' && (
                         <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
@@ -1235,7 +1235,7 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                           <span className="text-[11px] font-bold text-white flex-shrink-0 whitespace-nowrap">{bet.liveInfo.score.team1} - {bet.liveInfo.score.team2}</span>
                           <span className="text-[11px] text-white/60 truncate">{bet.team2}</span>
                           <span className="text-[10px] text-white/40 ml-auto flex-shrink-0 whitespace-nowrap">{bet.liveInfo.period} {bet.liveInfo.time}</span>
-                        </div>
+                </div>
                       )}
                       {!bet.isLive && bet.finalScore && bet.type !== 'parlay' && (
                         <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
@@ -1243,9 +1243,9 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                           <span className="text-[11px] text-white/60 truncate">{bet.team1}</span>
                           <span className="text-[11px] font-bold text-white flex-shrink-0 whitespace-nowrap">{bet.finalScore.team1} - {bet.finalScore.team2}</span>
                           <span className="text-[11px] text-white/60 truncate">{bet.team2}</span>
-                        </div>
+              </div>
                       )}
-                    </div>
+              </div>
 
                     {/* Tags + Odds + Chevron */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -1253,54 +1253,54 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                         bet.isLive ? getLiveTag() : getPendingTag()
                       )}
                       <span className="text-sm font-medium text-white/80 min-w-[45px] text-right">{bet.odds}</span>
-                      <motion.div
+                <motion.div
                         animate={{ rotate: isExpanded ? 90 : 0 }}
-                        transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2 }}
                       >
                         <IconChevronRight className="w-4 h-4 text-white/30" />
                       </motion.div>
-                    </div>
-                  </div>
+                      </div>
+                      </div>
 
                   <AnimatePresence>
                     {isExpanded && renderExpandedBet(bet)}
-                  </AnimatePresence>
-                </div>
+            </AnimatePresence>
+          </div>
               )
             })}
-          </div>
+      </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-3 px-1">
-            <div className="flex items-center gap-2 text-xs text-white/50">
-              <span>Rows per page:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}
-                className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-white text-xs focus:outline-none cursor-pointer"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-white/50">
-              <span>{currentPage} of {totalPages}</span>
-              <div className="flex items-center gap-1">
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-3 px-1">
+        <div className="flex items-center gap-2 text-xs text-white/50">
+          <span>Rows per page:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}
+            className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-white text-xs focus:outline-none cursor-pointer"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-white/50">
+          <span>{currentPage} of {totalPages}</span>
+          <div className="flex items-center gap-1">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="p-1 rounded hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
-                  <IconChevronLeft className="w-4 h-4" />
-                </button>
+              <IconChevronLeft className="w-4 h-4" />
+            </button>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="p-1 rounded hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
-                  <IconChevronRight className="w-4 h-4" />
-                </button>
+              <IconChevronRight className="w-4 h-4" />
+            </button>
               </div>
             </div>
           </div>
@@ -1326,24 +1326,24 @@ function BonusContent() {
       <div>
         <AnimateTabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <AnimateTabsList className="bg-white/5 p-0.5 h-auto gap-1 rounded-3xl border-0 relative">
-            {['Sports', 'Casino'].map((tab) => (
+        {['Sports', 'Casino'].map((tab) => (
               <TabsTab
-                key={tab}
+            key={tab}
                 value={tab}
                 className="relative z-10 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl px-4 py-1 h-9 text-xs font-medium transition-colors data-[state=active]:text-white focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:bg-transparent active:outline-none"
               >
-                {activeTab === tab && (
-                  <motion.div
+            {activeTab === tab && (
+              <motion.div
                     layoutId="accountBonusTab"
                     className="absolute inset-0 rounded-2xl -z-10"
-                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
                     initial={false}
                     transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                  />
-                )}
+              />
+            )}
                 <span className="relative z-10">{tab}</span>
               </TabsTab>
-            ))}
+        ))}
           </AnimateTabsList>
         </AnimateTabs>
       </div>
@@ -1545,46 +1545,46 @@ function PaymentsContent() {
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-5 space-y-4">
               <p className="text-xs text-white/50">Select your preferred payment method to make a deposit.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { label: 'Bitcoin', icon: '₿' },
-                  { label: 'Ethereum', icon: 'Ξ' },
-                  { label: 'Credit Card', icon: '💳' },
-                  { label: 'Wire Transfer', icon: '🏦' },
-                  { label: 'Cashier Check', icon: '📄' },
-                  { label: 'Person to Person', icon: '🤝' },
-                ].map((method) => (
+          {[
+            { label: 'Bitcoin', icon: '₿' },
+            { label: 'Ethereum', icon: 'Ξ' },
+            { label: 'Credit Card', icon: '💳' },
+            { label: 'Wire Transfer', icon: '🏦' },
+            { label: 'Cashier Check', icon: '📄' },
+            { label: 'Person to Person', icon: '🤝' },
+          ].map((method) => (
                   <button key={method.label} className="flex flex-col items-center gap-2 p-3 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/20 transition-colors">
                     <span className="text-xl">{method.icon}</span>
                     <span className="text-[10px] text-white/70">{method.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            </button>
+          ))}
+        </div>
+      </div>
           </motion.div>
         )}
         {activeTab === 'Withdraw' && (
           <motion.div key="withdraw" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-5 space-y-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
-                <div>
+          <div>
                   <span className="text-[10px] text-white/40">Available for Withdrawal</span>
                   <p className="text-lg font-bold text-white mt-0.5">$100,000.00</p>
-                </div>
+          </div>
                 <IconWallet className="w-6 h-6 text-white/20" strokeWidth={1.5} />
-              </div>
+        </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { label: 'Bitcoin', icon: '₿' },
-                  { label: 'Wire Transfer', icon: '🏦' },
-                  { label: 'Cashier Check', icon: '📄' },
-                  { label: 'Person to Person', icon: '🤝' },
-                ].map((method) => (
+          {[
+            { label: 'Bitcoin', icon: '₿' },
+            { label: 'Wire Transfer', icon: '🏦' },
+            { label: 'Cashier Check', icon: '📄' },
+            { label: 'Person to Person', icon: '🤝' },
+          ].map((method) => (
                   <button key={method.label} className="flex flex-col items-center gap-2 p-3 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/20 transition-colors">
                     <span className="text-xl">{method.icon}</span>
                     <span className="text-[10px] text-white/70">{method.label}</span>
-                  </button>
-                ))}
-              </div>
+            </button>
+          ))}
+        </div>
             </div>
           </motion.div>
         )}
@@ -2618,19 +2618,19 @@ function AccountPageContent() {
               <SidebarMenu className="flex flex-row items-center gap-2">
                 {/* Sidebar collapse toggle */}
                 <div className="flex items-center gap-1.5 mr-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                <Button
+                  variant="ghost"
+                  size="icon"
                     onClick={() => toggleSidebar()}
-                    className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <line x1="9" y1="3" x2="9" y2="21" />
-                    </svg>
-                  </Button>
-                  <div className="w-px h-5 bg-white/20" />
-                </div>
+                  className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                  </svg>
+                </Button>
+                <div className="w-px h-5 bg-white/20" />
+              </div>
 
                 {visibleProducts.sports && (
                 <SidebarMenuItem>
@@ -2835,7 +2835,7 @@ function AccountPageContent() {
 
           {/* VIP Crown Button - Mobile only */}
           {isMobile && (
-            <button
+          <button
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -2851,7 +2851,7 @@ function AccountPageContent() {
               style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
             >
               <IconCrown className="text-yellow-400 w-4 h-4" />
-            </button>
+          </button>
           )}
 
           {/* Deposit Button - Desktop only */}
@@ -2922,7 +2922,7 @@ function AccountPageContent() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <line x1="9" y1="3" x2="9" y2="21" />
-                  </svg>
+              </svg>
                 </button>
               )}
               <div onClick={() => router.push('/')} className="cursor-pointer">
@@ -2938,7 +2938,7 @@ function AccountPageContent() {
                     >
                       <svg viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
                         <path fillRule="evenodd" clipRule="evenodd" d="M113.405 60.8753V61.3718C113.405 61.5704 113.405 61.769 113.505 61.8684V62.2656C113.405 66.6351 112.307 70.3095 110.211 73.2887C108.014 76.2679 105.219 78.7506 101.825 80.5381C98.4308 82.4249 94.5375 83.7159 90.2449 84.5104C85.9523 85.3048 81.6597 85.7021 77.367 85.7021H37.4357V36.4457H37.236C37.236 36.4457 7.08782 34.4596 0 34.4596C0 34.4596 20.1653 32.7714 37.236 32.4734H37.4357L37.3358 0H73.3739C77.5667 0 81.7595 0.297921 85.9523 0.794457C90.1451 1.3903 94.0384 2.38337 97.4325 3.97229C100.827 5.5612 103.722 7.84526 105.818 10.7252C108.014 13.6051 109.112 17.3788 109.112 22.1455C109.112 27.0115 107.615 31.0831 104.52 34.261L103.722 35.0554C103.722 35.0554 103.422 35.4527 102.723 36.0485C101.925 36.6443 101.126 37.2402 99.9282 37.9353C99.8284 37.985 99.7536 38.0346 99.6787 38.0843C99.6038 38.1339 99.5289 38.1836 99.4291 38.2333C93.1399 35.4527 86.0521 33.8637 80.861 32.97C83.9557 31.679 85.2535 30.388 85.6528 29.8915C85.799 29.7461 85.8916 29.6007 86.0091 29.4163C86.0521 29.3488 86.0984 29.2761 86.1519 29.1963C86.8507 28.0046 87.25 26.6143 87.25 25.0254C87.25 23.3372 86.8507 22.0462 86.0521 20.9538C85.1536 19.8614 84.1554 19.067 82.8576 18.4711C81.46 17.776 79.9626 17.3788 78.2655 17.0808C76.5684 16.7829 74.8713 16.6836 73.2741 16.6836H58.9986L59.0984 33.0693H59.7972C82.9574 34.4596 98.7303 38.6305 106.617 45.6813C107.415 46.2771 111.608 49.8522 113.006 56.6051L113.205 57.3002V57.5981C113.205 57.7471 113.23 57.8961 113.255 58.045C113.28 58.194 113.305 58.343 113.305 58.4919V58.8891C113.305 59.2367 113.33 59.5595 113.355 59.8822C113.38 60.205 113.405 60.5277 113.405 60.8753ZM90.5444 63.7552L90.6442 63.5566C91.343 62.2656 93.0401 57.9954 88.8473 52.7321C86.1519 49.6536 79.7629 45.2841 65.4874 41.5104L56.6027 39.4249L57.8007 40.8152L58.0003 41.0139C58.0262 41.0654 58.0723 41.1303 58.1316 41.2138C58.3007 41.4521 58.5772 41.8417 58.7989 42.5035L59.0984 43.3972C59.1068 43.4722 59.1152 43.5465 59.1235 43.6203C59.2143 44.4257 59.2981 45.1688 59.2981 46.0785C59.1983 48.7598 59.0984 61.6697 59.0984 67.3303V69.1178L59.8971 69.2171H77.6665C79.2638 69.2171 80.9609 69.0185 82.6579 68.7205C84.355 68.4226 85.8524 67.8268 87.1502 67.0323C88.448 66.2379 89.5461 65.2448 90.4445 63.9538C90.4445 63.9538 90.5444 63.8545 90.5444 63.7552Z" fill="#ee3536"/>
-                      </svg>
+              </svg>
                     </motion.div>
                   ) : isMobile ? (
                     <motion.div
@@ -3175,9 +3175,9 @@ function AccountPageContent() {
                       const Icon = item.icon
                       return (
                         <SidebarMenuItem key={index}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <SidebarMenuButton
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -3188,22 +3188,22 @@ function AccountPageContent() {
                                     setActiveSection('payments')
                                   }
                                 }}
-                                className={cn(
+                            className={cn(
                                   "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
                                   "text-white/70 hover:text-white hover:bg-white/5"
-                                )}
-                              >
+                            )}
+                          >
                                 <Icon strokeWidth={1.5} className="w-5 h-5" />
                                 <span>{item.label}</span>
-                              </SidebarMenuButton>
-                            </TooltipTrigger>
-                            {sidebarState === 'collapsed' && (
-                              <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        {sidebarState === 'collapsed' && (
+                          <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
                                 <p>{item.label}</p>
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </SidebarMenuItem>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </SidebarMenuItem>
                       )
                     })}
                   </SidebarMenu>
@@ -3264,21 +3264,21 @@ function AccountPageContent() {
             </div>
           )}
 
-          {/* Content Area */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeSection}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.15 }}
-            >
+            {/* Content Area */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.15 }}
+              >
               {activeSection === 'dashboard' && <DashboardSection onNavigate={setActiveSection} onOpenVipHub={openVipDrawer} />}
-              {activeSection === 'bet-history' && <BetHistoryContent />}
+                {activeSection === 'bet-history' && <BetHistoryContent />}
               {activeSection === 'transactions' && <TransactionsContent />}
               {activeSection === 'my-bonus' && <BonusContent />}
               {activeSection === 'payments' && <PaymentsContent />}
-              {activeSection === 'refer' && <ReferFriendContent />}
+                {activeSection === 'refer' && <ReferFriendContent />}
               {activeSection === 'security' && <SecurityContent />}
               {activeSection === 'profile' && <ProfileContent />}
             </motion.div>
@@ -3301,7 +3301,7 @@ function AccountPageContent() {
                     <li><a href="#" className="hover:text-white transition-colors">Terms & Conditions</a></li>
                     <li><a href="#" className="hover:text-white transition-colors">Responsible Gaming</a></li>
                   </ul>
-                </div>
+                          </div>
                 <div>
                   <h3 className="font-semibold mb-3 text-sm">Casino</h3>
                   <ul className="space-y-1.5 text-xs text-white/70">
@@ -3314,7 +3314,7 @@ function AccountPageContent() {
                     <li><a href="#" className="hover:text-white transition-colors">Slots</a></li>
                     <li><a href="#" className="hover:text-white transition-colors">Video Poker</a></li>
                   </ul>
-                </div>
+                          </div>
                 <div>
                   <h3 className="font-semibold mb-3 text-sm">Sports</h3>
                   <ul className="space-y-1.5 text-xs text-white/70">
@@ -3327,7 +3327,7 @@ function AccountPageContent() {
                     <li><a href="#" className="hover:text-white transition-colors">Super Bowl Betting Odds</a></li>
                     <li><a href="#" className="hover:text-white transition-colors">Boxing Betting Odds</a></li>
                   </ul>
-                </div>
+                        </div>
                 <div>
                   <h3 className="font-semibold mb-3 text-sm">Poker</h3>
                   <ul className="space-y-1.5 text-xs text-white/70">
@@ -3389,9 +3389,9 @@ function AccountPageContent() {
                   <SecurityBadge name="SSL Secure" iconPath="/logos/payment/ssl-secure.svg" />
                   <div className="flex items-center justify-center w-7 h-7 rounded-full bg-red-500 border-2 border-white">
                     <span className="text-[10px] font-bold text-white">18+</span>
+                    </div>
                   </div>
-                </div>
-              </div>
+          </div>
 
               <Separator className="bg-white/10 mb-6" />
 
@@ -3616,7 +3616,7 @@ function AccountPageContent() {
                           }, 1000)
                         }}
                         disabled={depositAmount < 25 || depositAmount > 10000 || isDepositLoading}
-                        className={cn("w-full bg-[#8BC34A] text-white hover:bg-[#7CB342] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
+                        className={cn("w-full bg-[#059669] text-white hover:bg-[#10b981] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
                         style={{ pointerEvents: 'auto', zIndex: 10 }}
                       >
                         {isDepositLoading ? (
@@ -3690,7 +3690,7 @@ function AccountPageContent() {
                         <div className="flex flex-col items-center flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                             depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                              ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                              ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                           }`}>
                             {stepLoading.started ? (
                               <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -3701,13 +3701,13 @@ function AccountPageContent() {
                           <span className="text-gray-900 text-xs font-medium whitespace-nowrap">Started</span>
                         </div>
                         <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                          depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                          depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#059669]' : 'bg-gray-200'
                         }`} />
                         {/* Processing Step */}
                         <div className="flex flex-col items-center flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                             depositStep === 'processing' ? 'bg-white border-2 border-gray-300 shadow-sm'
-                            : depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#8BC34A] shadow-sm'
+                            : depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#059669] shadow-sm'
                             : 'bg-gray-200 border-2 border-gray-300'
                           }`}>
                             {stepLoading.processing ? (
@@ -3725,12 +3725,12 @@ function AccountPageContent() {
                           }`}>Processing</span>
                         </div>
                         <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                          depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                          depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#059669]' : 'bg-gray-200'
                         }`} />
                         {/* Almost Done Step */}
                         <div className="flex flex-col items-center flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                            depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                            depositStep === 'almost' || depositStep === 'complete' ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                           }`}>
                             {stepLoading.almost ? (
                               <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -3743,12 +3743,12 @@ function AccountPageContent() {
                           }`}>Almost Done</span>
                         </div>
                         <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                          depositStep === 'complete' ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                          depositStep === 'complete' ? 'bg-[#059669]' : 'bg-gray-200'
                         }`} />
                         {/* Complete Step */}
                         <div className="flex flex-col items-center flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                            depositStep === 'complete' ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                            depositStep === 'complete' ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                           }`}>
                             {stepLoading.complete ? (
                               <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -4152,7 +4152,7 @@ function AccountPageContent() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] bg-[#1a1a1a] border border-white/10 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3"
           >
-            <div className="w-6 h-6 rounded-full bg-[#8BC34A] flex items-center justify-center flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#059669] flex items-center justify-center flex-shrink-0">
               <IconCheck className="w-4 h-4 text-white" />
             </div>
             <span className="text-sm font-medium">{toastMessage}</span>

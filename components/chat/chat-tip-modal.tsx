@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 import { useChatStore, type ChatMessage } from "@/lib/store/chatStore"
-import { IconCoin, IconX, IconStar, IconShield, IconDiamond } from "@tabler/icons-react"
+import { IconCoin, IconX, IconCrown, IconShield } from "@tabler/icons-react"
+import { getVipLevelName, getVipLevelTagTone } from "@/lib/chat/vipLevels"
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100]
 
@@ -84,9 +85,19 @@ export default function ChatTipModal() {
               <span className="text-[14px] font-semibold text-white">
                 {user.username}
               </span>
-              {user.badge === 'vip' && <IconStar className="w-3.5 h-3.5 text-amber-400/60" />}
+              {user.badge === 'vip' && (
+                <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium", getVipLevelTagTone(user.vipLevel).chipClass)} style={getVipLevelTagTone(user.vipLevel).chipStyle}>
+                  <IconCrown className="w-3 h-3" style={getVipLevelTagTone(user.vipLevel).iconStyle} />
+                  {getVipLevelName(user.vipLevel)}
+                </span>
+              )}
               {user.badge === 'mod' && <IconShield className="w-3.5 h-3.5 text-emerald-400/60" />}
-              {user.badge === 'high-roller' && <IconDiamond className="w-3.5 h-3.5 text-purple-400/60" />}
+              {user.badge === 'high-roller' && (
+                <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium", getVipLevelTagTone(7).chipClass)} style={getVipLevelTagTone(7).chipStyle}>
+                  <IconCrown className="w-3 h-3" style={getVipLevelTagTone(7).iconStyle} />
+                  Black
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-white/30">Sending tip to this user</p>
           </div>

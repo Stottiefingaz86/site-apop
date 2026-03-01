@@ -19,6 +19,7 @@ export interface ChatMessage {
   username: string
   avatar?: string
   badge?: 'vip' | 'mod' | 'high-roller' | null
+  vipLevel?: number
   content: string
   timestamp: Date
   type: 'message' | 'tip' | 'rain' | 'bet-share' | 'system'
@@ -144,15 +145,15 @@ interface ChatState {
 const mockUsers: ChatUser[] = [
   { id: '1', username: 'HighRoller_Mike', badge: 'vip', vipLevel: 8, isOnline: true },
   { id: '2', username: 'Mod_Sarah', badge: 'mod', isOnline: true },
-  { id: '3', username: 'LuckySpinner', badge: null, isOnline: true },
-  { id: '4', username: 'BlackjackPro', badge: 'high-roller', isOnline: true },
-  { id: '5', username: 'RouletteQueen', badge: null, isOnline: true },
-  { id: '6', username: 'CardCounter88', badge: null, isOnline: true },
+  { id: '3', username: 'LuckySpinner', badge: 'vip', vipLevel: 1, isOnline: true },
+  { id: '4', username: 'BlackjackPro', badge: 'vip', vipLevel: 7, isOnline: true },
+  { id: '5', username: 'RouletteQueen', badge: 'vip', vipLevel: 2, isOnline: true },
+  { id: '6', username: 'CardCounter88', badge: 'vip', vipLevel: 4, isOnline: true },
   { id: '7', username: 'SlotMachineKing', badge: 'vip', vipLevel: 3, isOnline: true },
-  { id: '8', username: 'BetMaster2026', badge: null, isOnline: true },
+  { id: '8', username: 'BetMaster2026', badge: 'vip', vipLevel: 6, isOnline: true },
   { id: '9', username: 'AceOfSpades', badge: 'vip', vipLevel: 5, isOnline: true },
   { id: '10', username: 'WinStreak99', badge: null, isOnline: false },
-  { id: '11', username: 'PokerFace_Joe', badge: 'high-roller', isOnline: true },
+  { id: '11', username: 'PokerFace_Joe', badge: 'vip', vipLevel: 9, isOnline: true },
   { id: '12', username: 'CryptoWhale', badge: 'vip', vipLevel: 10, isOnline: true },
 ]
 
@@ -162,6 +163,7 @@ const mockCasinoMessages: ChatMessage[] = [
     userId: '1',
     username: 'HighRoller_Mike',
     badge: 'vip',
+    vipLevel: 8,
     content: 'Hey @LuckySpinner, great win on the slots! How much was it? 🎰',
     timestamp: new Date(Date.now() - 300000),
     type: 'message',
@@ -188,7 +190,8 @@ const mockCasinoMessages: ChatMessage[] = [
     id: 'cm4',
     userId: '4',
     username: 'BlackjackPro',
-    badge: 'high-roller',
+    badge: 'vip',
+    vipLevel: 7,
     content: 'Any open seats at the high stakes blackjack table?',
     timestamp: new Date(Date.now() - 160000),
     type: 'message',
@@ -198,6 +201,7 @@ const mockCasinoMessages: ChatMessage[] = [
     userId: '1',
     username: 'HighRoller_Mike',
     badge: 'vip',
+    vipLevel: 8,
     content: '',
     timestamp: new Date(Date.now() - 120000),
     type: 'tip',
@@ -208,6 +212,8 @@ const mockCasinoMessages: ChatMessage[] = [
     id: 'cm6',
     userId: '5',
     username: 'RouletteQueen',
+    badge: 'vip',
+    vipLevel: 2,
     content: '@Mod_Sarah is the tournament schedule updated for the weekend?',
     timestamp: new Date(Date.now() - 80000),
     type: 'message',
@@ -218,6 +224,7 @@ const mockCasinoMessages: ChatMessage[] = [
     userId: '7',
     username: 'SlotMachineKing',
     badge: 'vip',
+    vipLevel: 3,
     content: 'Just won $2,500 on Gonzo\'s Quest! This slot is on fire today 🔥🔥',
     timestamp: new Date(Date.now() - 60000),
     type: 'message',
@@ -227,6 +234,7 @@ const mockCasinoMessages: ChatMessage[] = [
     userId: '12',
     username: 'CryptoWhale',
     badge: 'vip',
+    vipLevel: 10,
     content: 'Making it rain! 💰🌧️',
     timestamp: new Date(Date.now() - 40000),
     type: 'rain',
@@ -236,6 +244,7 @@ const mockCasinoMessages: ChatMessage[] = [
     userId: '9',
     username: 'AceOfSpades',
     badge: 'vip',
+    vipLevel: 5,
     content: 'GG everyone! The live blackjack table was insane tonight',
     timestamp: new Date(Date.now() - 20000),
     type: 'message',
@@ -272,7 +281,8 @@ const mockSportsMessages: ChatMessage[] = [
     id: 'sm2',
     userId: '11',
     username: 'PokerFace_Joe',
-    badge: 'high-roller',
+    badge: 'vip',
+    vipLevel: 9,
     content: '',
     timestamp: new Date(Date.now() - 350000),
     type: 'bet-share',
@@ -292,6 +302,7 @@ const mockSportsMessages: ChatMessage[] = [
     userId: '1',
     username: 'HighRoller_Mike',
     badge: 'vip',
+    vipLevel: 8,
     content: 'That parlay is spicy 🌶️ I\'m tailing!',
     timestamp: new Date(Date.now() - 320000),
     type: 'message',
@@ -302,6 +313,7 @@ const mockSportsMessages: ChatMessage[] = [
     userId: '12',
     username: 'CryptoWhale',
     badge: 'vip',
+    vipLevel: 10,
     content: 'Making it rain! 💰🌧️',
     timestamp: new Date(Date.now() - 280000),
     type: 'rain',
@@ -351,7 +363,8 @@ const mockSportsMessages: ChatMessage[] = [
     id: 'sm5',
     userId: '4',
     username: 'BlackjackPro',
-    badge: 'high-roller',
+    badge: 'vip',
+    vipLevel: 7,
     content: 'Arsenal vs Man City should be a banger. Taking Arsenal ML at +250 🎯',
     timestamp: new Date(Date.now() - 180000),
     type: 'message',
@@ -388,6 +401,7 @@ const mockSportsMessages: ChatMessage[] = [
     userId: 'sim-18',
     username: 'WhaleAlert🐋',
     badge: 'vip',
+    vipLevel: 6,
     content: 'Making it rain! 💰🌧️',
     timestamp: new Date(Date.now() - 100000),
     type: 'rain',
@@ -421,6 +435,7 @@ const mockSportsMessages: ChatMessage[] = [
     userId: 'sim-7',
     username: 'SlotQueenXO',
     badge: 'vip',
+    vipLevel: 2,
     content: 'appreciate the rain whale 🐋❤️',
     timestamp: new Date(Date.now() - 65000),
     type: 'message',
@@ -430,6 +445,7 @@ const mockSportsMessages: ChatMessage[] = [
     userId: '9',
     username: 'AceOfSpades',
     badge: 'vip',
+    vipLevel: 5,
     content: '@BetMaster2026 nice call on the Chiefs! Already up 14-3 ✅',
     timestamp: new Date(Date.now() - 50000),
     type: 'message',
@@ -456,7 +472,8 @@ const mockSportsMessages: ChatMessage[] = [
     id: 'sm-hype-dave',
     userId: 'sim-13',
     username: 'OddsGuru',
-    badge: 'high-roller',
+    badge: 'vip',
+    vipLevel: 7,
     content: '@DaveMason the GOAT of hold analysis. Every time you break down the book I make money 💯🐐',
     timestamp: new Date(Date.now() - 15000),
     type: 'message',
@@ -569,12 +586,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sportsMessages: mockSportsMessages,
   addMessage: (room, message) =>
     set((state) => {
+      const roomUsers = room === 'casino' ? state.casinoUsers : state.sportsUsers
+      const userMeta = roomUsers.find((u) => u.id === message.userId || u.username === message.username)
+      const normalizedMessage: ChatMessage = {
+        ...message,
+        badge: message.badge ?? userMeta?.badge ?? null,
+        vipLevel: message.vipLevel ?? userMeta?.vipLevel,
+      }
       const MAX_MESSAGES = 200
       if (room === 'casino') {
-        const msgs = [...state.casinoMessages, message]
+        const msgs = [...state.casinoMessages, normalizedMessage]
         return { casinoMessages: msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs }
       }
-      const msgs = [...state.sportsMessages, message]
+      const msgs = [...state.sportsMessages, normalizedMessage]
       return { sportsMessages: msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs }
     }),
 

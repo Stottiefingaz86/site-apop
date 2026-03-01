@@ -3925,7 +3925,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       className={cn(
                         "w-full text-[15px] font-semibold uppercase tracking-[0.46px] py-2 px-[22px] rounded-[4px] transition-colors",
                         totalStake > 0 
-                          ? "bg-[#8BC34A] text-white hover:bg-[#7CB342] cursor-pointer" 
+                          ? "bg-[#059669] text-white hover:bg-[#10b981] cursor-pointer" 
                           : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed"
                       )}
                     >
@@ -7955,7 +7955,7 @@ function NavTestPageContent() {
                         }, 1000)
                       }}
                       disabled={depositAmount < 25 || depositAmount > 10000 || isDepositLoading}
-                      className={cn("w-full bg-[#8BC34A] text-white hover:bg-[#7CB342] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
+                      className={cn("w-full bg-[#059669] text-white hover:bg-[#10b981] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
                       style={{ pointerEvents: 'auto', zIndex: 10 }}
                     >
                       {isDepositLoading ? (
@@ -8034,7 +8034,7 @@ function NavTestPageContent() {
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.started ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -8048,7 +8048,7 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Processing Step */}
@@ -8057,7 +8057,7 @@ function NavTestPageContent() {
                                 depositStep === 'processing'
                                   ? 'bg-white border-2 border-gray-300 shadow-sm' 
                                   : depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm'
+                                  ? 'bg-[#059669] shadow-sm'
                                   : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.processing ? (
@@ -8079,14 +8079,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Almost Done Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.almost ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />
@@ -8103,14 +8103,14 @@ function NavTestPageContent() {
                             {/* Connector Line */}
                             <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
                               depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
+                                ? 'bg-[#059669]' : 'bg-gray-200'
                             }`} />
                             
                             {/* Complete Step */}
                             <div className="flex flex-col items-center flex-1 min-w-0">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
                                 depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
+                                  ? 'bg-[#059669] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
                               }`}>
                                 {stepLoading.complete ? (
                                   <IconLoader2 className="w-4 h-4 text-white animate-spin" />

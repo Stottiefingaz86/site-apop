@@ -1,14 +1,31 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useChatStore, type ChatUser } from "@/lib/store/chatStore"
-import { IconStar, IconShield, IconDiamond, IconCoin, IconAt } from "@tabler/icons-react"
+import { IconShield, IconCoin, IconAt, IconCrown } from "@tabler/icons-react"
+import { cn } from "@/lib/utils"
+import { getVipLevelName, getVipLevelTagTone } from "@/lib/chat/vipLevels"
 
 function UserBadgeSmall({ badge, vipLevel }: { badge?: string | null; vipLevel?: number }) {
   if (!badge) return null
-  if (badge === 'vip') return <IconStar className="w-3 h-3 text-amber-400" />
+  if (badge === 'vip') {
+    const tone = getVipLevelTagTone(vipLevel)
+    return (
+      <span className={cn("inline-flex items-center gap-1 text-[10px] rounded px-1 py-0.5", tone.chipClass)} style={tone.chipStyle}>
+        <IconCrown className="w-2.5 h-2.5" style={tone.iconStyle} />
+        {getVipLevelName(vipLevel)}
+      </span>
+    )
+  }
   if (badge === 'mod') return <IconShield className="w-3 h-3 text-emerald-400" />
-  if (badge === 'high-roller') return <IconDiamond className="w-3 h-3 text-purple-400" />
+  if (badge === 'high-roller') {
+    const blackTone = getVipLevelTagTone(7)
+    return (
+      <span className={cn("inline-flex items-center gap-1 text-[10px] rounded px-1 py-0.5", blackTone.chipClass)} style={blackTone.chipStyle}>
+        <IconCrown className="w-2.5 h-2.5" style={blackTone.iconStyle} />
+        Black
+      </span>
+    )
+  }
   return null
 }
 
@@ -35,19 +52,13 @@ export default function ChatUserList({ onUserClick }: { onUserClick?: (user: Cha
             className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/5 transition-colors text-left"
           >
             <div className="relative flex-shrink-0">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
+              <div className="w-7 h-7 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">
                 {user.username.charAt(0).toUpperCase()}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#222222]" />
             </div>
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className={cn(
-                "text-[12px] font-medium truncate",
-                user.badge === 'mod' ? 'text-emerald-400' :
-                user.badge === 'vip' ? 'text-amber-400' :
-                user.badge === 'high-roller' ? 'text-purple-400' :
-                'text-white/80'
-              )}>
+              <span className="text-[12px] font-medium truncate text-white/80">
                 {user.username}
               </span>
               <UserBadgeSmall badge={user.badge} vipLevel={user.vipLevel} />

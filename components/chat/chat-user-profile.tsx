@@ -20,16 +20,18 @@ import {
   IconCrown,
 } from "@tabler/icons-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { getVipLevelName, getVipLevelTagTone } from "@/lib/chat/vipLevels"
 
 // ─── Badge Component ─────────────────────────────────────
 function VipBadge({ badge, vipLevel }: { badge?: string | null; vipLevel?: number }) {
   if (!badge) return null
 
   if (badge === 'vip') {
+    const tone = getVipLevelTagTone(vipLevel)
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-white/60 border border-white/10">
-        <IconCrown className="w-3 h-3 text-amber-400/70" />
-        VIP {vipLevel || 1}
+      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold", tone.chipClass)} style={tone.chipStyle}>
+        <IconCrown className="w-3 h-3" style={tone.iconStyle} />
+        {getVipLevelName(vipLevel)}
       </span>
     )
   }
@@ -42,10 +44,11 @@ function VipBadge({ badge, vipLevel }: { badge?: string | null; vipLevel?: numbe
     )
   }
   if (badge === 'high-roller') {
+    const blackTone = getVipLevelTagTone(7)
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-white/60 border border-white/10">
-        <IconDiamond className="w-3 h-3 text-purple-400/70" />
-        HIGH ROLLER
+      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold", blackTone.chipClass)} style={blackTone.chipStyle}>
+        <IconCrown className="w-3 h-3" style={blackTone.iconStyle} />
+        Black
       </span>
     )
   }

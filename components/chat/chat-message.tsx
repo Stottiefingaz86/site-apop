@@ -3,18 +3,20 @@
 import { cn } from "@/lib/utils"
 import { useChatStore, type ChatMessage as ChatMessageType, type ChatUser } from "@/lib/store/chatStore"
 import { useBetslipStore } from "@/lib/store/betslipStore"
-import { IconStar, IconShield, IconDiamond, IconCoin, IconCloud, IconCopy, IconFlame, IconHandStop, IconMoodSmile, IconCheck } from "@tabler/icons-react"
+import { IconCrown, IconShield, IconDiamond, IconCoin, IconCloud, IconCopy, IconFlame, IconHandStop, IconMoodSmile, IconCheck } from "@tabler/icons-react"
 import { useState } from "react"
+import { getVipLevelName, getVipLevelTagTone } from "@/lib/chat/vipLevels"
 
 // ─── Badge Component ─────────────────────────────────────
 function UserBadge({ badge, vipLevel }: { badge?: string | null; vipLevel?: number }) {
   if (!badge) return null
 
   if (badge === 'vip') {
+    const tone = getVipLevelTagTone(vipLevel)
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-        <IconStar className="w-2.5 h-2.5" />
-        VIP{vipLevel ? ` ${vipLevel}` : ''}
+      <span className={cn("inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold", tone.chipClass)} style={tone.chipStyle}>
+        <IconCrown className="w-2.5 h-2.5" style={tone.iconStyle} />
+        {getVipLevelName(vipLevel)}
       </span>
     )
   }
@@ -29,9 +31,11 @@ function UserBadge({ badge, vipLevel }: { badge?: string | null; vipLevel?: numb
   }
 
   if (badge === 'high-roller') {
+    const blackTone = getVipLevelTagTone(7)
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
-        <IconDiamond className="w-2.5 h-2.5" />
+      <span className={cn("inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold", blackTone.chipClass)} style={blackTone.chipStyle}>
+        <IconCrown className="w-2.5 h-2.5" style={blackTone.iconStyle} />
+        Black
       </span>
     )
   }
@@ -120,7 +124,7 @@ function BetShareMessage({ message }: { message: ChatMessageType }) {
       <div className="rounded-xl overflow-hidden border border-white/10 bg-gradient-to-b from-[#1a2332] to-[#151c28]">
         {/* Header */}
         <div className="px-3 py-2 flex items-center gap-2 border-b border-white/5">
-          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
+          <div className="w-5 h-5 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">
             {message.username.charAt(0).toUpperCase()}
           </div>
           <span className="text-[11px] font-semibold text-white/90">{message.username}</span>
@@ -226,7 +230,7 @@ export default function ChatMessage({
       {/* Avatar */}
       <button
         onClick={() => onUserClick?.({ id: message.userId, username: message.username, badge: message.badge })}
-        className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[11px] font-bold text-white cursor-pointer hover:ring-2 hover:ring-white/20 transition-all mt-0.5"
+        className="flex-shrink-0 w-7 h-7 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center text-[11px] font-bold text-white cursor-pointer hover:ring-2 hover:ring-white/20 transition-all mt-0.5"
       >
         {message.username.charAt(0).toUpperCase()}
       </button>
@@ -236,17 +240,11 @@ export default function ChatMessage({
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => onUserClick?.({ id: message.userId, username: message.username, badge: message.badge })}
-            className={cn(
-              "text-[12px] font-semibold cursor-pointer hover:underline",
-              message.badge === 'mod' ? 'text-emerald-400' :
-              message.badge === 'vip' ? 'text-amber-400' :
-              message.badge === 'high-roller' ? 'text-purple-400' :
-              'text-white/90'
-            )}
+            className="text-[12px] font-semibold cursor-pointer hover:underline text-white/90"
           >
             {message.username}
           </button>
-          <UserBadge badge={message.badge} />
+          <UserBadge badge={message.badge} vipLevel={message.vipLevel} />
           <span className="text-[10px] text-white/25">{formatTimestamp(message.timestamp)}</span>
         </div>
         <p className="text-[13px] text-white/75 leading-relaxed break-words">
