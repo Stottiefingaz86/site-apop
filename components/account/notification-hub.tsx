@@ -297,13 +297,30 @@ const SEED_NOTIFICATIONS: NotificationItem[] = [
     timeLabel: "Aug 27, 2024",
     unread: false,
   },
+  {
+    id: "n-24",
+    title: "20 Free Spins Added",
+    description: "You have been given 20 free spins on a casino game.",
+    timeLabel: "Today",
+    unread: true,
+    type: "feature-cta",
+    ctaLabel: "Play now",
+    ctaAction: "launch_game_of_week",
+  },
 ]
+
+function ensureRequiredNotifications(items: NotificationItem[]): NotificationItem[] {
+  const freeSpins = SEED_NOTIFICATIONS.find((item) => item.id === "n-24")
+  if (!freeSpins) return items
+  const withoutFreeSpins = items.filter((item) => item.id !== "n-24")
+  return [hydrateNotificationTemplates(freeSpins), ...withoutFreeSpins]
+}
 
 export function NotificationHub() {
   const isMobile = useIsMobile()
   const [tab, setTab] = useState<"all" | "unread">("all")
   const [items, setItems] = useState<NotificationItem[]>(() =>
-    SEED_NOTIFICATIONS.map(hydrateNotificationTemplates),
+    ensureRequiredNotifications(SEED_NOTIFICATIONS.map(hydrateNotificationTemplates)),
   )
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
@@ -314,7 +331,7 @@ export function NotificationHub() {
     try {
       const parsed = JSON.parse(raw) as NotificationItem[]
       if (Array.isArray(parsed) && parsed.length > 0) {
-        setItems(parsed.map(hydrateNotificationTemplates))
+        setItems(ensureRequiredNotifications(parsed.map(hydrateNotificationTemplates)))
       }
     } catch {
       // Ignore malformed local storage.
