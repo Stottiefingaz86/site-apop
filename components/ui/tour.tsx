@@ -1660,8 +1660,10 @@ function TourFooter(props: DivProps) {
   const hasDefaultFooter = React.useContext(DefaultFooterContext);
   const context = useTourContext(FOOTER_NAME);
 
+  const safeRef = typeof ref === "string" ? undefined : ref;
+
   const composedRef = useComposedRefs(
-    ref,
+    safeRef,
     hasDefaultFooter ? undefined : stepContext.onFooterChange,
   );
 
