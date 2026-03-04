@@ -1528,10 +1528,14 @@ function SportsOfferingsPreview() {
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <div className="flex flex-col items-center justify-center gap-0.5">
                     <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
-                      <span className="text-[10px] font-bold text-white leading-none">{(event as { score1: number }).score1}</span>
+                      <span className="text-[10px] font-bold text-white leading-none">
+                        {'score1' in event && typeof event.score1 === 'number' ? event.score1 : ''}
+                      </span>
                     </div>
                     <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
-                      <span className="text-[10px] font-bold text-white leading-none">{(event as { score2: number }).score2}</span>
+                      <span className="text-[10px] font-bold text-white leading-none">
+                        {'score2' in event && typeof event.score2 === 'number' ? event.score2 : ''}
+                      </span>
                     </div>
                   </div>
                   <IconChevronRight className="w-3.5 h-3.5 text-white/50 hover:text-white transition-colors cursor-pointer flex-shrink-0" />
