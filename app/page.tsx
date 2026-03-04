@@ -1499,10 +1499,6 @@ function HomePageContent() {
       const amount = (evt as CustomEvent<{ amount?: number }>).detail?.amount ?? 250
       setBalance((prev) => prev + amount)
       setDisplayBalance((prev) => prev + amount)
-      setToastMessage(`Reward claimed! +$${amount.toFixed(2)} added to your balance.`)
-      setToastAction(null)
-      setShowToast(true)
-      setTimeout(() => setShowToast(false), 2200)
     }
 
     window.addEventListener('notification:open-vip-benefits', onOpenVipBenefits)
