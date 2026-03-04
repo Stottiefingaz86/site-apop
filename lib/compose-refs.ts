@@ -6,13 +6,15 @@ type PossibleRef<T> = React.Ref<T> | undefined;
  * Set a given ref to a given value
  * This utility takes care of different types of refs: callback refs and RefObject(s)
  */
-function setRef<T>(ref: PossibleRef<T>, value: T) {
+function setRef<T>(ref: PossibleRef<T>, value: T | null) {
   if (typeof ref === "function") {
     return ref(value);
   }
 
   if (ref !== null && ref !== undefined) {
-    ref.current = value;
+    // RefObject<T> exposes readonly `current` in type space, but assigning is
+    // valid for mutable refs at runtime.
+    (ref as React.MutableRefObject<T | null>).current = value;
   }
 }
 
