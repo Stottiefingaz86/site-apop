@@ -1500,8 +1500,8 @@ function SportsOfferingsPreview() {
                     <span className="text-[8px] font-semibold text-[#ee3536]">LIVE</span>
                   </div>
                   <div className="flex items-center gap-0.5">
-                    <span className="text-[8px] font-bold text-white/70">{(event as { period: string }).period}</span>
-                    <span className="text-[8px] text-white/60">{(event as { time: string }).time}</span>
+                    <span className="text-[8px] font-bold text-white/70">{'period' in event ? event.period : ''}</span>
+                    <span className="text-[8px] text-white/60">{event.time}</span>
                   </div>
                 </div>
               ) : (
