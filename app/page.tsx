@@ -125,6 +125,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
+import { NotificationHub } from '@/components/account/notification-hub'
 
 // Helper function to get vendor icon path
 const getVendorIconPath = (vendorName: string): string => {
@@ -1475,6 +1476,44 @@ function HomePageContent() {
   const jackpotTimerRef = useRef<NodeJS.Timeout | null>(null)
   const gameLauncherMenuRef = useRef<HTMLDivElement>(null)
   const gameImageRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onOpenVipBenefits = () => {
+      openVipDrawer()
+      setVipActiveTab('VIP Hub')
+    }
+    const onLaunchGameOfWeek = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ game?: { title: string; image: string; provider?: string; features?: string[] } }>).detail
+      if (detail?.game) {
+        setSelectedGame(detail.game)
+        return
+      }
+      setSelectedGame({
+        title: 'Game of the Week',
+        image: '/banners/casino/casino_banner1.svg',
+        provider: 'Dragon Gaming',
+        features: ['Weekly featured title', 'Bonus rounds enabled'],
+      })
+    }
+    const onClaimReward = (evt: Event) => {
+      const amount = (evt as CustomEvent<{ amount?: number }>).detail?.amount ?? 250
+      setBalance((prev) => prev + amount)
+      setDisplayBalance((prev) => prev + amount)
+      setToastMessage(`Reward claimed! +$${amount.toFixed(2)} added to your balance.`)
+      setToastAction(null)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2200)
+    }
+
+    window.addEventListener('notification:open-vip-benefits', onOpenVipBenefits)
+    window.addEventListener('notification:launch-game-of-week', onLaunchGameOfWeek as EventListener)
+    window.addEventListener('notification:claim-reward', onClaimReward as EventListener)
+    return () => {
+      window.removeEventListener('notification:open-vip-benefits', onOpenVipBenefits)
+      window.removeEventListener('notification:launch-game-of-week', onLaunchGameOfWeek as EventListener)
+      window.removeEventListener('notification:claim-reward', onClaimReward as EventListener)
+    }
+  }, [openVipDrawer])
   
   // Helper function to hash game title to a number for favoritedGames Set
   const hashGameTitle = (title: string): number => {
@@ -4449,35 +4488,7 @@ function HomePageContent() {
                 </div>
               ) : (
                 <>
-                  {/* Notifications Page */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <Button 
-                        variant="ghost" 
-                        className="h-8 px-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                      >
-                        View All
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">New Promotion Available!</p>
-                          <p className="text-xs text-gray-500 mt-1">Claim your free spins now!</p>
-                          <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">Your Bet has been settled!</p>
-                          <p className="text-xs text-gray-500 mt-1">Check your winnings now!</p>
-                          <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <NotificationHub />
                 </>
               )}
             </div>

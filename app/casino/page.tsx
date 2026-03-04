@@ -211,6 +211,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+  Tour,
+  TourArrow,
+  TourClose,
+  TourDescription,
+  TourFooter,
+  TourHeader,
+  TourNext,
+  TourPortal,
+  TourPrev,
+  TourSkip,
+  TourSpotlight,
+  TourSpotlightRing,
+  TourStep,
+  TourStepCounter,
+  TourTitle,
+} from '@/components/ui/tour'
 import NumberFlow from "@number-flow/react"
 import {
   Drawer,
@@ -246,6 +263,7 @@ import {
   useFamilyDrawer,
   type ViewsRegistry,
 } from '@/components/ui/family-drawer'
+import { NotificationHub } from '@/components/account/notification-hub'
 
 // Helper function to get vendor icon path
 const getVendorIconPath = (vendorName: string): string => {
@@ -7889,6 +7907,7 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
 }
 
 function NavTestPageContent() {
+  const CASINO_FEATURE_TOUR_KEY = 'bol-casino-feature-tour-v1'
   const isMobile = useIsMobile()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -7937,6 +7956,7 @@ function NavTestPageContent() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [toastAction, setToastAction] = useState<{ label: string; onClick: () => void } | null>(null)
+  const [casinoFeatureTourOpen, setCasinoFeatureTourOpen] = useState(false)
 
   useEffect(() => {
     const handleProfitBoostOptInToggled = (evt: Event) => {
@@ -7955,6 +7975,20 @@ function NavTestPageContent() {
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)
   const [accountDrawerView, setAccountDrawerView] = useState<'account' | 'notifications'>('account')
+
+  const completeCasinoFeatureTour = useCallback(() => {
+    setCasinoFeatureTourOpen(false)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(CASINO_FEATURE_TOUR_KEY, 'seen')
+    }
+  }, [CASINO_FEATURE_TOUR_KEY])
+
+  const handleCasinoTourOpenChange = useCallback((open: boolean) => {
+    setCasinoFeatureTourOpen(open)
+    if (!open && typeof window !== 'undefined') {
+      window.localStorage.setItem(CASINO_FEATURE_TOUR_KEY, 'seen')
+    }
+  }, [CASINO_FEATURE_TOUR_KEY])
 
   // ─── Product visibility (from Design Customizer brand toggles) ───
   const ALL_ON: ProductToggles = { sports: true, liveBetting: true, casino: true, liveCasino: true, poker: true, vipRewards: true }
@@ -8474,6 +8508,44 @@ function NavTestPageContent() {
   const jackpotTimerRef = useRef<NodeJS.Timeout | null>(null)
   const gameLauncherMenuRef = useRef<HTMLDivElement>(null)
   const gameImageRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onOpenVipBenefits = () => {
+      openVipDrawer()
+      setVipActiveTab('VIP Hub')
+    }
+    const onLaunchGameOfWeek = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ game?: { title: string; image: string; provider?: string; features?: string[] } }>).detail
+      if (detail?.game) {
+        setSelectedGame(detail.game)
+        return
+      }
+      setSelectedGame({
+        title: 'Game of the Week',
+        image: '/banners/casino/casino_banner1.svg',
+        provider: 'Dragon Gaming',
+        features: ['Weekly featured title', 'Bonus rounds enabled'],
+      })
+    }
+    const onClaimReward = (evt: Event) => {
+      const amount = (evt as CustomEvent<{ amount?: number }>).detail?.amount ?? 250
+      setBalance((prev) => prev + amount)
+      setDisplayBalance((prev) => prev + amount)
+      setToastMessage(`Reward claimed! +$${amount.toFixed(2)} added to your balance.`)
+      setToastAction(null)
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2200)
+    }
+
+    window.addEventListener('notification:open-vip-benefits', onOpenVipBenefits)
+    window.addEventListener('notification:launch-game-of-week', onLaunchGameOfWeek as EventListener)
+    window.addEventListener('notification:claim-reward', onClaimReward as EventListener)
+    return () => {
+      window.removeEventListener('notification:open-vip-benefits', onOpenVipBenefits)
+      window.removeEventListener('notification:launch-game-of-week', onLaunchGameOfWeek as EventListener)
+      window.removeEventListener('notification:claim-reward', onClaimReward as EventListener)
+    }
+  }, [openVipDrawer])
   
   // Detect landscape orientation on mobile
   useEffect(() => {
@@ -8843,6 +8915,20 @@ function NavTestPageContent() {
       router.replace('/casino', { scroll: false })
     }
   }, [searchParams, router])
+
+  useEffect(() => {
+    if (!mounted || isMobile || showSports || showVipRewards || showPoker) return
+    if (typeof window === 'undefined') return
+
+    const hasSeenTour = window.localStorage.getItem(CASINO_FEATURE_TOUR_KEY) === 'seen'
+    if (hasSeenTour) return
+
+    const timeout = window.setTimeout(() => {
+      setCasinoFeatureTourOpen(true)
+    }, 500)
+
+    return () => window.clearTimeout(timeout)
+  }, [mounted, isMobile, showSports, showVipRewards, showPoker, CASINO_FEATURE_TOUR_KEY])
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
@@ -10230,6 +10316,11 @@ function NavTestPageContent() {
                               <TooltipTrigger asChild>
                                 <SidebarMenuButton
                                   isActive={isActive}
+                                  data-tour-target={item.label === 'Play Random'
+                                    ? 'casino-play-random'
+                                    : item.label === 'Last Game Played'
+                                      ? 'casino-last-played'
+                                      : undefined}
                                   onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
@@ -13801,59 +13892,7 @@ function NavTestPageContent() {
                 </>
               ) : (
                 <>
-                  {/* Notifications Page */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <Button 
-                        variant="ghost" 
-                        className="h-8 px-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                      >
-                        View All
-                      </Button>
-                </div>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">New Promotion Available!</p>
-                          <p className="text-xs text-gray-500 mt-1">Claim your free spins now!</p>
-                          <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                </div>
-              </div>
-                      <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">Your Bet has been settled!</p>
-                          <p className="text-xs text-gray-500 mt-1">Check your winnings now!</p>
-                          <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
-                </div>
-                </div>
-                      <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">Weekly summary</p>
-                          <p className="text-xs text-gray-500 mt-1">View your weekly betting activity</p>
-                          <p className="text-xs text-gray-400 mt-1">1 day ago</p>
-              </div>
-              </div>
-                      <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">Bet settled</p>
-                          <p className="text-xs text-gray-500 mt-1">Your bet on Liverpool has been settled</p>
-                          <p className="text-xs text-gray-400 mt-1">2 days ago</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 font-medium">New bonus code available</p>
-                          <p className="text-xs text-gray-500 mt-1">Use code BONUS50 for 50% match</p>
-                          <p className="text-xs text-gray-400 mt-1">3 days ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <NotificationHub />
                 </>
               )}
             </div>
@@ -14686,6 +14725,71 @@ function NavTestPageContent() {
             </div>
           </DrawerContent>
         </Drawer>
+
+      {mounted && !isMobile && !showSports && !showVipRewards && !showPoker && (
+        <Tour
+          open={casinoFeatureTourOpen}
+          onOpenChange={handleCasinoTourOpenChange}
+          onComplete={completeCasinoFeatureTour}
+          onSkip={completeCasinoFeatureTour}
+          sideOffset={12}
+          spotlightPadding={8}
+          className="pointer-events-none"
+        >
+          <TourPortal>
+            <TourSpotlight className="z-[10040] bg-black/75" />
+            <TourSpotlightRing className="z-[10041] rounded-small border-white/25 ring-white/25" />
+
+            <TourStep
+              target='[data-tour-target="casino-play-random"]'
+              side="right"
+              className="z-[10042] pointer-events-auto w-[340px] border-white/15 bg-[#2d2d2d] text-white shadow-2xl"
+            >
+              <TourArrow className="fill-[#2d2d2d] stroke-white/15" />
+              <TourClose className="text-white/70 hover:text-white" />
+              <TourHeader className="space-y-1">
+                <TourStepCounter className="text-[11px] uppercase tracking-wide text-white/50" />
+                <TourTitle className="text-base font-semibold text-white">Play Random</TourTitle>
+                <TourDescription className="text-sm text-white/70">
+                  Jump into a surprise game instantly to discover new titles faster.
+                </TourDescription>
+              </TourHeader>
+              <TourFooter className="mt-2 !flex-row items-center justify-between gap-2">
+                <TourSkip variant="ghost" className="border-white/15 bg-transparent text-white/70 hover:bg-white/10 hover:text-white">
+                  Skip Tour
+                </TourSkip>
+                <TourNext className="!bg-[var(--ds-primary,#ee3536)] !text-white hover:!bg-[var(--ds-primary-hover,#d92d2f)] hover:!text-white">
+                  Next
+                </TourNext>
+              </TourFooter>
+            </TourStep>
+
+            <TourStep
+              target='[data-tour-target="casino-last-played"]'
+              side="right"
+              className="z-[10042] pointer-events-auto w-[340px] border-white/15 bg-[#2d2d2d] text-white shadow-2xl"
+            >
+              <TourArrow className="fill-[#2d2d2d] stroke-white/15" />
+              <TourClose className="text-white/70 hover:text-white" />
+              <TourHeader className="space-y-1">
+                <TourStepCounter className="text-[11px] uppercase tracking-wide text-white/50" />
+                <TourTitle className="text-base font-semibold text-white">Last Game Played</TourTitle>
+                <TourDescription className="text-sm text-white/70">
+                  Return to your most recent game in one tap and continue your session.
+                </TourDescription>
+              </TourHeader>
+              <TourFooter className="mt-2 !flex-row items-center justify-between gap-2">
+                <TourPrev variant="ghost" className="border-white/15 bg-transparent text-white/70 hover:bg-white/10 hover:text-white">
+                  Back
+                </TourPrev>
+                <TourNext className="!bg-[var(--ds-primary,#ee3536)] !text-white hover:!bg-[var(--ds-primary-hover,#d92d2f)] hover:!text-white">
+                  Done
+                </TourNext>
+              </TourFooter>
+            </TourStep>
+          </TourPortal>
+        </Tour>
+      )}
 
       {/* Toast Notification - Rendered via Portal */}
       {mounted && typeof window !== 'undefined' && createPortal(

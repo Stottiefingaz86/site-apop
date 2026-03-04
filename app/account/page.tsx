@@ -482,8 +482,8 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
               activeFilter === tab.key
                 ? "bg-white/10 text-white border border-white/20"
                 : "text-white/50 hover:text-white/70 hover:bg-white/5 border border-transparent"
-            )}
-          >
+              )}
+            >
             {tab.label}
             {tab.count !== null && (
               <span className={cn(
@@ -575,7 +575,7 @@ function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSect
                             <div className="text-[10px] text-white/40">{bet.team1} v {bet.team2}</div>
                             <div className="text-[10px] text-white/40">{bet.league}{bet.country ? `, ${bet.country}` : ''}</div>
                           </div>
-                        )}
+        )}
 
                         {bet.isLive && bet.liveInfo && bet.type !== 'parlay' && (
                           <div className="mb-2 rounded-lg border border-white/10 bg-white/[0.03] overflow-hidden">
@@ -884,7 +884,7 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
                     </div>
                   </div>
                 </CarouselItem>
-              ))}
+          ))}
             </CarouselContent>
           </Carousel>
         </div>
@@ -1145,8 +1145,8 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
               activeFilter === tab.key
                   ? "text-white"
                   : "text-white/60 hover:text-white hover:bg-white/5"
-              )}
-            >
+            )}
+          >
               {activeFilter === tab.key && (
                 <motion.div
                   layoutId="activeMyBetsTab"
@@ -1256,7 +1256,7 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                 <motion.div
                         animate={{ rotate: isExpanded ? 90 : 0 }}
                   transition={{ duration: 0.2 }}
-                      >
+                >
                         <IconChevronRight className="w-4 h-4 text-white/30" />
                       </motion.div>
                       </div>
@@ -2849,7 +2849,7 @@ function AccountPageContent() {
                 "h-8 w-8"
               )}
               style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
-            >
+          >
               <IconCrown className="text-yellow-400 w-4 h-4" />
           </button>
           )}

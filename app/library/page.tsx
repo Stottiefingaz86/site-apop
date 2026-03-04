@@ -43,11 +43,13 @@ import {
   IconWallet,
   IconLayoutDashboard,
   IconLifebuoy,
+  IconInfoCircle,
   IconBuilding,
   IconStar,
   IconPlayerPlay,
   IconCards,
   IconMenu2,
+  IconLoader2,
   IconBallBasketball,
   IconBallAmericanFootball,
   IconBallTennis,
@@ -446,83 +448,41 @@ function SubNavGlassPreview() {
 // ── QuickLinksPreview (interactive mobile quick links bar) ─────────
 function QuickLinksPreview() {
   const [open, setOpen] = useState(true)
-  const [active, setActive] = useState('Casino')
-  const [otherOpen, setOtherOpen] = useState(false)
-  const items = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const items = [
+    { label: 'Home', isPrimary: true },
+    { label: 'Sports' },
+    { label: 'Live Betting' },
+    { label: 'Casino' },
+    { label: 'Live Casino' },
+    { label: 'Poker' },
+    { label: 'VIP Rewards' },
+    { label: 'Other' },
+  ]
+
   return (
     <div className="w-full rounded-lg overflow-hidden border border-white/10">
-      {/* Quick links bar */}
       <motion.div
         initial={false}
         animate={{ height: open ? 40 : 0 }}
         transition={{ type: 'tween', ease: 'linear', duration: 0.3 }}
         className="overflow-hidden"
-        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
+        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)', opacity: 1, visibility: 'visible' }}
       >
-        <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-white/10">
           {items.map((item) => (
             <button
-              key={item}
-              onClick={() => setActive(item)}
+              key={item.label}
               className={cn(
                 'flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative whitespace-nowrap cursor-pointer',
-                active === item ? 'text-white' : 'text-white/70 hover:text-white'
+                item.isPrimary ? 'text-white' : 'text-white/70 hover:text-white'
               )}
             >
-              {item}
+              {item.label}
             </button>
           ))}
-          <button
-            onClick={() => setOtherOpen(!otherOpen)}
-            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-white/70 hover:text-white flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
-          >
-            Other
-            <IconChevronDown className={cn('w-3 h-3 transition-transform duration-200', otherOpen && 'rotate-180')} />
-          </button>
         </div>
       </motion.div>
-      {/* Other dropdown */}
-      <AnimatePresence initial={false}>
-        {otherOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="overflow-hidden border-t border-white/5"
-            style={{ backgroundColor: 'rgba(45, 45, 45, 0.95)' }}
-          >
-            <div className="flex items-center gap-0 px-1 py-1">
-              {['Esports', 'Racebook', 'Contests', 'Virtuals'].map((item) => (
-                <button key={item} className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors cursor-pointer">
-                  {item}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* Main header bar */}
-      <div
-        className="border-t border-white/10 h-16 flex items-center justify-between px-3"
-        style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}
-      >
-        <div className="flex items-center gap-3">
-          <svg className="h-4 w-4 text-white" viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="2.75" width="14" height="2" rx="1" fill="currentColor" />
-            <rect x="1" y="7" width="10" height="2" rx="1" fill="currentColor" />
-            <rect x="1" y="11.25" width="6" height="2" rx="1" fill="currentColor" />
-          </svg>
-          <span className="text-sm font-bold text-white tracking-tight">BET<span className="text-white/70">ONLINE</span></span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-            <span className="text-xs font-semibold text-white/80">CH</span>
-            <span className="text-xs font-bold text-white tabular-nums">$10.00</span>
-          </div>
-        </div>
-      </div>
-      {/* Toggle button */}
+
       <div className="flex justify-center py-2 border-t border-white/5" style={{ backgroundColor: 'var(--ds-page-bg, #1a1a1a)' }}>
         <button
           onClick={() => setOpen(!open)}
@@ -530,6 +490,86 @@ function QuickLinksPreview() {
         >
           {open ? '↑ scroll down to hide' : '↓ scroll up to show'}
         </button>
+      </div>
+    </div>
+  )
+}
+
+function SportsSubNavPreview() {
+  const [activeSport, setActiveSport] = useState('Soccer')
+  const [loadingNav, setLoadingNav] = useState<string | null>(null)
+  const sports = [
+    { icon: '/sports_icons/my-feed.svg', label: 'My Feed' },
+    { icon: '/sports_icons/soccer.svg', label: 'Soccer' },
+    { icon: '/sports_icons/Basketball.svg', label: 'Basketball' },
+    { icon: '/sports_icons/football.svg', label: 'Football' },
+    { icon: '/sports_icons/tennis.svg', label: 'Tennis' },
+    { icon: '/sports_icons/Hockey.svg', label: 'Hockey' },
+    { icon: '/sports_icons/mma.svg', label: 'MMA' },
+    { icon: '/sports_icons/baseball.svg', label: 'Baseball' },
+    { icon: '/sports_icons/table_tennis.svg', label: 'Table Tennis' },
+  ]
+
+  return (
+    <div className="w-full rounded-lg" style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}>
+      <div className="pt-3 pb-4 px-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+          {sports.map((sport) => {
+            const isActive = sport.label === activeSport
+            return (
+              <button
+                key={sport.label}
+                type="button"
+                onClick={() => {
+                  setLoadingNav(sport.label)
+                  setTimeout(() => {
+                    setActiveSport(sport.label)
+                    setLoadingNav(null)
+                  }, 500)
+                }}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 min-w-[60px] px-2 py-1.5 rounded-small transition-all duration-300 cursor-pointer flex-shrink-0 relative',
+                  loadingNav === sport.label && 'opacity-40',
+                  'hover:bg-white/5 active:bg-white/15',
+                  isActive && 'bg-white/10'
+                )}
+                style={{ position: 'relative', overflow: 'visible' }}
+              >
+                <img
+                  src={sport.icon}
+                  alt={sport.label}
+                  width={20}
+                  height={20}
+                  className={cn(
+                    'object-contain transition-opacity duration-300 pointer-events-none',
+                    isActive ? 'opacity-100' : 'opacity-70'
+                  )}
+                  decoding="sync"
+                />
+                <span
+                  className={cn(
+                    'text-[10px] font-medium whitespace-nowrap transition-colors duration-300 pointer-events-none',
+                    isActive ? 'text-white' : 'text-white/70'
+                  )}
+                >
+                  {sport.label}
+                </span>
+                {loadingNav === sport.label && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <IconLoader2 className="w-4 h-4 animate-spin text-white" />
+                  </div>
+                )}
+                <div
+                  className={cn(
+                    'absolute left-1/2 -translate-x-1/2 -bottom-2 h-0.5 rounded-full transition-all duration-300 ease-in-out z-10',
+                    isActive ? 'w-8 opacity-100' : 'w-0 opacity-0'
+                  )}
+                  style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : {}}
+                />
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -949,256 +989,151 @@ function SidebarNavPreview() {
 
 // ── SportsbarNavPreview (sports sidebar with expandable items) ─────────
 function SportsSidebarPreview() {
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
   const [collapsed, setCollapsed] = useState(false)
-  const [activeItem, setActiveItem] = useState('Soccer')
-  const [expanded, setExpanded] = useState<string[]>(['Soccer'])
-  const [mobileOtherOpen, setMobileOtherOpen] = useState(false)
-  const [activeQuickLink, setActiveQuickLink] = useState('Sports')
+  const [activeItem, setActiveItem] = useState('My Feed')
+  const sidebarW = collapsed ? '84px' : '320px'
 
-  const sportsList = [
-    { icon: '/sports_icons/soccer.svg', label: 'Soccer', expandable: true, subItems: ['Premier League', 'La Liga', 'Serie A', 'Bundesliga'] },
-    { icon: '/sports_icons/Basketball.svg', label: 'Basketball', expandable: true, subItems: ['NBA', 'NCAA', 'EuroLeague'] },
-    { icon: '/sports_icons/football.svg', label: 'Football', expandable: true, subItems: ['NFL', 'NCAAF'] },
-    { icon: '/sports_icons/tennis.svg', label: 'Tennis', expandable: true, subItems: ['ATP', 'WTA'] },
-    { icon: '/sports_icons/Hockey.svg', label: 'Hockey', expandable: false },
-    { icon: '/sports_icons/mma.svg', label: 'MMA', expandable: false },
-  ]
   const features = [
+    { icon: IconHome, label: 'Home' },
     { icon: IconTicket, label: 'My Bets' },
-    { icon: IconFlame, label: 'Same Game Parlays' },
-    { icon: IconSettings, label: 'Settings' },
+    { icon: IconHeart, label: 'My Feed' },
+    { icon: IconBolt, label: 'Live Betting' },
+    { icon: IconTrophy, label: 'World Cup Hub' },
+    { icon: IconPlayerPlay, label: 'Odds Boosters' },
+    { icon: '/sports_icons/Same Game Parlays.svg', label: 'Same Game Parlays' },
+    { icon: '/sports_icons/megaparlays.svg', label: 'Mega Parlays' },
   ]
-  const bottomItems = [
-    { icon: IconCrown, label: 'Loyalty Hub' },
-    { icon: IconBuilding, label: 'Banking' },
-    { icon: IconLifebuoy, label: 'Need Help' },
-  ]
-  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
-  const otherLinks = ['Esports', 'Racebook', 'Contests', 'Virtuals']
 
-  const toggleExpand = (label: string) => {
-    setExpanded(prev => prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label])
-  }
-  const sidebarW = viewMode === 'mobile' ? '280px' : collapsed ? '48px' : '256px'
+  const topSports = [
+    { icon: '/sports_icons/baseball.svg', label: 'Baseball' },
+    { icon: '/sports_icons/Basketball.svg', label: 'Basketball' },
+    { icon: '/sports_icons/football.svg', label: 'Football' },
+    { icon: '/sports_icons/soccer.svg', label: 'Soccer' },
+    { icon: '/sports_icons/baseball.svg', label: 'Baseball' },
+    { icon: '/sports_icons/Basketball.svg', label: 'Basketball' },
+    { icon: '/sports_icons/Hockey.svg', label: 'Hockey' },
+    { icon: '/sports_icons/football.svg', label: 'Football' },
+  ]
 
   return (
     <div className="w-full">
-      {/* Toggle desktop/mobile */}
       <div className="flex items-center gap-2 mb-3">
-        {(['desktop', 'mobile'] as const).map(mode => (
-          <button
-            key={mode}
-            onClick={() => { setViewMode(mode); if (mode === 'mobile') setCollapsed(false) }}
-            className={cn(
-              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer',
-              viewMode === mode ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
-            )}
-          >
-            {mode === 'desktop' ? 'Desktop' : 'Mobile'}
-          </button>
-        ))}
-        {viewMode === 'desktop' && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="ml-auto px-3 py-1.5 rounded-small text-xs font-medium text-white/50 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-          >
-            {collapsed ? 'Expand' : 'Collapse'}
-          </button>
-        )}
+        <button
+          onClick={() => setCollapsed(false)}
+          className={cn('px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer', !collapsed ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5')}
+        >
+          Expanded
+        </button>
+        <button
+          onClick={() => setCollapsed(true)}
+          className={cn('px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer', collapsed ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5')}
+        >
+          Collapsed
+        </button>
       </div>
 
-      <div className="flex rounded-lg overflow-hidden border border-white/10" style={{ backgroundColor: '#1a1a1a' }}>
+      <div className="rounded-lg overflow-hidden border border-white/10" style={{ backgroundColor: '#1a1a1a' }}>
         <motion.div
           animate={{ width: sidebarW }}
           transition={{ duration: 0.2, ease: 'linear' }}
-          className="flex-shrink-0 border-r border-white/10 flex flex-col overflow-hidden"
-          style={{ backgroundColor: '#2d2d2d', height: '480px' }}
+          className="border-r border-white/10 flex flex-col overflow-hidden"
+          style={{ backgroundColor: '#2d2d2d', height: '560px' }}
         >
-          {/* Header — logo + panel close (mobile) */}
-          <div className="h-14 px-4 flex items-center flex-shrink-0 relative" style={{ backgroundColor: viewMode === 'mobile' ? '#2d2d2d' : 'rgba(45,45,45,0.75)' }}>
-            <div className="relative w-full h-full flex items-center justify-center">
-              {viewMode === 'mobile' && (
-                <button className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <line x1="9" y1="3" x2="9" y2="21" />
-                  </svg>
-                </button>
-              )}
-              {collapsed && viewMode === 'desktop' ? (
-                <span className="text-white font-bold text-sm">B</span>
-              ) : (
-                <div className="h-5 w-[110px] flex items-center">
-                  <svg viewBox="0 0 120 20" className="h-5 w-[110px] text-white"><text x="0" y="15" fill="currentColor" fontSize="14" fontWeight="700" fontFamily="system-ui">BETONLINE</text></svg>
-                </div>
-              )}
-            </div>
+          <div className={cn('h-16 px-4 flex items-center flex-shrink-0', collapsed ? 'justify-center' : 'justify-center')}>
+            {collapsed ? (
+              <span className="text-[#ee3536] font-bold text-6xl leading-none -mt-1">B</span>
+            ) : (
+              <div className="h-8 w-[190px] flex items-center justify-center">
+                <svg viewBox="0 0 210 30" className="h-8 w-[190px]">
+                  <text x="0" y="22" fill="#ee3536" fontSize="18" fontWeight="700" fontFamily="system-ui">BET</text>
+                  <text x="58" y="22" fill="#f3f3f3" fontSize="18" fontWeight="700" fontFamily="system-ui">ONLINE</text>
+                </svg>
+              </div>
+            )}
           </div>
 
-          {/* Mobile Quick Links — horizontal scrolling strip */}
-          {viewMode === 'mobile' && (
-            <>
-              <div className="border-b border-white/5" style={{ backgroundColor: 'rgba(45,45,45,0.92)' }}>
-                <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide px-1">
-                  {quickLinks.map(item => {
-                    const isCurrent = item === activeQuickLink
-                    return (
-                      <button
-                        key={item}
-                        onClick={() => setActiveQuickLink(item)}
-                        className={cn(
-                          'flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors relative cursor-pointer',
-                          isCurrent ? 'text-white font-bold' : 'text-white/35 font-medium hover:text-white/60'
-                        )}
-                      >
-                        {item}
-                        {isCurrent && (
-                          <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }} />
-                        )}
-                      </button>
-                    )
-                  })}
-                  <button
-                    onClick={() => setMobileOtherOpen(!mobileOtherOpen)}
-                    className="flex-shrink-0 px-3 py-2.5 text-[13px] whitespace-nowrap text-white/35 font-medium hover:text-white/60 flex items-center gap-0.5 cursor-pointer"
-                  >
-                    Other
-                    <IconChevronDown className={cn('w-3 h-3 transition-transform duration-200', mobileOtherOpen && 'rotate-180')} />
-                  </button>
-                </div>
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3">
+            <button
+              onClick={() => setActiveItem('Settings')}
+              className={cn(
+                'w-full flex items-center gap-3 rounded-small text-sm font-medium transition-all cursor-pointer text-white/80 hover:text-white hover:bg-white/5',
+                collapsed ? 'justify-center py-3 px-0 mb-2' : 'px-3 py-2.5 mb-2'
+              )}
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <IconSettings className="w-5 h-5" />
               </div>
-              <AnimatePresence initial={false}>
-                {mobileOtherOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: 'easeInOut' }}
-                    className="overflow-hidden border-b border-white/5"
-                    style={{ backgroundColor: 'rgba(45,45,45,0.95)' }}
-                  >
-                    <div className="flex items-center gap-0 px-1 py-1">
-                      {otherLinks.map(item => (
-                        <button key={item} className="flex-shrink-0 px-3 py-2 text-[13px] text-white/50 font-medium hover:text-white whitespace-nowrap transition-colors cursor-pointer">{item}</button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </>
-          )}
+              {!collapsed && <span className="text-2xl/none text-white/80">{'Settings'.replace('Settings', 'Settings')}</span>}
+            </button>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 px-1.5">
-            {/* FEATURES section label (mobile) */}
-            {viewMode === 'mobile' && <div className="px-2 py-1 text-[10px] text-white/40 font-medium uppercase tracking-wider">Features</div>}
-            {/* Features — square icon style */}
-            <div className="space-y-0.5 mb-1">
-              {features.map(item => {
-                const Icon = item.icon
+            {!collapsed && (
+              <div className="px-1 pb-2 pt-1 text-[11px] text-white/45 font-medium uppercase tracking-wide">Features</div>
+            )}
+
+            <div className="space-y-1 mb-2">
+              {features.map((item) => {
                 const isActive = activeItem === item.label
+                const Icon = typeof item.icon === 'string' ? null : item.icon
                 return (
                   <button
                     key={item.label}
                     onClick={() => setActiveItem(item.label)}
                     className={cn(
-                      'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
-                      collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
-                      isActive ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
+                      'w-full flex items-center gap-3 rounded-small text-sm font-medium transition-all cursor-pointer',
+                      collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5',
+                      isActive ? 'bg-white/10 text-white' : 'text-white/75 hover:text-white hover:bg-white/5'
                     )}
-                    style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                   >
-                    <div className={cn('w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0', isActive ? 'bg-white/20' : 'bg-white/10')}>
-                      <Icon strokeWidth={1.5} className="w-4 h-4" />
+                    <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                      {Icon ? <Icon strokeWidth={1.6} className="w-5 h-5" /> : <img src={item.icon as string} alt={item.label} className="w-5 h-5 object-contain" />}
                     </div>
-                    {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                    {!collapsed && <span className="text-[20px] leading-none">{item.label}</span>}
                   </button>
                 )
               })}
             </div>
 
-            {/* Top Leagues separator */}
-            <div className="border-b border-white/10 mx-1 my-2" />
-            {(!collapsed || viewMode === 'mobile') && <div className="px-2 py-1 text-[10px] text-white/40 font-medium uppercase tracking-wider">Top Sports</div>}
+            <div className="border-b border-white/10 mx-1 my-3" />
 
-            {/* Sports list with expandable sub-items */}
-            <div className="space-y-0.5">
-              {sportsList.map(sport => {
-                const isActive = activeItem === sport.label
-                const isExpanded = expanded.includes(sport.label)
-                return (
-                  <div key={sport.label}>
-                    <button
-                      onClick={() => { setActiveItem(sport.label); if (sport.expandable) toggleExpand(sport.label) }}
-                      className={cn(
-                        'w-full flex items-center gap-2.5 rounded-small text-sm font-medium transition-all cursor-pointer',
-                        collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5',
-                        isActive ? 'text-white' : 'text-white/70 hover:text-white hover:bg-white/5'
-                      )}
-                      style={isActive ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
-                    >
-                      <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain flex-shrink-0" />
-                      {(!collapsed || viewMode === 'mobile') && (
-                        <>
-                          <span>{sport.label}</span>
-                          {sport.expandable && (
-                            <IconChevronRight className={cn('w-4 h-4 ml-auto transition-transform duration-300', isExpanded && 'rotate-90')} />
-                          )}
-                        </>
-                      )}
-                    </button>
-                    {/* Animated sub-items */}
-                    <AnimatePresence initial={false}>
-                      {sport.expandable && isExpanded && (!collapsed || viewMode === 'mobile') && sport.subItems && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: 'easeInOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="pl-8 space-y-0.5 py-1">
-                            {sport.subItems.map(sub => (
-                              <button key={sub} className="w-full text-left px-3 py-1.5 text-xs text-white/60 hover:text-white hover:bg-white/5 rounded-small transition-colors cursor-pointer">
-                                {sub}
-                              </button>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )
-              })}
-            </div>
+            <button
+              className={cn(
+                'w-full flex items-center gap-3 rounded-small text-sm font-medium text-white/75 hover:text-white hover:bg-white/5 transition-all cursor-pointer',
+                collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'
+              )}
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <IconTrophy strokeWidth={1.6} className="w-5 h-5" />
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="text-[20px] leading-none">Top Leagues</span>
+                  <IconChevronRight className="w-5 h-5 ml-auto text-white/60" />
+                </>
+              )}
+            </button>
 
-            <div className="min-h-[24px]" />
-          </div>
+            <div className="border-b border-white/10 mx-1 my-3" />
 
-          {/* Bottom */}
-          <div className="border-t border-white/10 py-2 px-1.5 space-y-0.5 flex-shrink-0">
-            {bottomItems.map(item => {
-              const Icon = item.icon
-              return (
+            {!collapsed && (
+              <div className="px-1 pb-2 pt-1 text-[11px] text-white/45 font-medium uppercase tracking-wide">Top Sports</div>
+            )}
+
+            <div className="space-y-1">
+              {topSports.map((sport, idx) => (
                 <button
-                  key={item.label}
+                  key={`${sport.label}-${idx}`}
                   className={cn(
-                    'w-full flex items-center gap-2.5 rounded-small text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all cursor-pointer',
-                    collapsed && viewMode === 'desktop' ? 'px-1.5 py-2 justify-center' : 'px-3 py-2.5'
+                    'w-full flex items-center gap-3 rounded-small text-sm font-medium text-white/75 hover:text-white hover:bg-white/5 transition-all cursor-pointer',
+                    collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'
                   )}
                 >
-                  <Icon strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
-                  {(!collapsed || viewMode === 'mobile') && <span>{item.label}</span>}
+                  <img src={sport.icon} alt={sport.label} className="w-6 h-6 object-contain shrink-0" />
+                  {!collapsed && <span className="text-[20px] leading-none">{sport.label}</span>}
                 </button>
-              )
-            })}
+              ))}
+            </div>
           </div>
         </motion.div>
-
-        <div className="flex-1 p-6 flex items-center justify-center min-w-0">
-          <span className="text-white/20 text-sm">Page Content</span>
-        </div>
       </div>
     </div>
   )
@@ -1461,76 +1396,148 @@ function SportsOfferingsPreview() {
   const [selectedOdds, setSelectedOdds] = useState<string[]>([])
 
   const toggleOdds = (id: string) => {
-    setSelectedOdds(prev => prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id])
+    setSelectedOdds((prev) => (prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]))
   }
 
   const liveEvents = [
-    { id: 'l1', league: 'NFL', sport: '/sports_icons/football.svg', team1: 'Green Bay Packers', team2: 'Detroit Lions', score1: 14, score2: 10, period: 'Q2', time: "7'", markets: [{ label: 'GB -4.5', odds: '-110' }, { label: 'DET +4.5', odds: '-110' }, { label: 'O 48.5', odds: '-105' }, { label: 'U 48.5', odds: '-115' }] },
-    { id: 'l2', league: 'Premier League', sport: '/sports_icons/soccer.svg', team1: 'Arsenal', team2: 'Chelsea', score1: 2, score2: 1, period: '2H', time: "67'", markets: [{ label: 'ARS', odds: '-250' }, { label: 'Draw', odds: '+350' }, { label: 'CHE', odds: '+600' }] },
+    {
+      id: 'l1',
+      league: 'Premier League',
+      country: 'England',
+      sportLabel: 'Soccer',
+      sport: '/sports_icons/soccer.svg',
+      team1: 'Liverpool',
+      team2: 'Arsenal',
+      score1: 2,
+      score2: 1,
+      period: '2H',
+      time: "67'",
+      markets: [{ label: 'LIV', odds: '+120' }, { label: 'Draw', odds: '+230' }, { label: 'ARS', odds: '+250' }],
+    },
+    {
+      id: 'l2',
+      league: 'NBA',
+      country: 'USA',
+      sportLabel: 'Basketball',
+      sport: '/sports_icons/Basketball.svg',
+      team1: 'Lakers',
+      team2: 'Celtics',
+      score1: 94,
+      score2: 89,
+      period: 'Q4',
+      time: '4:12',
+      markets: [{ label: 'LAL -3.5', odds: '-110' }, { label: 'BOS +3.5', odds: '-110' }, { label: 'O 221.5', odds: '-105' }],
+    },
   ]
   const upcomingEvents = [
-    { id: 'u1', league: 'NFL', sport: '/sports_icons/football.svg', team1: 'Kansas City Chiefs', team2: 'Buffalo Bills', time: 'Today 20:00', markets: [{ label: 'KC -3.5', odds: '-110' }, { label: 'BUF +3.5', odds: '-110' }, { label: 'O 51.5', odds: '-110' }, { label: 'U 51.5', odds: '-110' }] },
-    { id: 'u2', league: 'La Liga', sport: '/sports_icons/soccer.svg', team1: 'Real Madrid', team2: 'Barcelona', time: 'Tomorrow 21:00', markets: [{ label: 'RMA', odds: '+180' }, { label: 'Draw', odds: '+220' }, { label: 'BAR', odds: '+150' }] },
+    {
+      id: 'u1',
+      league: 'NFL',
+      country: 'USA',
+      sportLabel: 'Football',
+      sport: '/sports_icons/football.svg',
+      team1: 'Chiefs',
+      team2: 'Bills',
+      time: 'Today 20:00',
+      markets: [{ label: 'KC -3.5', odds: '-110' }, { label: 'BUF +3.5', odds: '-110' }, { label: 'O 51.5', odds: '-110' }],
+    },
+    {
+      id: 'u2',
+      league: 'La Liga',
+      country: 'Spain',
+      sportLabel: 'Soccer',
+      sport: '/sports_icons/soccer.svg',
+      team1: 'Real Madrid',
+      team2: 'Barcelona',
+      time: 'Tomorrow 21:00',
+      markets: [{ label: 'RMA', odds: '+180' }, { label: 'Draw', odds: '+220' }, { label: 'BAR', odds: '+150' }],
+    },
   ]
+
+  const rows = tab === 'live' ? liveEvents : upcomingEvents
 
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-3">
-        {(['live', 'upcoming'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer capitalize',
-              tab === t ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
-            )}
-          >
-            {t === 'live' ? '🔴 Live' : 'Upcoming'}
-          </button>
-        ))}
+        <button
+          onClick={() => setTab('live')}
+          className={cn('px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5', tab === 'live' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5')}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#ee3536] animate-pulse" />
+          Live
+        </button>
+        <button
+          onClick={() => setTab('upcoming')}
+          className={cn('px-3 py-1.5 rounded-small text-xs font-medium transition-colors cursor-pointer', tab === 'upcoming' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white hover:bg-white/5')}
+        >
+          Upcoming
+        </button>
       </div>
 
-      <div className="space-y-2">
-        {(tab === 'live' ? liveEvents : upcomingEvents).map(event => (
+      <div className="space-y-1.5">
+        {rows.map((event) => (
           <div key={event.id} className="bg-white/5 border border-white/10 rounded-small overflow-hidden">
-            {/* Header */}
-            <div className="px-2.5 py-1.5 flex items-center gap-2 bg-white/[0.02]">
-              <img src={event.sport} alt="" className="w-3.5 h-3.5 object-contain" />
-              <span className="text-[10px] text-white/60 font-medium">{event.league}</span>
-              {'score1' in event ? (
-                <div className="ml-auto flex items-center gap-1">
-                  <div className="flex items-center gap-0.5 bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5">
+            <div className="px-2.5 py-1.5 flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <img src={event.sport} alt="" className="w-3 h-3 object-contain" />
+                <span className="text-[9px] text-white/70">{event.league}</span>
+                <span className="text-[9px] text-white/50">|</span>
+                <span className="text-[9px] text-white/70">{event.country}</span>
+                <span className="text-[9px] text-white/50">,</span>
+                <span className="text-[9px] text-white/70">{event.sportLabel}</span>
+              </div>
+              <button className="text-[10px] text-white/70 hover:text-white transition-colors cursor-pointer flex items-center gap-1">
+                <IconPlayerPlay className="w-3 h-3" />
+                Watch
+              </button>
+            </div>
+
+            <div className="px-2.5 py-2 flex items-center gap-2" style={{ overflow: 'visible', alignItems: 'center' }}>
+              {tab === 'live' ? (
+                <div className="flex flex-col items-start justify-center gap-0.5 flex-shrink-0 w-[50px]">
+                  <div className="flex items-center gap-0.5 bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5 whitespace-nowrap">
                     <div className="w-1 h-1 bg-[#ee3536] rounded-full animate-pulse" />
                     <span className="text-[8px] font-semibold text-[#ee3536]">LIVE</span>
                   </div>
-                  <span className="text-[8px] text-white/50">{(event as any).period} {(event as any).time}</span>
-                </div>
-              ) : (
-                <span className="ml-auto text-[10px] text-white/50">{(event as any).time}</span>
-              )}
-            </div>
-            {/* Content */}
-            <div className="px-2.5 py-2 flex items-center gap-3">
-              {/* Status */}
-              {'score1' in event ? (
-                <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-[40px]">
-                  <span className="text-xs font-bold text-white">{(event as any).score1}</span>
-                  <span className="text-xs font-bold text-white">{(event as any).score2}</span>
-                </div>
-              ) : (
-                <div className="flex-shrink-0 w-[50px]">
-                  <div className="flex items-center gap-0.5 bg-green-500/20 border border-green-500/50 rounded px-1 py-0.5 w-fit">
-                    <span className="text-[8px] font-semibold text-green-400">UPCOMING</span>
+                  <div className="flex items-center gap-0.5">
+                    <span className="text-[8px] font-bold text-white/70">{(event as { period: string }).period}</span>
+                    <span className="text-[8px] text-white/60">{(event as { time: string }).time}</span>
                   </div>
                 </div>
+              ) : (
+                <div className="flex flex-col items-start justify-center gap-0.5 flex-shrink-0 w-[50px]">
+                  <div className="text-[8px] text-white/60 font-semibold">PRE</div>
+                  <div className="text-[8px] text-white/60">{(event as { time: string }).time}</div>
+                </div>
               )}
-              {/* Teams */}
-              <div className="flex flex-col gap-1 min-w-0 w-[140px] flex-shrink-0">
-                <div className="text-[11px] font-semibold text-white truncate">{event.team1}</div>
-                <div className="text-[11px] font-semibold text-white truncate">{event.team2}</div>
+
+              <div className="flex flex-col gap-1 min-w-0 w-[200px] flex-shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-white/20" />
+                  <div className="text-[11px] font-semibold text-white truncate leading-tight">{event.team1}</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-white/20" />
+                  <div className="text-[11px] font-semibold text-white truncate leading-tight">{event.team2}</div>
+                </div>
               </div>
-              {/* Markets */}
-              <div className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
+
+              {tab === 'live' && (
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex flex-col items-center justify-center gap-0.5">
+                    <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
+                      <span className="text-[10px] font-bold text-white leading-none">{(event as { score1: number }).score1}</span>
+                    </div>
+                    <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
+                      <span className="text-[10px] font-bold text-white leading-none">{(event as { score2: number }).score2}</span>
+                    </div>
+                  </div>
+                  <IconChevronRight className="w-3.5 h-3.5 text-white/50 hover:text-white transition-colors cursor-pointer flex-shrink-0" />
+                </div>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
                 {event.markets.map((m, j) => {
                   const oddsId = `${event.id}-${j}`
                   const isSelected = selectedOdds.includes(oddsId)
@@ -1539,22 +1546,280 @@ function SportsOfferingsPreview() {
                       key={j}
                       onClick={() => toggleOdds(oddsId)}
                       className={cn(
-                        'flex flex-col items-center px-2 py-1.5 rounded-small border text-[10px] font-medium transition-all flex-shrink-0 cursor-pointer min-w-[52px]',
+                        'flex flex-col items-center px-2 py-1.5 rounded-small border text-[10px] font-medium transition-all flex-shrink-0 cursor-pointer min-w-[68px]',
                         isSelected
-                          ? 'border-[#ee3536] bg-[#ee3536]/20 text-white'
+                          ? 'border-transparent text-white'
                           : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
                       )}
+                      style={isSelected ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
                     >
                       <span className="text-[8px] text-white/50 mb-0.5">{m.label}</span>
                       <span className="font-bold">{m.odds}</span>
                     </button>
                   )
                 })}
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function SportsTopEventsCardsPreview() {
+  const [selected, setSelected] = useState<string | null>(null)
+  const events = [
+    {
+      id: 'te1',
+      league: 'NFL',
+      country: 'USA',
+      leagueIcon: '/banners/sports_league/NFL.svg',
+      team1: 'Kansas City Chiefs',
+      team2: 'Buffalo Bills',
+      team1Code: 'KC',
+      team2Code: 'BUF',
+      score1: 1,
+      score2: 0,
+      time: "Q2 7'",
+      team1Percent: 58,
+      team2Percent: 42,
+      odds: ['+350', '+350', '+350'],
+    },
+    {
+      id: 'te2',
+      league: 'NFL',
+      country: 'USA',
+      leagueIcon: '/banners/sports_league/NFL.svg',
+      team1: 'Dallas Cowboys',
+      team2: 'Philadelphia Eagles',
+      team1Code: 'DAL',
+      team2Code: 'PHI',
+      score1: 2,
+      score2: 1,
+      time: "Q4 2'",
+      team1Percent: 45,
+      team2Percent: 55,
+      odds: ['+280', '+260', '+320'],
+    },
+  ]
+
+  return (
+    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+      {events.map((e) => (
+        <div
+          key={e.id}
+          className="w-[320px] bg-white/5 border border-white/10 rounded-small p-3 relative overflow-hidden flex-shrink-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(238, 53, 54, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <img src={e.leagueIcon} alt={e.league} width={16} height={16} className="object-contain" />
+              <span className="text-[10px] text-white">{e.league} | {e.country}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5 bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5 whitespace-nowrap">
+                <div className="w-1.5 h-1.5 bg-[#ee3536] rounded-full animate-pulse" />
+                <span className="text-[9px] font-semibold text-[#ee3536]">LIVE</span>
+              </div>
+              <span className="text-[10px] text-[#ee3536]">{e.time}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center mb-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className="text-xs font-semibold text-white truncate">{e.team1}</span>
+            </div>
+            <div className="flex items-center justify-center mx-3 flex-shrink-0 gap-1">
+              <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
+                <span className="text-[10px] font-bold text-white leading-none">{e.score1}</span>
+              </div>
+              <span className="text-base font-bold text-white leading-none">-</span>
+              <div className="border rounded-small px-1.5 py-1.5 w-[28px] h-[28px] flex items-center justify-center bg-white/5 border-white/10">
+                <span className="text-[10px] font-bold text-white leading-none">{e.score2}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
+              <span className="text-xs font-semibold text-white truncate">{e.team2}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {[e.team1Code, 'Tie', e.team2Code].map((label, idx) => {
+              const id = `${e.id}-${idx}`
+              const active = selected === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => setSelected(active ? null : id)}
+                  className={cn(
+                    'bg-white/10 rounded-small py-2 border transition-colors',
+                    active ? 'border-[#ee3536] bg-[#ee3536]/15' : 'border-white/10 hover:bg-white/15'
+                  )}
+                >
+                  <div className="text-[10px] text-white/65 leading-none mb-1">{label}</div>
+                  <div className="text-sm font-bold text-white leading-none">{e.odds[idx]}</div>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="text-center text-[10px] text-white/60 mb-1.5">Moneyline</div>
+          <div className="h-3 bg-white/10 rounded-full overflow-hidden mb-1.5">
+            <div className="h-full bg-[#ff3b3f]" style={{ width: `${e.team1Percent}%` }} />
+          </div>
+          <div className="flex items-center justify-between text-[10px] text-white/60">
+            <span>{e.team1Percent}% {e.team1Code}</span>
+            <span>{e.team2Percent}% {e.team2Code}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SameGameParlayCardsPreview() {
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+
+  return (
+    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+      {[
+        {
+          id: 1,
+          match: 'Chiefs vs Bills',
+          league: 'NFL',
+          leagueIcon: '/banners/sports_league/NFL.svg',
+          country: 'USA',
+          time: 'SUN 1:00PM',
+          legs: ['Chiefs To Win', 'Mahomes 300+ Pass Yds', 'Over 49.5 Points'],
+          combinedOdds: '+750',
+        },
+        {
+          id: 2,
+          match: 'Arsenal vs Chelsea',
+          league: 'Premier League',
+          leagueIcon: '/banners/sports_league/prem.svg',
+          country: 'England',
+          time: 'TODAY 3:00PM',
+          legs: ['Arsenal To Win', 'Over 2.5 Goals', 'Both Teams To Score'],
+          combinedOdds: '+850',
+        },
+      ].map((parlay) => (
+        <div
+          key={parlay.id}
+          className="w-[340px] bg-white/5 border border-white/10 rounded-small p-3 relative overflow-hidden flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.3) 50%, rgba(255, 255, 255, 0.03) 100%)' }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <img src={parlay.leagueIcon} alt={parlay.league} width={16} height={16} className="object-contain" />
+              <span className="text-[10px] text-white">{parlay.league} | {parlay.country}, Football</span>
+            </div>
+            <span className="text-[10px] text-white/70">{parlay.time}</span>
+          </div>
+
+          <div className="text-sm font-semibold text-white/90 leading-tight mb-3">{parlay.match}</div>
+
+          <div className="relative mb-3 ml-[3px]">
+            <div className="absolute left-[2.5px] top-[5px] bottom-[5px] w-[1px] bg-white/20" />
+            <div className="space-y-2">
+              {parlay.legs.map((leg, legIndex) => (
+                <div key={legIndex} className="flex items-center gap-2.5 relative">
+                  <div className="w-[6px] h-[6px] rounded-full bg-emerald-400 flex-shrink-0 relative z-10 ring-2 ring-emerald-400/20" />
+                  <span className="text-[11px] text-white/80">{leg}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/50">{parlay.legs.length}-Leg Parlay</span>
+            <button
+              onClick={() => setSelectedId((prev) => (prev === parlay.id ? null : parlay.id))}
+              className={cn(
+                'rounded-small h-[34px] flex items-center justify-center px-4 transition-colors cursor-pointer border',
+                selectedId === parlay.id ? 'border-transparent text-white' : 'bg-white/10 hover:bg-white/20 border-transparent text-white'
+              )}
+              style={selectedId === parlay.id ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+            >
+              <span className="text-xs font-bold text-white leading-none">{parlay.combinedOdds}</span>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function BetBoostCardsPreview() {
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+
+  return (
+    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+      {[
+        { id: 1, marketName: 'Haaland To Score From A Header Vs Wolves', isLive: true, liveTime: "H2 70'", wasOdds: '+350', boostedOdds: '+450' },
+        { id: 2, marketName: 'Vinicius Jr To Score 2+ Goals Vs Sevilla', isLive: false, time: 'TODAY 10:30PM', wasOdds: '+280', boostedOdds: '+350' },
+      ].map((b) => (
+        <div
+          key={b.id}
+          className="w-[340px] bg-white/5 border border-white/10 rounded-small p-3 relative overflow-hidden flex-shrink-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%)' }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <img src="/banners/sports_league/prem.svg" alt="Premier League" width={16} height={16} className="object-contain" />
+              <span className="text-[10px] text-white">Premier League | England, Soccer</span>
+            </div>
+            {b.isLive ? (
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-0.5 bg-[#ee3536]/20 border border-[#ee3536]/50 rounded px-1 py-0.5 whitespace-nowrap">
+                  <div className="w-1.5 h-1.5 bg-[#ee3536] rounded-full animate-pulse" />
+                  <span className="text-[9px] font-semibold text-[#ee3536]">LIVE</span>
+                </div>
+                <span className="text-[10px] text-[#ee3536]">{b.liveTime}</span>
+              </div>
+            ) : (
+              <span className="text-[10px] text-white">{b.time}</span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="text-sm font-semibold text-white/90 leading-tight flex-1" style={{ lineHeight: '1.3', maxWidth: '200px' }}>
+              {b.marketName}
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div>
+                <div className="text-[10px] text-white/50 mb-1 text-center">Was</div>
+                <button disabled className="bg-white/10 text-white/50 rounded-small h-[38px] flex items-center justify-center px-3 border border-white/20 cursor-not-allowed opacity-60">
+                  <span className="text-[10px] text-white/50 leading-none line-through">{b.wasOdds}</span>
+                </button>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/50 mb-1 text-center">Boosted</div>
+                <button
+                  onClick={() => setSelectedId((prev) => (prev === b.id ? null : b.id))}
+                  className={cn(
+                    'rounded-small h-[38px] flex items-center justify-center px-3 border transition-colors cursor-pointer',
+                    selectedId === b.id ? 'border-transparent text-white' : 'bg-white/10 border-white/20 text-white'
+                  )}
+                  style={selectedId === b.id ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : undefined}
+                >
+                  <span className="text-[10px] font-bold text-white leading-none">{b.boostedOdds}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-1.5">
+            <IconInfoCircle className="w-3.5 h-3.5 text-white/50 flex-shrink-0 mt-0.5" />
+            <span className="text-[10px] text-white/50 leading-tight">
+              Player Must Play. If No TD&apos;s Are Scored Wager Will Be Graded As A Loss
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -1718,6 +1983,60 @@ interface ComponentEntry {
   codeSnippet: string
 }
 
+const LIVE_SOURCE_PATHS = new Set([
+  'app/page.tsx',
+  'app/casino/page.tsx',
+  'app/sports/page.tsx',
+  'app/sports/soccer/premier-league/page.tsx',
+  'components/dynamic-island.tsx',
+  'components/chat/chat-nav-toggle.tsx',
+  'components/chat/chat-header.tsx',
+  'components/chat/chat-rain-banner.tsx',
+  'components/chat/chat-panel.tsx',
+  'components/vip/streak-counter.tsx',
+  'components/vip/reload-claim.tsx',
+  'components/vip/cash-drop-code.tsx',
+  'components/vip/bet-and-get.tsx',
+  'components/animate-ui/components/base/tabs.tsx',
+  'components/betslip/number-pad.tsx',
+  'components/betslip/global-betslip.tsx',
+  'components/design-customizer.tsx',
+  'components/rain-background.tsx',
+  'components/interactive-grid-background.tsx',
+  'components/sports-tracker-widget.tsx',
+  'components/casino/jackpot-overlay.tsx',
+  'components/ui/drawer.tsx',
+  'components/ui/sidebar.tsx',
+  'components/ui/family-drawer.tsx',
+  'hooks/use-rain-balance.ts',
+])
+
+const AUDITED_ENTRY_IDS = new Set([
+  'quick-links',
+  'sub-nav-sports',
+  'sidebar-sports',
+  'betslip',
+  'chat-panel',
+  'sports-live-upcoming',
+  'sports-top-events-cards',
+  'sports-sgp-cards',
+  'sports-bet-boost-cards',
+])
+
+function extractSourcePaths(filePath: string) {
+  const matches = filePath.match(/[A-Za-z0-9_/-]+\.(?:tsx|ts|jsx|js)/g) ?? []
+  return Array.from(new Set(matches))
+}
+
+function isEntrySourceVerified(entry: ComponentEntry) {
+  const paths = extractSourcePaths(entry.filePath)
+  return paths.some((path) => LIVE_SOURCE_PATHS.has(path))
+}
+
+function isEntryAudited(entry: ComponentEntry) {
+  return AUDITED_ENTRY_IDS.has(entry.id)
+}
+
 // ── Code Block with Copy ─────────────────────────────────
 function CodeBlock({ code, filename }: { code: string; filename: string }) {
   const [copied, setCopied] = useState(false)
@@ -1759,6 +2078,9 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
 function ComponentCard({ entry }: { entry: ComponentEntry }) {
   const [isOpen, setIsOpen] = useState(false)
   const [view, setView] = useState<'preview' | 'code'>('preview')
+  const verified = isEntrySourceVerified(entry)
+  const audited = isEntryAudited(entry)
+  const sourcePaths = extractSourcePaths(entry.filePath)
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden hover:border-white/[0.15] transition-colors">
@@ -1769,6 +2091,26 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
             <h3 className="text-sm font-semibold text-white truncate">{entry.name}</h3>
             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-white/40 uppercase tracking-wider font-medium shrink-0">
               {entry.category}
+            </span>
+            <span
+              className={cn(
+                'text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-medium shrink-0',
+                verified
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+              )}
+            >
+              {verified ? 'Live Source' : 'Needs Review'}
+            </span>
+            <span
+              className={cn(
+                'text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-medium shrink-0',
+                audited
+                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                  : 'bg-white/10 text-white/60 border border-white/20'
+              )}
+            >
+              {audited ? 'Audited' : 'Unreviewed'}
             </span>
           </div>
           <p className="text-[11px] text-white/40 mt-0.5 line-clamp-1">{entry.description}</p>
@@ -1816,7 +2158,9 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
             {tag}
           </span>
         ))}
-        <span className="text-[9px] text-white/20 ml-auto font-mono">{entry.filePath}</span>
+        <span className="text-[9px] text-white/20 ml-auto font-mono">
+          {sourcePaths.join(' + ') || entry.filePath}
+        </span>
       </div>
 
       {/* Preview area (always visible) */}
@@ -1852,6 +2196,123 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
   )
 }
 
+type PreviewBet = {
+  id: string
+  title: string
+  market: string
+  event: string
+  odds: string
+  stake: number
+}
+
+function BetslipAnimatedPreview() {
+  const betPool: PreviewBet[] = [
+    { id: 'b1', title: 'Liverpool ML', market: 'Money Line', event: 'Liverpool vs Arsenal', odds: '-150', stake: 5 },
+    { id: 'b2', title: 'Over 2.5 Goals', market: 'Total Goals', event: 'Liverpool vs Arsenal', odds: '+120', stake: 5 },
+    { id: 'b3', title: 'Both Teams To Score', market: 'Match Props', event: 'Chelsea vs Spurs', odds: '+110', stake: 5 },
+    { id: 'b4', title: 'Under 3.5 Goals', market: 'Total Goals', event: 'City vs Newcastle', odds: '-105', stake: 5 },
+  ]
+  const [bets, setBets] = useState<PreviewBet[]>([betPool[0], betPool[1]])
+
+  const removeBet = (id: string) => setBets((prev) => prev.filter((b) => b.id !== id))
+  const removeAll = () => setBets([])
+  const addBet = () => {
+    const available = betPool.find((b) => !bets.some((active) => active.id === b.id))
+    if (available) setBets((prev) => [...prev, available])
+  }
+
+  const totalStake = bets.reduce((sum, b) => sum + b.stake, 0)
+  const potentialWin = bets.reduce((sum, b) => {
+    const american = Number(b.odds)
+    const dec = american > 0 ? american / 100 + 1 : 100 / Math.abs(american) + 1
+    return sum + b.stake * dec
+  }, 0)
+
+  return (
+    <div className="w-full max-w-[320px] mx-auto rounded-xl border border-black/10 overflow-hidden bg-white shadow-lg">
+      <div className="px-3 py-2.5 flex items-center justify-between border-b border-black/5" style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'saturate(180%) blur(20px)' }}>
+        <div className="flex items-center gap-2">
+          <div className="bg-[#424242] h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-md">
+            <span className="text-xs font-semibold text-white leading-none">{bets.length}</span>
+          </div>
+          <h2 className="text-sm font-semibold text-black/90">Betslip</h2>
+        </div>
+        <button className="text-[10px] font-semibold uppercase tracking-wide text-black/60 flex items-center gap-1 px-2.5 py-1 rounded-md border border-black/20">
+          <IconChevronDown className="w-3 h-3" /> MINIMIZE
+        </button>
+      </div>
+
+      <div className="px-2 pt-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="text-[10px] font-medium text-black/50 uppercase tracking-wide">{bets.length} Selections</div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={addBet}
+              disabled={bets.length >= betPool.length}
+              className="text-[10px] font-medium text-black/70 uppercase tracking-wide px-2 py-0.5 rounded border border-black/15 disabled:opacity-40"
+            >
+              + Add
+            </button>
+            <button
+              onClick={removeAll}
+              disabled={bets.length === 0}
+              className="text-[10px] font-medium text-red-400 uppercase tracking-wide px-2 py-0.5 rounded border border-red-200 inline-flex items-center gap-1 disabled:opacity-40"
+            >
+              <IconTrash size={12} /> Remove All
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {bets.map((bet) => (
+            <motion.div
+              key={bet.id}
+              layout
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="flex items-start gap-2.5 py-2.5 px-2.5 bg-[#f5f5f5] rounded-lg border border-black/[0.04] mb-1.5"
+            >
+              <button onClick={() => removeBet(bet.id)} className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                <IconX className="w-3 h-3 text-black/50" strokeWidth={2.5} />
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">{bet.title}</div>
+                <div className="text-[10px] text-black/50 mb-0.5 leading-tight">{bet.market}</div>
+                <div className="text-[10px] text-black/40 truncate leading-tight">{bet.event}</div>
+              </div>
+              <div className="flex-shrink-0 bg-black/[0.06] rounded-md px-2 py-1">
+                <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">{bet.odds}</span>
+              </div>
+              <div className="flex-shrink-0 w-[80px]">
+                <div className="border border-black/10 rounded-lg h-[34px] flex items-center justify-end px-2 relative bg-white">
+                  <span className="absolute left-2 text-xs text-black/50">$</span>
+                  <span className="text-black font-medium text-sm pl-4 text-right">{bet.stake.toFixed(2)}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <div className="px-2 pb-2.5">
+        <div className="flex items-center justify-between px-2 py-2 text-[11px]">
+          <span className="text-black/50">Total Stake</span>
+          <span className="text-black font-semibold">${totalStake.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center justify-between px-2 pb-2 text-[11px]">
+          <span className="text-black/50">Potential Win</span>
+          <span className="font-semibold" style={{ color: '#059669' }}>${potentialWin.toFixed(2)}</span>
+        </div>
+        <button className="w-full py-3 rounded-lg text-white text-xs font-semibold uppercase tracking-wider" style={{ backgroundColor: '#059669' }}>
+          Place ${totalStake.toFixed(2)} Bet
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Component Registry ──────────────────────────────────
 const LIBRARY: ComponentEntry[] = [
 
@@ -1862,63 +2323,11 @@ const LIBRARY: ComponentEntry[] = [
   {
     id: 'sub-nav-sports',
     name: 'Sports Sub Nav',
-    description: 'Horizontal scrollable sport icon tabs with active indicator underline, brand-themed. Uses real SVG sport icons.',
+    description: 'Horizontal sports icon tabs with live red underline active state and press preloader spinner behavior.',
     category: 'components',
     tags: ['navigation', 'sub-nav', 'sports', 'tabs', 'horizontal-scroll', 'icons'],
     filePath: 'app/sports/page.tsx (inline)',
-    preview: (
-      <div className="w-full rounded-lg" style={{ backgroundColor: 'var(--ds-nav-bg, #2D2E2C)' }}>
-        <div className="pt-3 pb-4 px-2">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-            {[
-              { icon: '/sports_icons/my-feed.svg', label: 'My Feed', active: false },
-              { icon: '/sports_icons/soccer.svg', label: 'Soccer', active: true },
-              { icon: '/sports_icons/Basketball.svg', label: 'Basketball', active: false },
-              { icon: '/sports_icons/football.svg', label: 'Football', active: false },
-              { icon: '/sports_icons/tennis.svg', label: 'Tennis', active: false },
-              { icon: '/sports_icons/Hockey.svg', label: 'Hockey', active: false },
-              { icon: '/sports_icons/mma.svg', label: 'MMA', active: false },
-              { icon: '/sports_icons/baseball.svg', label: 'Baseball', active: false },
-              { icon: '/sports_icons/table_tennis.svg', label: 'Table Tennis', active: false },
-            ].map((sport) => (
-              <button
-                key={sport.label}
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 min-w-[60px] px-2 py-1.5 rounded-small transition-all duration-300 cursor-pointer flex-shrink-0 relative',
-                  'hover:bg-white/5 active:bg-white/15',
-                  sport.active && 'bg-white/10'
-                )}
-              >
-                <img
-                  src={sport.icon}
-                  alt={sport.label}
-                  width={20}
-                  height={20}
-                  className={cn(
-                    'object-contain transition-opacity duration-300',
-                    sport.active ? 'opacity-100' : 'opacity-70'
-                  )}
-                />
-                <span className={cn(
-                  'text-[10px] font-medium whitespace-nowrap transition-colors duration-300',
-                  sport.active ? 'text-white' : 'text-white/70'
-                )}>
-                  {sport.label}
-                </span>
-                {/* Active underline indicator */}
-                <div
-                  className={cn(
-                    'absolute left-1/2 -translate-x-1/2 -bottom-2 h-0.5 rounded-full transition-all duration-300 ease-in-out',
-                    sport.active ? 'w-8 opacity-100' : 'w-0 opacity-0'
-                  )}
-                  style={sport.active ? { backgroundColor: 'var(--ds-primary, #ee3536)' } : {}}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    ),
+    preview: <SportsSubNavPreview />,
     codeSnippet: `{/* Sports Sub Nav — horizontal scrollable icons with active underline */}
 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
   {[
@@ -1945,6 +2354,11 @@ const LIBRARY: ComponentEntry[] = [
           isActive ? "text-white" : "text-white/70")}>
           {sport.label}
         </span>
+        {loadingNav === sport.label && (
+          <div className="absolute inset-0 flex items-center justify-center z-20">
+            <IconLoader2 className="w-4 h-4 animate-spin text-white" />
+          </div>
+        )}
         {/* Red underline indicator */}
         <div className={cn(
           "absolute left-1/2 -translate-x-1/2 -bottom-2 h-0.5 rounded-full",
@@ -1970,7 +2384,7 @@ import { motion } from 'framer-motion'
 {/* Sticky Sub Nav — glass blur + AnimateTabs with spring-animated pill */}
 <motion.div
   data-sub-nav
-  className={cn(
+                className={cn(
     "fixed z-[100] backdrop-blur-xl border-b border-white/10 py-3 shadow-sm",
     isMobile ? "left-0 right-0" : "px-6"
   )}
@@ -2010,7 +2424,7 @@ import { motion } from 'framer-motion'
         ))}
       </AnimateTabsList>
     </AnimateTabs>
-  </div>
+          </div>
 </motion.div>
 
 // Features:
@@ -2026,7 +2440,7 @@ import { motion } from 'framer-motion'
     description: 'Casino sub-navigation with icon buttons (search & favorite) alongside AnimateTabs. Favorite button turns pink when active with filled heart. Used on desktop casino for filtering games.',
     category: 'components',
     tags: ['navigation', 'sub-nav', 'casino', 'search', 'favorite', 'heart', 'animated-tabs', 'framer-motion', 'spring', 'icons'],
-    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    filePath: 'app/casino/page.tsx (inline in CasinoPageContent)',
     preview: <SubNavWithIconsPreview />,
     codeSnippet: `import { AnimateTabs, AnimateTabsList, TabsTab } from '@/components/ui/animate-tabs'
 import { motion } from 'framer-motion'
@@ -2048,7 +2462,7 @@ import { IconSearch, IconHeart } from '@tabler/icons-react'
     {!isMobile && (
       <div className="flex-shrink-0">
         <div className="bg-white/5 p-0.5 gap-0.5 rounded-3xl flex items-center">
-          <button
+      <button
             onClick={() => setSearchOverlayOpen(true)}
             className="text-white/70 hover:text-white hover:bg-white/5
               rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center
@@ -2061,7 +2475,7 @@ import { IconSearch, IconHeart } from '@tabler/icons-react'
               setActiveIconTab('favorite')
               setSelectedCategory('Favorites')
             }}
-            className={cn(
+        className={cn(
               "rounded-2xl p-1.5 h-9 w-9 flex items-center justify-center transition-all",
               activeIconTab === 'favorite'
                 ? "text-pink-500 bg-white/10"
@@ -2072,7 +2486,7 @@ import { IconSearch, IconHeart } from '@tabler/icons-react'
               "w-3.5 h-3.5",
               activeIconTab === 'favorite' && "fill-pink-500 text-pink-500"
             )} />
-          </button>
+      </button>
         </div>
       </div>
     )}
@@ -2112,10 +2526,10 @@ import { IconSearch, IconHeart } from '@tabler/icons-react'
   {
     id: 'quick-links',
     name: 'Quick Links (Mobile)',
-    description: 'Mobile-only product quick links bar that sits above the main header. Animates open/closed based on scroll direction. Includes expandable "Other" dropdown with secondary links.',
+    description: 'Mobile-only product quick links bar that sits above the main header. Animates open/closed based on scroll direction. Mirrors current live nav item order and behavior.',
     category: 'components',
     tags: ['navigation', 'quick-links', 'mobile', 'scroll', 'animation', 'framer-motion', 'dropdown'],
-    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    filePath: 'app/page.tsx (inline in HomePageContent)',
     preview: <QuickLinksPreview />,
     codeSnippet: `import { motion, AnimatePresence } from 'framer-motion'
 
@@ -2161,22 +2575,22 @@ useEffect(() => {
         { label: 'Poker', product: 'poker' },
         { label: 'VIP Rewards', product: 'vipRewards' },
       ].filter(i => !i.product || visibleProducts[i.product]).map((item) => (
-        <button
-          key={item.label}
+          <button
+            key={item.label}
           onClick={() => item.onClick()}
-          className={cn(
+            className={cn(
             "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium",
             isActive ? "text-white" : "text-white/70 hover:text-white"
           )}
         >
           {item.label}
-        </button>
-      ))}
+          </button>
+        ))}
       <button onClick={() => setOtherDropdownOpen(!otherDropdownOpen)}
         className="flex items-center gap-0.5 text-xs text-white/70">
         Other <IconChevronDown className={cn("w-3 h-3", otherDropdownOpen && "rotate-180")} />
       </button>
-    </div>
+      </div>
   </motion.div>
 )}
 
@@ -2209,7 +2623,7 @@ useEffect(() => {
     description: 'Global header bar used on casino, poker, sports, account. Left: sidebar toggle, divider, animated nav pills (Sports, Live Betting, Casino, Live Casino, Poker, VIP Rewards) with shared layoutId spring pill, "Other" dropdown. Right: VIP crown (gold), divider, avatar with red notification dot + balance (NumberFlow), DEPOSIT button with wallet icon, ChatNavToggle.',
     category: 'components',
     tags: ['navigation', 'header', 'nav-pills', 'animated', 'framer-motion', 'spring', 'layoutId', 'balance', 'vip', 'chat', 'deposit', 'crown', 'wallet', 'dropdown'],
-    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    filePath: 'app/sports/soccer/premier-league/page.tsx (inline in SportsPage)',
     preview: <MainNavPreview />,
     codeSnippet: `import { motion, AnimatePresence } from 'framer-motion'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
@@ -2345,7 +2759,7 @@ import { IconCrown, IconWallet, IconChevronDown } from '@tabler/icons-react'
     description: 'Casino sidebar with featured items (square icon style: My Favorites, Last Game Played, Play Random), separator, regular menu items (Popular Games, Slots, Blackjack, etc.), and bottom section (Loyalty Hub, Banking, Need Help). Supports desktop collapsed, expanded, and mobile sheet modes. Mobile includes horizontal scrolling quick links strip with active underline and "Other" dropdown, plus panel close icon in header.',
     category: 'blocks',
     tags: ['sidebar', 'navigation', 'collapsible', 'menu', 'casino', 'mobile', 'tooltip', 'animated', 'square-icon'],
-    filePath: 'app/casino/page.tsx (inline in NavTestPageContent)',
+    filePath: 'app/casino/page.tsx (inline in CasinoPageContent)',
     preview: <SidebarNavPreview />,
     codeSnippet: `import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel,
@@ -2486,7 +2900,7 @@ import { AnimatePresence, motion } from 'framer-motion'
     description: 'Sports sidebar with FEATURES section (My Bets, Same Game Parlays, Settings — square icon style), TOP SPORTS with expandable sub-items (animated with framer-motion), A-Z sports list, Top Leagues accordion, and bottom section. Supports desktop collapsed/expanded and mobile sheet. Mobile includes horizontal scrolling quick links strip with active underline and "Other" dropdown.',
     category: 'blocks',
     tags: ['sidebar', 'navigation', 'collapsible', 'menu', 'sports', 'expandable', 'accordion', 'tooltip', 'mobile', 'animated'],
-    filePath: 'app/sports/football/page.tsx (SportsPage)',
+    filePath: 'app/sports/page.tsx (SportsPage)',
     preview: <SportsSidebarPreview />,
     codeSnippet: `import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel,
@@ -2556,15 +2970,15 @@ import { AnimatePresence, motion } from 'framer-motion'
                 <SidebarMenuButton isActive={isActive}
                   onClick={() => toggleSport(sport.label)}
                   style={isActive ? { backgroundColor: 'var(--ds-primary)' } : undefined}>
-                  <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" />
-                  <span>{sport.label}</span>
+                      <img src={sport.icon} alt={sport.label} className="w-5 h-5 object-contain" />
+                      <span>{sport.label}</span>
                   {sport.expandable && (
                     <IconChevronRight className={cn(
                       "w-4 h-4 ml-auto transition-transform duration-300",
                       isExpanded && "rotate-90"
                     )} />
                   )}
-                </SidebarMenuButton>
+                    </SidebarMenuButton>
 
                 {/* Animated sub-items */}
                 <AnimatePresence>
@@ -2608,8 +3022,8 @@ import { AnimatePresence, motion } from 'framer-motion'
       {/* Bottom — Loyalty Hub, Banking, Need Help */}
       {/* Same pattern as casino sidebar */}
     </TooltipProvider>
-  </SidebarContent>
-</Sidebar>
+    </SidebarContent>
+  </Sidebar>
 
 // Structure:
 // • FEATURES: square 7x7 icon style (My Bets, Same Game Parlays, Settings)
@@ -3032,91 +3446,11 @@ const tabs = ['For You', 'Slots', 'Bonus Buys', 'Megaways', 'Originals', 'Live']
   {
     id: 'betslip',
     name: 'Global Betslip',
-    description: 'Family Drawer-based betslip with multi-bet support, parlay builder, custom number pad, and animated confirmation. White-themed card with glassmorphism header.',
+    description: 'Family Drawer-based betslip with multi-bet support, parlay builder, custom number pad, and animated add/remove transitions for selections.',
     category: 'blocks',
     tags: ['betslip', 'drawer', 'family-drawer', 'betting', 'parlay', 'mobile'],
     filePath: 'components/betslip/global-betslip.tsx',
-    preview: (
-      <div className="w-full max-w-[320px] mx-auto rounded-xl border border-black/10 overflow-hidden bg-white shadow-lg">
-        {/* Glassmorphism header — matches actual betslip */}
-        <div className="px-3 py-2.5 flex items-center justify-between border-b border-black/5" style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'saturate(180%) blur(20px)' }}>
-          <div className="flex items-center gap-2">
-            <div className="bg-[#424242] h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-md">
-              <span className="text-xs font-semibold text-white leading-none">2</span>
-            </div>
-            <h2 className="text-sm font-semibold text-black/90">Betslip</h2>
-          </div>
-          <button className="text-[10px] font-semibold uppercase tracking-wide text-black/60 flex items-center gap-1 px-2.5 py-1 rounded-md border border-black/20">
-            <IconChevronDown className="w-3 h-3" /> MINIMIZE
-          </button>
-        </div>
-        {/* Selections header */}
-        <div className="px-2 pt-2">
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="text-[10px] font-medium text-black/50 uppercase tracking-wide">2 Selections</div>
-            <button className="text-[10px] font-medium text-red-400 uppercase tracking-wide px-2 py-0.5 rounded border border-red-200 inline-flex items-center gap-1">
-              <IconTrash size={12} /> Remove All
-            </button>
-          </div>
-          {/* Bet card 1 */}
-          <div className="flex items-start gap-2.5 py-2.5 px-2.5 bg-[#f5f5f5] rounded-lg border border-black/[0.04] mb-1.5">
-            <button className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center">
-              <IconX className="w-3 h-3 text-black/50" strokeWidth={2.5} />
-            </button>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">Liverpool ML</div>
-              <div className="text-[10px] text-black/50 mb-0.5 leading-tight">Money Line</div>
-              <div className="text-[10px] text-black/40 truncate leading-tight">Liverpool vs Arsenal</div>
-            </div>
-            <div className="flex-shrink-0 bg-black/[0.06] rounded-md px-2 py-1">
-              <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">-150</span>
-            </div>
-            <div className="flex-shrink-0 w-[80px]">
-              <div className="border border-black/10 rounded-lg h-[34px] flex items-center justify-end px-2 relative bg-white">
-                <span className="absolute left-2 text-xs text-black/50">$</span>
-                <span className="text-black font-medium text-sm pl-4 text-right">5.00</span>
-              </div>
-              <div className="text-[9px] text-black/50 text-right mt-0.5">To Win $3.33</div>
-            </div>
-          </div>
-          {/* Bet card 2 */}
-          <div className="flex items-start gap-2.5 py-2.5 px-2.5 bg-[#f5f5f5] rounded-lg border border-black/[0.04] mb-1.5">
-            <button className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center">
-              <IconX className="w-3 h-3 text-black/50" strokeWidth={2.5} />
-            </button>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-black mb-0.5 truncate leading-tight">Over 2.5 Goals</div>
-              <div className="text-[10px] text-black/50 mb-0.5 leading-tight">Total Goals</div>
-              <div className="text-[10px] text-black/40 truncate leading-tight">Liverpool vs Arsenal</div>
-            </div>
-            <div className="flex-shrink-0 bg-black/[0.06] rounded-md px-2 py-1">
-              <span className="text-[11px] font-semibold text-black/80 whitespace-nowrap">+120</span>
-            </div>
-            <div className="flex-shrink-0 w-[80px]">
-              <div className="border border-black/10 rounded-lg h-[34px] flex items-center justify-end px-2 relative bg-white">
-                <span className="absolute left-2 text-xs text-black/50">$</span>
-                <span className="text-black font-medium text-sm pl-4 text-right">5.00</span>
-              </div>
-              <div className="text-[9px] text-black/50 text-right mt-0.5">To Win $6.00</div>
-            </div>
-          </div>
-        </div>
-        {/* Footer with total + Place Bet */}
-        <div className="px-2 pb-2.5">
-          <div className="flex items-center justify-between px-2 py-2 text-[11px]">
-            <span className="text-black/50">Total Stake</span>
-            <span className="text-black font-semibold">$10.00</span>
-          </div>
-          <div className="flex items-center justify-between px-2 pb-2 text-[11px]">
-            <span className="text-black/50">Potential Win</span>
-            <span className="font-semibold" style={{ color: '#8BC34A' }}>$9.33</span>
-          </div>
-          <button className="w-full py-3 rounded-lg text-white text-xs font-semibold uppercase tracking-wider" style={{ backgroundColor: '#8BC34A' }}>
-            Place $10.00 Bet
-          </button>
-        </div>
-      </div>
-    ),
+    preview: <BetslipAnimatedPreview />,
     codeSnippet: `import GlobalBetslip from '@/components/betslip/global-betslip'
 import { BetslipNumberPad } from '@/components/betslip/number-pad'
 
@@ -3128,6 +3462,7 @@ import { BetslipNumberPad } from '@/components/betslip/number-pad'
 // • Multi-bet (single + parlay) support
 // • Custom mobile number pad (BetslipNumberPad)
 // • Animated confirmation view
+// • Animated add/remove selection transitions (AnimatePresence + layout)
 // • Integrated with global betslipStore (Zustand)
 // • Auto-hides on sports pages (sports has local betslip)
 // • Listens for bet:copy-to-slip events from chat
@@ -3169,26 +3504,26 @@ import { BetslipNumberPad } from '@/components/betslip/number-pad'
         {/* Messages */}
         <div className="p-3 space-y-2.5 max-h-[200px] overflow-y-auto">
           <div className="flex items-start gap-2">
-            <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center text-[10px] text-white font-bold shrink-0">J</div>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shrink-0" style={{ backgroundColor: '#2a2a2a' }}>J</div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-amber-400 font-semibold">Jake92</span>
-                <span className="text-[8px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-400">VIP</span>
+                <span className="text-[10px] text-white/80 font-semibold">Jake92</span>
+                <span className="text-[8px] px-1 py-0.5 rounded border border-[#cd7f32]/40 bg-[#cd7f32]/15 text-[#e0aa6b]">Bronze</span>
               </div>
               <p className="text-[11px] text-white/60 mt-0.5">Big win on the parlay! 🎉</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-[10px] text-white font-bold shrink-0">S</div>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shrink-0" style={{ backgroundColor: '#2a2a2a' }}>S</div>
             <div>
-              <span className="text-[10px] text-purple-400 font-semibold">Sarah_VIP</span>
+              <span className="text-[10px] text-white/80 font-semibold">Sarah_VIP</span>
               <p className="text-[11px] text-white/60 mt-0.5">Anyone watching the Liverpool game?</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold shrink-0">M</div>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shrink-0" style={{ backgroundColor: '#2a2a2a' }}>M</div>
             <div>
-              <span className="text-[10px] text-blue-400 font-semibold">Mike_Bets</span>
+              <span className="text-[10px] text-white/80 font-semibold">Mike_Bets</span>
               <p className="text-[11px] text-white/60 mt-0.5">Just hit a 5-leg parlay 💰💰</p>
             </div>
           </div>
@@ -3835,10 +4170,10 @@ const vendors = [
   {
     id: 'sports-live-upcoming',
     name: 'Sports Live & Upcoming Events',
-    description: 'Two-tab component showing live in-play events (with live score, period, pulsing red indicator) and upcoming events (with scheduled time). Each event row shows sport icon, league, team names, and a horizontal markets carousel with selectable odds buttons. Selected odds highlight in red (primary). Supports NFL, soccer, basketball, tennis, and more via sportIconMap.',
+    description: 'Current sports events list style with Live/Upcoming tabs, in-play chips, compact score column, and selectable odds tiles.',
     category: 'blocks',
     tags: ['sports', 'live', 'upcoming', 'events', 'betting', 'odds', 'markets', 'score', 'in-play'],
-    filePath: 'app/sports/football/page.tsx (Live & Upcoming section)',
+    filePath: 'app/sports/page.tsx (events list section)',
     preview: <SportsOfferingsPreview />,
     codeSnippet: `// Sports Live & Upcoming Events
 const [tab, setTab] = useState<'live' | 'upcoming'>('live')
@@ -3892,6 +4227,59 @@ const [tab, setTab] = useState<'live' | 'upcoming'>('live')
     <MarketsCarousel markets={event.markets} onSelect={addToBetslip} />
   </div>
 </div>`,
+  },
+  {
+    id: 'sports-top-events-cards',
+    name: 'Sports Top Events Cards',
+    description: 'Top events card list with compact league headers, team rows, and quick-select odds buttons.',
+    category: 'blocks',
+    tags: ['sports', 'top-events', 'cards', 'odds', 'markets'],
+    filePath: 'app/sports/page.tsx (Top Events section)',
+    preview: <SportsTopEventsCardsPreview />,
+    codeSnippet: `// Sports Top Events Cards
+<section>
+  <h2>Top Events</h2>
+  {events.map((event) => (
+    <EventCard key={event.id}>
+      <TeamRows />
+      <OddsButtons />
+    </EventCard>
+  ))}
+</section>`,
+  },
+  {
+    id: 'sports-sgp-cards',
+    name: 'Sports Same Game Parlay Cards',
+    description: 'Card-style SGP offers showing match, combined leg summary, and combined odds CTA.',
+    category: 'blocks',
+    tags: ['sports', 'same-game-parlay', 'sgp', 'cards', 'odds'],
+    filePath: 'app/sports/page.tsx (Same Game Parlays section)',
+    preview: <SameGameParlayCardsPreview />,
+    codeSnippet: `// Same Game Parlay Card
+<Card>
+  <Badge>Same Game Parlay</Badge>
+  <MatchTitle />
+  <LegSummary />
+  <CombinedOdds />
+  <Button>Add SGP</Button>
+</Card>`,
+  },
+  {
+    id: 'sports-bet-boost-cards',
+    name: 'Sports Bet Boost Cards',
+    description: 'Boost card treatment with yellow boost badge, original odds crossed out, and boosted odds as primary.',
+    category: 'blocks',
+    tags: ['sports', 'bet-boost', 'boosted-odds', 'cards'],
+    filePath: 'app/sports/page.tsx (Top Bet Boosts section)',
+    preview: <BetBoostCardsPreview />,
+    codeSnippet: `// Bet Boost Card
+<Card>
+  <BoostBadge />
+  <MarketLabel />
+  <SelectionTitle />
+  <Odds from={originalOdds} to={boostedOdds} />
+  <Button>Add Boost</Button>
+</Card>`,
   },
 
   // ── Balance Animation (NumberFlow) ─────────────────────
@@ -4343,6 +4731,10 @@ export default function LibraryPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [strictSourceMode, setStrictSourceMode] = useState(true)
+
+  const verifiedLibrary = LIBRARY.filter(isEntrySourceVerified)
+  const auditedLibrary = LIBRARY.filter((entry) => isEntrySourceVerified(entry) && isEntryAudited(entry))
 
   const filtered = LIBRARY.filter((entry) => {
     const matchesCategory = activeCategory === 'all' || entry.category === activeCategory
@@ -4351,7 +4743,8 @@ export default function LibraryPage() {
       entry.name.toLowerCase().includes(search.toLowerCase()) ||
       entry.description.toLowerCase().includes(search.toLowerCase()) ||
       entry.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
-    return matchesCategory && matchesSearch
+    const matchesGovernance = !strictSourceMode || (isEntrySourceVerified(entry) && isEntryAudited(entry))
+    return matchesCategory && matchesSearch && matchesGovernance
   })
 
   // Strip any lingering chat/dock padding from the library page
@@ -4368,9 +4761,10 @@ export default function LibraryPage() {
     }
   }, [])
 
-  const atomCount = LIBRARY.filter((e) => e.category === 'atoms').length
-  const componentCount = LIBRARY.filter((e) => e.category === 'components').length
-  const blockCount = LIBRARY.filter((e) => e.category === 'blocks').length
+  const atomCount = auditedLibrary.filter((e) => e.category === 'atoms').length
+  const componentCount = auditedLibrary.filter((e) => e.category === 'components').length
+  const blockCount = auditedLibrary.filter((e) => e.category === 'blocks').length
+  const hiddenPendingAuditCount = LIBRARY.length - auditedLibrary.length
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--ds-page-bg, #0a0a0a)' }}>
@@ -4387,12 +4781,24 @@ export default function LibraryPage() {
             <div>
               <h1 className="text-lg font-bold text-white">Our Library</h1>
               <p className="text-[11px] text-white/40">
-                {LIBRARY.length} components · {atomCount} atoms · {componentCount} components · {blockCount} blocks
+                {auditedLibrary.length} audited live-source · {atomCount} atoms · {componentCount} components · {blockCount} blocks
               </p>
             </div>
           </div>
 
-          {/* Search */}
+          {/* Search + governance */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setStrictSourceMode((prev) => !prev)}
+              className={cn(
+                'h-9 px-3 rounded-lg border text-[11px] font-medium transition-colors',
+                strictSourceMode
+                  ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
+                  : 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+              )}
+            >
+              {strictSourceMode ? 'Audit-Locked: ON' : 'Audit-Locked: OFF'}
+            </button>
           <div className="relative w-72">
             <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
@@ -4402,6 +4808,7 @@ export default function LibraryPage() {
               placeholder="Search components..."
               className="w-full h-9 pl-9 pr-4 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/30 outline-none focus:border-white/20 transition-colors"
             />
+            </div>
           </div>
         </div>
       </header>
@@ -4409,59 +4816,65 @@ export default function LibraryPage() {
       <div className="flex">
         {/* Main content */}
         <div className="flex-1 min-w-0 px-6 py-8">
-          {/* Category tabs */}
-          <div className="flex items-center gap-2 mb-8">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon
-              const isActive = activeCategory === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                    isActive
-                      ? 'bg-white/10 text-white border border-white/15'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent'
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {cat.label}
-                  {cat.id !== 'all' && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] ml-1">
-                      {cat.id === 'atoms' ? atomCount : cat.id === 'components' ? componentCount : blockCount}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
+        {/* Category tabs */}
+        <div className="flex items-center gap-2 mb-8">
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon
+            const isActive = activeCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                  isActive
+                    ? 'bg-white/10 text-white border border-white/15'
+                    : 'text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent'
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {cat.label}
+                {cat.id !== 'all' && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] ml-1">
+                    {cat.id === 'atoms' ? atomCount : cat.id === 'components' ? componentCount : blockCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
 
-          {/* Results */}
-          <LibraryErrorBoundary>
-          <div className="space-y-4">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((entry) => (
-                <motion.div
-                  key={entry.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ComponentCard entry={entry} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-
-            {filtered.length === 0 && (
-              <div className="py-20 text-center">
-                <p className="text-white/30 text-sm">No components match your search.</p>
-              </div>
-            )}
+        {strictSourceMode && (
+          <div className="mb-5 rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-[11px] text-cyan-200">
+            Audit-Locked mode is active: {hiddenPendingAuditCount} entries are hidden until reviewed and source-matched.
           </div>
-          </LibraryErrorBoundary>
+        )}
+
+        {/* Results */}
+        <LibraryErrorBoundary>
+        <div className="space-y-4">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((entry) => (
+              <motion.div
+                key={entry.id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ComponentCard entry={entry} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {filtered.length === 0 && (
+            <div className="py-20 text-center">
+              <p className="text-white/30 text-sm">No components match your search.</p>
+            </div>
+          )}
+        </div>
+        </LibraryErrorBoundary>
         </div>
 
         {/* Right sidebar — design system reference */}

@@ -82,6 +82,23 @@ export const BRANDS: BrandTokens[] = [
     products: { ...ALL_PRODUCTS_ON },
   },
   {
+    id: 'vip',
+    name: 'VIP',
+    primary: '#242020',
+    primaryHover: '#1b1818',
+    navBg: '#1b1919',
+    pageBg: '#1a1a1a',
+    sidebarBg: '#1b1919',
+    cardBg: '#201d1d',
+    accentGreen: '#8ac500',
+    logo: (
+      <img src="/brands/VIP%20BRAND/Logo.svg" alt="VIP" className="h-6 w-auto" />
+    ),
+    logoSrc: '/brands/VIP%20BRAND/Logo.svg',
+    lockupSrc: '/brands/VIP%20BRAND/LOCKUP.svg',
+    products: { ...ALL_PRODUCTS_ON },
+  },
+  {
     id: 'wildcasino',
     name: 'Wild Casino',
     primary: '#2faf16',
@@ -213,15 +230,16 @@ function saveActiveBrandId(id: string) {
 const STYLE_ID = '__ds-brand-override'
 
 function buildOverrideCSS(b: BrandTokens): string {
+  const isVipBrand = b.id === 'vip'
   // Use white-opacity layers for surfaces instead of solid greys
   // This makes cards/sidebars adapt naturally to any brand background
-  const surface5 = 'rgba(255, 255, 255, 0.05)'   // subtle card/sidebar bg
-  const surface8 = 'rgba(255, 255, 255, 0.08)'   // slightly elevated surfaces
-  const surface10 = 'rgba(255, 255, 255, 0.10)'  // interactive/hover surfaces
-  const surface15 = 'rgba(255, 255, 255, 0.15)'  // emphasized surfaces
-  const surface3 = 'rgba(255, 255, 255, 0.03)'   // very subtle (chat, footer)
-  const borderWhite8 = 'rgba(255, 255, 255, 0.08)'
-  const borderWhite12 = 'rgba(255, 255, 255, 0.12)'
+  const surface5 = isVipBrand ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.05)'     // subtle card/sidebar bg
+  const surface8 = isVipBrand ? 'rgba(255, 255, 255, 0.065)' : 'rgba(255, 255, 255, 0.08)'    // slightly elevated surfaces
+  const surface10 = isVipBrand ? 'rgba(255, 255, 255, 0.085)' : 'rgba(255, 255, 255, 0.10)'   // interactive/hover surfaces
+  const surface15 = isVipBrand ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.15)'    // emphasized surfaces
+  const surface3 = isVipBrand ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.03)'     // very subtle (chat, footer)
+  const borderWhite8 = isVipBrand ? 'rgba(255, 255, 255, 0.022)' : 'rgba(255, 255, 255, 0.08)'
+  const borderWhite12 = isVipBrand ? 'rgba(255, 255, 255, 0.035)' : 'rgba(255, 255, 255, 0.12)'
   // Only Super Slots needs black text on its yellow primary
   const primaryTextColor = b.primaryTextBlack ? '#000000' : '#ffffff'
 
@@ -348,6 +366,27 @@ button[data-active="true"] {
 .border-\\[\\#1a1a1a\\] {
   border-color: ${borderWhite8} !important;
 }
+.border-white\\/5 {
+  border-color: ${surface8} !important;
+}
+.border-white\\/10 {
+  border-color: ${borderWhite8} !important;
+}
+.border-white\\/20 {
+  border-color: ${borderWhite12} !important;
+}
+.border-white\\/\\[0\\.06\\] {
+  border-color: ${borderWhite8} !important;
+}
+.border-white\\/\\[0\\.08\\] {
+  border-color: ${borderWhite8} !important;
+}
+.border-white\\/\\[0\\.12\\] {
+  border-color: ${borderWhite12} !important;
+}
+.border-white\\/\\[0\\.15\\] {
+  border-color: ${borderWhite12} !important;
+}
 
 /* Footer / bottom sections */
 .bg-\\[\\#222\\],
@@ -428,6 +467,120 @@ button[data-active="true"] {
 [data-customizer-fab] * {
   /* do not override */
 }
+${isVipBrand ? `
+/* VIP logo treatment — solid off-black with subtle luxury pulse */
+[data-custom-brand-logo],
+[data-custom-brand-lockup] {
+  /* black source logo -> invert to light, then dim to premium off-black/charcoal */
+  filter: invert(1) brightness(0.34) saturate(55%) contrast(1.08) !important;
+  opacity: 0.9 !important;
+  mix-blend-mode: normal !important;
+  animation: vipLogoSheen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+  will-change: filter, opacity, transform !important;
+  transform-origin: center center !important;
+}
+[data-custom-brand-lockup] {
+  /* Collapsed rail lockup needs to read stronger */
+  transform: scale(1.28) !important;
+}
+[data-custom-brand-logo-glare],
+[data-custom-brand-lockup-glare] {
+  position: absolute !important;
+  inset: -25% -40% !important;
+  pointer-events: none !important;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(228, 214, 160, 0.18) 48%,
+    rgba(255, 255, 255, 0) 62%
+  ) !important;
+  transform: translateX(-160%) skewX(-18deg) !important;
+  mix-blend-mode: screen !important;
+  animation: vipLogoSwish 4.8s ease-in-out infinite !important;
+}
+
+@keyframes vipLogoSheen {
+  0%, 100% {
+    opacity: 0.86;
+    filter: invert(1) brightness(0.3) saturate(50%) contrast(1.05) drop-shadow(0 0 0 rgba(214, 196, 140, 0));
+    transform: translateX(0) scale(1);
+  }
+  18% {
+    opacity: 0.9;
+    filter: invert(1) brightness(0.38) saturate(62%) contrast(1.1) drop-shadow(0 0 2px rgba(214, 196, 140, 0.14));
+    transform: translateX(0.2px) scale(1.002);
+  }
+  30% {
+    opacity: 0.96;
+    filter: invert(1) brightness(0.56) saturate(82%) contrast(1.16) drop-shadow(0 0 9px rgba(214, 196, 140, 0.28));
+    transform: translateX(0.9px) scale(1.008);
+  }
+  40% {
+    opacity: 0.99;
+    filter: invert(1) brightness(0.7) saturate(110%) contrast(1.22) drop-shadow(0 0 14px rgba(214, 196, 140, 0.36));
+    transform: translateX(1.2px) scale(1.01);
+  }
+  52% {
+    opacity: 0.92;
+    filter: invert(1) brightness(0.46) saturate(70%) contrast(1.12) drop-shadow(0 0 5px rgba(214, 196, 140, 0.18));
+    transform: translateX(0.4px) scale(1.004);
+  }
+  68% {
+    opacity: 0.88;
+    filter: invert(1) brightness(0.35) saturate(56%) contrast(1.07) drop-shadow(0 0 0 rgba(214, 196, 140, 0));
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes vipLogoSwish {
+  0%, 58%, 100% {
+    transform: translateX(-160%) skewX(-18deg);
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.35;
+  }
+  78% {
+    transform: translateX(170%) skewX(-18deg);
+    opacity: 0.7;
+  }
+  86% {
+    opacity: 0;
+  }
+}
+
+/* VIP divider softening — enforce low-contrast separators globally */
+.border-r.border-white\\/10,
+.border-l.border-white\\/10,
+.border-t.border-white\\/10,
+.border-b.border-white\\/10,
+[class*="border-r"][class*="border-white\\/10"],
+[class*="border-l"][class*="border-white\\/10"],
+[class*="border-t"][class*="border-white\\/10"],
+[class*="border-b"][class*="border-white\\/10"] {
+  border-color: rgba(255, 255, 255, 0.014) !important;
+}
+
+/* Critical: force the actual sidebar split line to be soft on all layouts */
+[data-sidebar="sidebar"],
+.group\\/sidebar-wrapper [data-sidebar="sidebar"],
+.group\\/sidebar-wrapper > div,
+.group.peer > div.fixed {
+  border-right-color: rgba(255, 255, 255, 0.014) !important;
+}
+
+/* VIP overlays/popovers/drawers — keep them solid so they don't blend into content */
+[data-radix-popper-content-wrapper] [class*="bg-[#2d2d2d]"],
+[data-radix-popper-content-wrapper] [class*="bg-[#1a1a1a]"],
+[data-radix-popper-content-wrapper] .bg-popover,
+[data-radix-popper-content-wrapper] [role="menu"],
+[data-vaul-drawer] [class*="bg-[#2d2d2d]"],
+[data-vaul-drawer] [class*="bg-[#1a1a1a]"],
+[role="dialog"][class*="bg-[#2d2d2d]"],
+[role="dialog"][class*="bg-[#1a1a1a]"] {
+  background-color: rgba(24, 22, 22, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+}
+` : ''}
 `
 }
 
@@ -497,10 +650,12 @@ function removeOverrideStyles() {
 }
 
 /** Swap logos in the DOM — finds BetOnline SVGs by viewBox and replaces */
-function swapLogos(logoSrc: string | undefined, lockupSrc?: string) {
+function swapLogos(logoSrc: string | undefined, lockupSrc?: string, addVipEffect = false) {
   // Remove any previously injected custom logos
   document.querySelectorAll('[data-custom-brand-logo]').forEach(el => el.remove())
   document.querySelectorAll('[data-custom-brand-lockup]').forEach(el => el.remove())
+  document.querySelectorAll('[data-custom-brand-logo-glare]').forEach(el => el.remove())
+  document.querySelectorAll('[data-custom-brand-lockup-glare]').forEach(el => el.remove())
   // Show any hidden original logos
   document.querySelectorAll('[data-original-logo-hidden]').forEach(el => {
     (el as HTMLElement).style.display = ''
@@ -517,16 +672,24 @@ function swapLogos(logoSrc: string | undefined, lockupSrc?: string) {
   document.querySelectorAll('svg[viewBox="0 0 640 86"]').forEach(svg => {
     const parent = svg.parentElement
     if (!parent) return
+    parent.style.position = parent.style.position || 'relative'
+    parent.style.overflow = 'hidden'
     ;(svg as HTMLElement).style.display = 'none'
     svg.setAttribute('data-original-logo-hidden', 'true')
     const img = document.createElement('img')
     img.src = logoSrc
     img.alt = 'Brand Logo'
     img.style.height = '100%'
-    img.style.width = 'auto'
+    img.style.width = '100%'
     img.style.objectFit = 'contain'
+    img.style.objectPosition = 'center'
     img.setAttribute('data-custom-brand-logo', 'true')
     parent.appendChild(img)
+    if (addVipEffect) {
+      const glare = document.createElement('span')
+      glare.setAttribute('data-custom-brand-logo-glare', 'true')
+      parent.appendChild(glare)
+    }
   })
 
   // Find all BetOnline "B" lockup SVGs (viewBox="0 0 114 86") and swap with brand lockup
@@ -534,16 +697,24 @@ function swapLogos(logoSrc: string | undefined, lockupSrc?: string) {
     document.querySelectorAll('svg[viewBox="0 0 114 86"]').forEach(svg => {
       const parent = svg.parentElement
       if (!parent) return
+      parent.style.position = parent.style.position || 'relative'
+      parent.style.overflow = 'hidden'
       ;(svg as HTMLElement).style.display = 'none'
       svg.setAttribute('data-original-lockup-hidden', 'true')
       const img = document.createElement('img')
       img.src = lockupSrc
       img.alt = 'Brand Lockup'
       img.style.height = '100%'
-      img.style.width = 'auto'
+      img.style.width = '100%'
       img.style.objectFit = 'contain'
+      img.style.objectPosition = 'center'
       img.setAttribute('data-custom-brand-lockup', 'true')
       parent.appendChild(img)
+      if (addVipEffect) {
+        const glare = document.createElement('span')
+        glare.setAttribute('data-custom-brand-lockup-glare', 'true')
+        parent.appendChild(glare)
+      }
     })
   }
 }
@@ -588,7 +759,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
         // Apply the brand after a tick to ensure DOM is ready
         requestAnimationFrame(() => {
           injectOverrideStyles(brand)
-          swapLogos(brand.logoSrc, brand.lockupSrc)
+          swapLogos(brand.logoSrc, brand.lockupSrc, brand.id === 'vip')
 
           const root = document.documentElement
           root.style.setProperty('--ds-primary', brand.primary)
@@ -678,16 +849,29 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
     const swapSvg = (svg: Element, src: string, dataAttrHidden: string, dataAttrCustom: string, alt: string) => {
       const parent = svg.parentElement
       if (!parent) return
+      parent.style.position = parent.style.position || 'relative'
+      parent.style.overflow = 'hidden'
       ;(svg as HTMLElement).style.display = 'none'
       svg.setAttribute(dataAttrHidden, 'true')
       const img = document.createElement('img')
       img.src = src
       img.alt = alt
       img.style.height = '100%'
-      img.style.width = 'auto'
+      img.style.width = '100%'
       img.style.objectFit = 'contain'
+      img.style.objectPosition = 'center'
       img.setAttribute(dataAttrCustom, 'true')
       parent.appendChild(img)
+      if (brand.id === 'vip') {
+        const glare = document.createElement('span')
+        glare.setAttribute(
+          dataAttrCustom === 'data-custom-brand-lockup'
+            ? 'data-custom-brand-lockup-glare'
+            : 'data-custom-brand-logo-glare',
+          'true'
+        )
+        parent.appendChild(glare)
+      }
     }
 
     const observer = new MutationObserver((mutations) => {
@@ -721,7 +905,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
     observer.observe(document.body, { childList: true, subtree: true })
 
     // Also do an immediate sweep in case the DOM already has un-swapped logos
-    requestAnimationFrame(() => swapLogos(logoSrc, lockupSrc))
+    requestAnimationFrame(() => swapLogos(logoSrc, lockupSrc, brand.id === 'vip'))
 
     return () => observer.disconnect()
   }, [activeBrandId])
@@ -772,7 +956,7 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
       root.style.removeProperty('--ds-primary-text')
     } else {
       injectOverrideStyles(brand)
-      swapLogos(brand.logoSrc, brand.lockupSrc)
+      swapLogos(brand.logoSrc, brand.lockupSrc, brand.id === 'vip')
     }
 
     // Set CSS variables on :root (both --ds-* and legacy --brand-* for compatibility)
