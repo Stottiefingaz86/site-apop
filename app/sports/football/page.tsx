@@ -6,7 +6,7 @@ import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { createPortal } from 'react-dom'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTracking } from '@/hooks/use-tracking'
@@ -15472,7 +15472,9 @@ function ViewTab({
 export default function NavTestPage() {
   return (
     <SidebarProvider>
-      <NavTestPageContent />
+      <Suspense fallback={null}>
+        <NavTestPageContent />
+      </Suspense>
     </SidebarProvider>
   )
 }
