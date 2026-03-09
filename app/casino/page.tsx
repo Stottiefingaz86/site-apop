@@ -7975,6 +7975,7 @@ function NavTestPageContent() {
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)
   const [accountDrawerView, setAccountDrawerView] = useState<'account' | 'notifications'>('account')
+  const webInboxUnreadCount = 2
 
   const completeCasinoFeatureTour = useCallback(() => {
     setCasinoFeatureTourOpen(false)
@@ -9351,7 +9352,7 @@ function NavTestPageContent() {
                         style={{ zIndex: 120 }}
                       >
                         <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
-                          <a href="#" className="w-full">Esports</a>
+                          <a href="/esports" className="w-full">Esports</a>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
                           <a href="#" className="w-full">Racebook</a>
@@ -13822,6 +13823,22 @@ function NavTestPageContent() {
                       <IconUser className="w-5 h-5 mr-3 text-gray-700" />
                       <span className="flex-1 text-left text-gray-900">My Account</span>
                 </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-900 hover:bg-gray-100 hover:text-gray-900 h-12 px-3 min-w-0"
+                      onClick={() => {
+                        setAccountDrawerView('notifications')
+                      }}
+                    >
+                      <IconBell className="w-5 h-5 mr-3 text-gray-700 flex-shrink-0" />
+                      <span className="flex-1 text-left text-gray-900">Notifications</span>
+                      {webInboxUnreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+                          {webInboxUnreadCount}
+                        </span>
+                      )}
+                    </Button>
                     
                     <Button 
                       variant="ghost" 
