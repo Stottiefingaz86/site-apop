@@ -3364,6 +3364,206 @@ function MyBetsContent({ onBack, brandPrimary, initialFilter }: { onBack: () => 
     if (oddsNum > 0) return amount + (amount * oddsNum / 100)
     return amount + (amount * 100 / Math.abs(oddsNum))
   }
+  const pendingPreMatchBets = sampleBets.filter((bet) => !bet.status && !bet.isLive)
+
+  const formatCurrency = (value: number) => `$${value.toFixed(2)}`
+
+  const openPrintTicket = (betsForTicket: Array<typeof sampleBets[0]>) => {
+    if (betsForTicket.length === 0) return
+
+    const issuedAt = new Date()
+    const issuedAtLabel = issuedAt.toLocaleString()
+
+    const ticketRows = betsForTicket
+      .map((bet) => {
+        const potentialReturns = getPotentialReturns(bet.amount, bet.odds)
+        return `
+          <section class="bet-card">
+            <header class="bet-top">
+              <div>
+                <p class="tag">PENDING</p>
+                <h3>${bet.selection}</h3>
+              </div>
+              <p class="odds">${bet.odds}</p>
+            </header>
+            <p class="meta">${bet.market}</p>
+            ${bet.team1 && bet.team2 ? `<p class="meta">${bet.team1} v ${bet.team2}</p>` : ''}
+            ${bet.league ? `<p class="meta">${bet.league}${bet.country ? `, ${bet.country}` : ''}</p>` : ''}
+            <div class="risk-row">
+              <div>
+                <span>Risk</span>
+                <strong>${formatCurrency(bet.amount)}</strong>
+              </div>
+              <div class="right">
+                <span>Potential Returns</span>
+                <strong>${formatCurrency(potentialReturns)}</strong>
+              </div>
+            </div>
+            <div class="foot">
+              <span>Bet ID: ${bet.betId}</span>
+              <span>${bet.datePlaced}</span>
+            </div>
+          </section>
+        `
+      })
+      .join('')
+
+    const html = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Pending Bets Ticket</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              background: #101012;
+              color: #f4f4f5;
+              padding: 20px;
+            }
+            .ticket {
+              width: 100%;
+              max-width: 1100px;
+              margin: 0 auto;
+              border: 1px solid rgba(255,255,255,0.14);
+              border-radius: 16px;
+              overflow: hidden;
+              background: linear-gradient(180deg, #19191d 0%, #121216 100%);
+            }
+            .header {
+              padding: 22px 24px;
+              border-bottom: 1px solid rgba(255,255,255,0.08);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            }
+            .title {
+              margin: 0;
+              font-size: 24px;
+              font-weight: 700;
+              letter-spacing: 0.01em;
+            }
+            .sub {
+              margin-top: 4px;
+              color: rgba(255,255,255,0.6);
+              font-size: 14px;
+            }
+            .count {
+              border: 1px solid rgba(238,53,54,0.45);
+              color: #ff8a8a;
+              background: rgba(238,53,54,0.12);
+              border-radius: 999px;
+              padding: 6px 10px;
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: .04em;
+            }
+            .actions {
+              display: flex;
+              gap: 8px;
+              padding: 12px 14px 0;
+            }
+            .action-btn {
+              border: 1px solid rgba(255,255,255,0.18);
+              background: rgba(255,255,255,0.04);
+              color: #f4f4f5;
+              border-radius: 8px;
+              padding: 8px 12px;
+              font-size: 12px;
+              font-weight: 700;
+              letter-spacing: .02em;
+              cursor: pointer;
+            }
+            .action-btn:hover {
+              background: rgba(255,255,255,0.09);
+            }
+            .body { padding: 20px; }
+            .bet-card {
+              border: 1px solid rgba(255,255,255,0.12);
+              border-radius: 12px;
+              padding: 16px;
+              background: rgba(255,255,255,0.02);
+              margin-bottom: 14px;
+            }
+            .bet-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+            .tag {
+              margin: 0 0 4px;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: .06em;
+              color: #f8bd60;
+            }
+            h3 { margin: 0; font-size: 18px; font-weight: 700; }
+            .odds { margin: 0; font-size: 17px; color: rgba(255,255,255,0.85); font-weight: 700; }
+            .meta { margin: 5px 0 0; color: rgba(255,255,255,0.62); font-size: 14px; }
+            .risk-row {
+              margin-top: 10px;
+              border-top: 1px solid rgba(255,255,255,0.08);
+              padding-top: 10px;
+              display: flex;
+              justify-content: space-between;
+              gap: 10px;
+            }
+            .risk-row span { display: block; font-size: 13px; color: rgba(255,255,255,0.5); }
+            .risk-row strong { display: block; font-size: 18px; margin-top: 2px; }
+            .risk-row .right { text-align: right; }
+            .foot {
+              margin-top: 10px;
+              padding-top: 8px;
+              border-top: 1px dashed rgba(255,255,255,0.16);
+              display: flex;
+              justify-content: space-between;
+              gap: 10px;
+              font-size: 12px;
+              color: rgba(255,255,255,0.42);
+            }
+            @media print {
+              @page { margin: 6mm; }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              body {
+                background: #101012 !important;
+                color: #f4f4f5 !important;
+                padding: 0;
+              }
+              .ticket { break-inside: avoid; }
+              .bet-card { break-inside: avoid; }
+              .actions { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <article class="ticket">
+            <header class="header">
+              <div>
+                <h1 class="title">Sportsbook Pending Bets Ticket</h1>
+                <p class="sub">Issued: ${issuedAtLabel}</p>
+              </div>
+              <div class="count">${betsForTicket.length} BET${betsForTicket.length > 1 ? 'S' : ''}</div>
+            </header>
+            <div class="actions">
+              <button class="action-btn" onclick="window.print()">Download PDF</button>
+              <button class="action-btn" onclick="window.print()">Print Ticket</button>
+            </div>
+            <section class="body">${ticketRows}</section>
+          </article>
+        </body>
+      </html>
+    `
+
+    const printBlob = new Blob([html], { type: 'text/html' })
+    const printUrl = URL.createObjectURL(printBlob)
+    const printWindow = window.open(printUrl, '_blank')
+    if (!printWindow) {
+      window.location.href = printUrl
+      return
+    }
+    window.setTimeout(() => URL.revokeObjectURL(printUrl), 60_000)
+  }
 
   // Share bet to chat helper
   const handleShareToChat = (bet: typeof sampleBets[0]) => {
@@ -3506,6 +3706,31 @@ function MyBetsContent({ onBack, brandPrimary, initialFilter }: { onBack: () => 
             </div>
           </div>
 
+          {/* Actions */}
+          <div className="px-4 pb-3 pt-1 flex items-center gap-2">
+            {!bet.status && !bet.isLive && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openPrintTicket([bet])
+                }}
+                className="inline-flex items-center gap-1.5 py-1 px-3 rounded-md text-[11px] font-medium text-white/75 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
+                aria-label={`Print ticket for bet ${bet.betId}`}
+              >
+                <IconDownload className="w-3.5 h-3.5" />
+                PRINT TICKET
+              </button>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleShareToChat(bet) }}
+              className="inline-flex items-center gap-1.5 py-1 px-3 rounded-md text-[11px] font-medium text-white/60 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
+            >
+              <IconMessageCircle2 className="w-3.5 h-3.5" />
+              SHARE TO CHAT
+            </button>
+          </div>
+
         </div>
       </motion.div>
     )
@@ -3566,14 +3791,27 @@ function MyBetsContent({ onBack, brandPrimary, initialFilter }: { onBack: () => 
         </div>
       </div>
 
-      {/* Add Filter */}
-      <div className="flex items-center gap-2 mb-3 text-sm">
-        <button className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors">
-          <IconFilter className="w-4 h-4" />
-          <span className="font-medium">ADD FILTER</span>
-        </button>
-        <span className="text-white/30">|</span>
-        <span className="text-white/40">No filters applied</span>
+      {/* Add Filter + Wallet CTA */}
+      <div className="flex items-center justify-between gap-3 mb-3 text-sm">
+        <div className="flex items-center gap-2 min-w-0">
+          <button className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors">
+            <IconFilter className="w-4 h-4" />
+            <span className="font-medium">ADD FILTER</span>
+          </button>
+          <span className="text-white/30">|</span>
+          <span className="text-white/40 truncate">No filters applied</span>
+        </div>
+        {activeFilter === 'pending' && pendingPreMatchBets.length > 0 && (
+          <button
+            type="button"
+            onClick={() => openPrintTicket(pendingPreMatchBets)}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold text-white/90 border border-white/15 bg-white/[0.03] hover:bg-white/[0.08] transition-all duration-200 flex-shrink-0"
+            aria-label="Print ticket for all pending bets"
+          >
+            <IconDownload className="w-3.5 h-3.5" />
+            PRINT TICKETS
+          </button>
+        )}
       </div>
 
       {/* Content: Bet List with inline accordion */}
@@ -6967,6 +7205,9 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               height={16}
                               className="object-contain"
                               decoding="sync"
+                              onError={(e) => {
+                                e.currentTarget.src = '/sports_icons/football.svg'
+                              }}
                             />
                             <span className="text-[10px] text-white">{event.league} | {event.country}</span>
                           </div>
@@ -6989,7 +7230,17 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 return TeamIcon ? <TeamIcon size={24} /> : null
                               })()
                             ) : 'team1Logo' in event && event.team1Logo ? (
-                              <img src={(event as any).team1Logo} alt={event.team1} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" onError={(e) => { const t = e.currentTarget; t.style.display = 'none'; const s = document.createElement('div'); s.className = 'w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0'; s.innerHTML = '<span class="text-[8px] font-bold text-white">' + event.team1Code + '</span>'; if (t.parentElement) t.parentElement.insertBefore(s, t); }} />
+                              <img
+                                src={(event as any).team1Logo}
+                                alt={event.team1}
+                                width={20}
+                                height={20}
+                                className="object-contain flex-shrink-0 rounded-full"
+                                decoding="sync"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none'
+                                }}
+                              />
                             ) : (
                             (() => {
                               const nbaBadgeMap: { [key: string]: string } = {
@@ -7064,7 +7315,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 'Italy': 'https://flagcdn.com/w80/it.png',
                               }
                               const logo = nbaBadgeMap[event.team1] || nflBadgeMap[event.team1] || soccerBadgeMap[event.team1] || ('team1Logo' in event ? (event as any).team1Logo : null) || rugbyFlagMap[event.team1]
-                              if (logo) return <img src={logo} alt={event.team1} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" />
+                              if (logo) return <img src={logo} alt={event.team1} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" onError={(e) => { e.currentTarget.style.display = 'none' }} />
                               return <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0"><span className="text-[8px] font-bold text-white">{event.team1Code}</span></div>
                             })()
                             )}
@@ -7145,7 +7396,17 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 return TeamIcon ? <TeamIcon size={24} /> : null
                               })()
                             ) : 'team2Logo' in event && event.team2Logo ? (
-                              <img src={(event as any).team2Logo} alt={event.team2} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" onError={(e) => { const t = e.currentTarget; t.style.display = 'none'; const s = document.createElement('div'); s.className = 'w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0'; s.innerHTML = '<span class="text-[8px] font-bold text-white">' + event.team2Code + '</span>'; if (t.parentElement) t.parentElement.insertBefore(s, t); }} />
+                              <img
+                                src={(event as any).team2Logo}
+                                alt={event.team2}
+                                width={20}
+                                height={20}
+                                className="object-contain flex-shrink-0 rounded-full"
+                                decoding="sync"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none'
+                                }}
+                              />
                             ) : (
                             (() => {
                               const nbaBadgeMap: { [key: string]: string } = {
@@ -7220,7 +7481,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                                 'Italy': 'https://flagcdn.com/w80/it.png',
                               }
                               const logo = nbaBadgeMap[event.team2] || nflBadgeMap[event.team2] || soccerBadgeMap[event.team2] || ('team2Logo' in event ? (event as any).team2Logo : null) || rugbyFlagMap[event.team2]
-                              if (logo) return <img src={logo} alt={event.team2} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" />
+                              if (logo) return <img src={logo} alt={event.team2} width={20} height={20} className="object-contain flex-shrink-0 rounded-full" decoding="sync" onError={(e) => { e.currentTarget.style.display = 'none' }} />
                               return <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0"><span className="text-[8px] font-bold text-white">{event.team2Code}</span></div>
                             })()
                             )}
@@ -10143,7 +10404,7 @@ function NavTestPageContent() {
                         style={{ zIndex: 120 }}
                       >
                         <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
-                          <a href="#" className="w-full">Esports</a>
+                          <a href="/esports" className="w-full">Esports</a>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
                           <a href="#" className="w-full">Racebook</a>

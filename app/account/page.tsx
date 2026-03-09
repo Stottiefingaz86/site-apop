@@ -237,6 +237,27 @@ const favouriteCasinoGames = [
   { title: 'Gold Nugget Rush 2', image: '/games/square/goldNuggetRush2.png', provider: 'Betsoft' },
 ]
 
+const accountPnlByWeek = {
+  thisWeek: [
+    { day: 'Mon', date: 'Mar 02', amount: 140 },
+    { day: 'Tue', date: 'Mar 03', amount: -60 },
+    { day: 'Wed', date: 'Mar 04', amount: 95 },
+    { day: 'Thu', date: 'Mar 05', amount: -20 },
+    { day: 'Fri', date: 'Mar 06', amount: 170 },
+    { day: 'Sat', date: 'Mar 07', amount: 75 },
+    { day: 'Sun', date: 'Mar 08', amount: 130 },
+  ],
+  lastWeek: [
+    { day: 'Mon', date: 'Feb 24', amount: 35 },
+    { day: 'Tue', date: 'Feb 25', amount: -110 },
+    { day: 'Wed', date: 'Feb 26', amount: 65 },
+    { day: 'Thu', date: 'Feb 27', amount: -85 },
+    { day: 'Fri', date: 'Feb 28', amount: 120 },
+    { day: 'Sat', date: 'Mar 01', amount: -30 },
+    { day: 'Sun', date: 'Mar 02', amount: 90 },
+  ],
+}
+
 // ═══════════════════════════════════════════════════════════
 // VIP Progress Bar — exact copy from casino/page.tsx
 // ═══════════════════════════════════════════════════════════
@@ -702,6 +723,7 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
   const [favCarouselApi, setFavCarouselApi] = React.useState<any>(null)
   const [favCanScrollPrev, setFavCanScrollPrev] = React.useState(false)
   const [favCanScrollNext, setFavCanScrollNext] = React.useState(true)
+  const [pnlRange, setPnlRange] = useState<'thisWeek' | 'lastWeek'>('thisWeek')
 
   React.useEffect(() => {
     if (!favCarouselApi) return
@@ -717,6 +739,13 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
       favCarouselApi.off('reInit', onSelect)
     }
   }, [favCarouselApi])
+
+  const selectedPnlData = useMemo(() => accountPnlByWeek[pnlRange], [pnlRange])
+
+  const pnlSummary = useMemo(() => {
+    const net = selectedPnlData.reduce((sum, day) => sum + day.amount, 0)
+    return { net }
+  }, [selectedPnlData])
 
   return (
     <div className="px-4 md:px-6 pt-4 md:pt-6 pb-8 w-full">
@@ -857,6 +886,134 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
 
 
       <Separator className="bg-white/10 mb-4" />
+
+      {/* ═══ Daily Figures (Weekly) ═══ */}
+      <Card className="bg-white/5 border-white/10 mb-4 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 border-b border-white/10">
+            <h3 className="text-base font-semibold text-white">Daily Figures</h3>
+            <AnimateTabs
+              value={pnlRange}
+              onValueChange={(value) => setPnlRange(value as 'thisWeek' | 'lastWeek')}
+              className="w-auto self-start sm:ml-auto"
+            >
+              <AnimateTabsList className="bg-[#1f1f1f] border border-white/15 p-0.5 h-auto gap-1 rounded-small relative">
+                {[
+                  { value: 'lastWeek', label: 'Last Week' },
+                  { value: 'thisWeek', label: 'This Week' },
+                ].map((tab) => (
+                  <TabsTab
+                    key={tab.value}
+                    value={tab.value}
+                    className="relative z-10 h-8 px-4 rounded-[8px] text-xs font-semibold text-white/75 hover:text-white focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  >
+                    {pnlRange === tab.value && (
+                      <motion.div
+                        layoutId="dailyFiguresWeekTab"
+                        className="absolute inset-0 rounded-[8px] -z-10"
+                        style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative z-10">{tab.label}</span>
+                  </TabsTab>
+                ))}
+              </AnimateTabsList>
+            </AnimateTabs>
+          </div>
+
+          <div className="px-4 py-3">
+            <div className="md:hidden rounded-small border border-white/10 bg-[#2d2d2d] p-4">
+                <div className="space-y-0.5">
+                  {selectedPnlData.map((day) => {
+                    const dayLabel =
+                      day.day === 'Mon' ? 'Monday' :
+                      day.day === 'Tue' ? 'Tuesday' :
+                      day.day === 'Wed' ? 'Wednesday' :
+                      day.day === 'Thu' ? 'Thursday' :
+                      day.day === 'Fri' ? 'Friday' :
+                      day.day === 'Sat' ? 'Saturday' :
+                      'Sunday'
+                    return (
+                      <div key={`${day.day}-${day.date}`} className="flex items-center justify-between py-2 border-b border-white/10 last:border-b-0">
+                        <span className="text-base text-white/90">{dayLabel}</span>
+                        <span
+                          className={cn(
+                            'text-base font-semibold tabular-nums',
+                            day.amount > 0 ? 'text-emerald-400' : day.amount < 0 ? 'text-red-400' : 'text-white/60'
+                          )}
+                        >
+                          {day.amount > 0 ? '+' : ''}{day.amount.toFixed(2)}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="mt-3 pt-3 border-t border-white/15 flex items-center justify-between">
+                  <span className="text-[26px] text-white/95 font-semibold">Total</span>
+                  <span
+                    className={cn(
+                      'text-[26px] font-bold tabular-nums',
+                      pnlSummary.net >= 0 ? 'text-emerald-400' : 'text-red-400'
+                    )}
+                  >
+                    {pnlSummary.net >= 0 ? '+' : ''}{pnlSummary.net.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            <div className="hidden md:block rounded-small border border-white/10 bg-[#2d2d2d] overflow-hidden">
+                <table className="w-full table-fixed border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">Wk</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">M</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">T</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">W</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">T</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">F</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">S</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">S</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="px-3 py-3 text-center text-sm text-white/85 font-semibold tabular-nums">
+                        {pnlRange === 'thisWeek' ? '35' : '34'}
+                      </td>
+                      {selectedPnlData.map((day) => (
+                        <td
+                          key={`${day.day}-${day.date}`}
+                          className={cn(
+                            'px-3 py-3 text-center text-sm font-semibold tabular-nums',
+                            day.amount > 0 ? 'text-emerald-400' : day.amount < 0 ? 'text-red-400' : 'text-white/60'
+                          )}
+                        >
+                          {day.amount > 0 ? '+' : ''}{day.amount.toFixed(2)}
+                        </td>
+                      ))}
+                      <td
+                        className={cn(
+                          'px-3 py-3 text-center text-sm font-bold tabular-nums',
+                          pnlSummary.net >= 0 ? 'text-emerald-400' : 'text-red-400'
+                        )}
+                      >
+                        {pnlSummary.net >= 0 ? '+' : ''}{pnlSummary.net.toFixed(2)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            <div className="mt-2 text-[11px] text-white/45 leading-relaxed">
+              * Daily figures are sample values shown in EST.
+            </div>
+            <div className="text-[11px] text-white/35">
+              * Includes Sports, Live Betting, Racebook, Esports and Casino transactions.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ═══ Favourites Carousel ═══ */}
       <div className="mb-4">
@@ -2751,7 +2908,7 @@ function AccountPageContent() {
                       style={{ zIndex: 120 }}
                     >
                       <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
-                        <a href="#" className="w-full">Esports</a>
+                        <a href="/esports" className="w-full">Esports</a>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-white/70 hover:text-white hover:bg-white/5">
                         <a href="#" className="w-full">Racebook</a>
