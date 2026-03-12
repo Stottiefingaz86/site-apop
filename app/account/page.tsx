@@ -132,6 +132,7 @@ import {
 import NumberFlow from '@number-flow/react'
 import DynamicIsland from '@/components/dynamic-island'
 import ChatNavToggle from '@/components/chat/chat-nav-toggle'
+import { NotificationHub } from '@/components/account/notification-hub'
 import { useChatStore } from '@/lib/store/chatStore'
 import { useBetslipStore } from '@/lib/store/betslipStore'
 import { useRainBalance } from '@/hooks/use-rain-balance'
@@ -4112,7 +4113,7 @@ function AccountPageContent() {
                       setAccountDrawerView('notifications')
                     }}
                   >
-                    <IconMessageCircle2 className="w-5 h-5 mr-3 text-gray-700 flex-shrink-0" />
+                    <IconBell className="w-5 h-5 mr-3 text-gray-700 flex-shrink-0" />
                     <span className="flex-1 text-left text-gray-900">Notifications</span>
                     {webInboxUnreadCount > 0 && (
                       <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
@@ -4203,61 +4204,7 @@ function AccountPageContent() {
                 </Button>
               </>
             ) : (
-              <>
-                {/* Notifications Page */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Button
-                      variant="ghost"
-                      className="h-8 px-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    >
-                      View All
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                      <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 font-medium">New Promotion Available!</p>
-                        <p className="text-xs text-gray-500 mt-1">Claim your free spins now!</p>
-                        <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 rounded-small bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                      <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 font-medium">Your Bet has been settled!</p>
-                        <p className="text-xs text-gray-500 mt-1">Check your winnings now!</p>
-                        <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                      <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 font-medium">Weekly summary</p>
-                        <p className="text-xs text-gray-500 mt-1">View your weekly betting activity</p>
-                        <p className="text-xs text-gray-400 mt-1">1 day ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                      <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 font-medium">Bet settled</p>
-                        <p className="text-xs text-gray-500 mt-1">Your bet on Liverpool has been settled</p>
-                        <p className="text-xs text-gray-400 mt-1">2 days ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 rounded-small hover:bg-gray-100 cursor-pointer transition-colors">
-                      <div className="h-2 w-2 rounded-full bg-transparent mt-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 font-medium">New bonus code available</p>
-                        <p className="text-xs text-gray-500 mt-1">Use code BONUS50 for 50% match</p>
-                        <p className="text-xs text-gray-400 mt-1">3 days ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <NotificationHub />
             )}
           </div>
         </DrawerContent>

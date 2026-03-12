@@ -2,7 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { IconBellRinging, IconCheck, IconCrown, IconTrash } from "@tabler/icons-react"
+import {
+  IconBallFootball,
+  IconBellRinging,
+  IconCrown,
+  IconCurrencyDollar,
+  IconDice,
+  IconDots,
+  IconGift,
+  IconSettings,
+} from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
@@ -18,10 +27,80 @@ type NotificationItem = {
   progressLabel?: string
   progressValue?: number
   ctaLabel?: string
-  ctaAction?: "claim_reward" | "open_vip_benefits" | "launch_game_of_week" | "open_poker"
+  ctaAction?: "claim_reward" | "open_vip_benefits" | "launch_game_of_week" | "open_poker" | "open_mystery_wheel"
 }
 
 const STORAGE_KEY = "bol-notification-hub-v3"
+const PREFERENCES_STORAGE_KEY = "bol-notification-preferences-v1"
+
+type CampaignKey = "casino" | "sports" | "poker" | "vip" | "promotions"
+type ChannelKey = "push" | "email" | "sms"
+
+type NotificationPreferences = {
+  channels: Record<ChannelKey, boolean>
+  campaigns: Record<CampaignKey, boolean>
+}
+
+const DEFAULT_PREFERENCES: NotificationPreferences = {
+  channels: {
+    push: true,
+    email: true,
+    sms: true,
+  },
+  campaigns: {
+    casino: true,
+    sports: true,
+    poker: true,
+    vip: true,
+    promotions: true,
+  },
+}
+
+const CHANNELS: { key: ChannelKey; label: string }[] = [
+  { key: "push", label: "Push" },
+  { key: "email", label: "Email" },
+  { key: "sms", label: "SMS" },
+]
+
+const CAMPAIGNS: { key: CampaignKey; label: string }[] = [
+  { key: "casino", label: "Casino" },
+  { key: "sports", label: "Sports" },
+  { key: "poker", label: "Poker" },
+  { key: "vip", label: "VIP" },
+  { key: "promotions", label: "Promotions" },
+]
+
+function getCampaignForItem(item: NotificationItem): CampaignKey {
+  const text = `${item.title} ${item.description}`.toLowerCase()
+  if (text.includes("poker")) return "poker"
+  if (text.includes("vip") || item.type === "vip-progress" || item.type === "vip-cash") return "vip"
+  if (text.includes("sport") || text.includes("bet")) return "sports"
+  if (text.includes("casino") || text.includes("spin") || text.includes("slot")) return "casino"
+  return "promotions"
+}
+
+function parsePreferences(value: string | null): NotificationPreferences {
+  if (!value) return DEFAULT_PREFERENCES
+  try {
+    const parsed = JSON.parse(value) as Partial<NotificationPreferences>
+    return {
+      channels: {
+        push: parsed.channels?.push ?? DEFAULT_PREFERENCES.channels.push,
+        email: parsed.channels?.email ?? DEFAULT_PREFERENCES.channels.email,
+        sms: parsed.channels?.sms ?? DEFAULT_PREFERENCES.channels.sms,
+      },
+      campaigns: {
+        casino: parsed.campaigns?.casino ?? DEFAULT_PREFERENCES.campaigns.casino,
+        sports: parsed.campaigns?.sports ?? DEFAULT_PREFERENCES.campaigns.sports,
+        poker: parsed.campaigns?.poker ?? DEFAULT_PREFERENCES.campaigns.poker,
+        vip: parsed.campaigns?.vip ?? DEFAULT_PREFERENCES.campaigns.vip,
+        promotions: parsed.campaigns?.promotions ?? DEFAULT_PREFERENCES.campaigns.promotions,
+      },
+    }
+  } catch {
+    return DEFAULT_PREFERENCES
+  }
+}
 
 function resolveProgressDefaults(item: NotificationItem): { progressValue: number; progressLabel: string } {
   if (typeof item.progressValue === "number" && item.progressLabel) {
@@ -307,22 +386,39 @@ const SEED_NOTIFICATIONS: NotificationItem[] = [
     ctaLabel: "Play now",
     ctaAction: "launch_game_of_week",
   },
+  {
+    id: "n-25",
+    title: "On the 1st Day of Christmas",
+    description: "Your $25 cash reward is ready to claim.",
+    timeLabel: "Today",
+    unread: true,
+    type: "reward-cta",
+    ctaLabel: "Claim $25",
+    ctaAction: "claim_reward",
+  },
 ]
 
 function ensureRequiredNotifications(items: NotificationItem[]): NotificationItem[] {
   const freeSpins = SEED_NOTIFICATIONS.find((item) => item.id === "n-24")
-  if (!freeSpins) return items
-  const withoutFreeSpins = items.filter((item) => item.id !== "n-24")
-  return [hydrateNotificationTemplates(freeSpins), ...withoutFreeSpins]
+  const christmasStreak = SEED_NOTIFICATIONS.find((item) => item.id === "n-25")
+  const withoutRequired = items.filter((item) => item.id !== "n-24" && item.id !== "n-25" && item.id !== "n-26")
+  const required: NotificationItem[] = []
+  if (freeSpins) required.push(hydrateNotificationTemplates(freeSpins))
+  if (christmasStreak) required.push(hydrateNotificationTemplates(christmasStreak))
+  return [...required, ...withoutRequired]
 }
 
 export function NotificationHub() {
   const isMobile = useIsMobile()
   const [tab, setTab] = useState<"all" | "unread">("all")
+  const [preferencesOpen, setPreferencesOpen] = useState(false)
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
+  const [mysteryWheelNotificationId, setMysteryWheelNotificationId] = useState<string | null>(null)
+  const [claimAlertMessage, setClaimAlertMessage] = useState<string | null>(null)
   const [items, setItems] = useState<NotificationItem[]>(() =>
     ensureRequiredNotifications(SEED_NOTIFICATIONS.map(hydrateNotificationTemplates)),
   )
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -340,44 +436,91 @@ export function NotificationHub() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
+    const parsed = parsePreferences(window.localStorage.getItem(PREFERENCES_STORAGE_KEY))
+    setPreferences(parsed)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences))
+    window.dispatchEvent(
+      new CustomEvent("notification:preferences-updated", {
+        detail: preferences,
+      }),
+    )
+  }, [preferences])
+
+  const campaignCounts = useMemo(
+    () =>
+      items.reduce(
+        (acc, item) => {
+          const key = getCampaignForItem(item)
+          acc[key] += 1
+          return acc
+        },
+        { casino: 0, sports: 0, poker: 0, vip: 0, promotions: 0 } as Record<CampaignKey, number>,
+      ),
+    [items],
+  )
 
   const unreadCount = useMemo(() => items.filter((item) => item.unread).length, [items])
   const filteredItems = useMemo(
     () => (tab === "unread" ? items.filter((item) => item.unread) : items),
     [items, tab],
   )
-  const allFilteredSelected =
-    filteredItems.length > 0 && filteredItems.every((item) => selectedIds.has(item.id))
-  const hasSelection = selectedIds.size > 0
+  const groupedItems = useMemo(() => {
+    const groups = {
+      today: [] as NotificationItem[],
+      yesterday: [] as NotificationItem[],
+      last7: [] as NotificationItem[],
+    }
 
-  const toggleSelected = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const deleteSelected = () => {
-    if (!hasSelection) return
-    setItems((prev) => prev.filter((item) => !selectedIds.has(item.id)))
-    setSelectedIds(new Set())
-  }
-
-  const toggleSelectAllFiltered = () => {
-    if (filteredItems.length === 0) return
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (allFilteredSelected) {
-        filteredItems.forEach((item) => next.delete(item.id))
+    filteredItems.forEach((item) => {
+      const time = item.timeLabel.toLowerCase()
+      if (
+        time.includes("today") ||
+        time.includes("just now") ||
+        time.includes("min ago") ||
+        time.includes("hour ago")
+      ) {
+        groups.today.push(item)
+      } else if (time.includes("yesterday")) {
+        groups.yesterday.push(item)
       } else {
-        filteredItems.forEach((item) => next.add(item.id))
+        groups.last7.push(item)
       }
-      return next
     })
+
+    return [
+      { label: "Today", items: groups.today },
+      { label: "Yesterday", items: groups.yesterday },
+      { label: "Last 7 Days", items: groups.last7 },
+    ].filter((group) => group.items.length > 0)
+  }, [filteredItems])
+
+  const toggleChannelPreference = (key: ChannelKey) => {
+    setPreferences((prev) => ({
+      ...prev,
+      channels: {
+        ...prev.channels,
+        [key]: !prev.channels[key],
+      },
+    }))
+  }
+
+  const toggleCampaignPreference = (key: CampaignKey) => {
+    setPreferences((prev) => ({
+      ...prev,
+      campaigns: {
+        ...prev.campaigns,
+        [key]: !prev.campaigns[key],
+      },
+    }))
   }
 
   const openVipBenefits = () => {
@@ -402,42 +545,43 @@ export function NotificationHub() {
   }
 
   const claimReward = (id: string) => {
-    const amount = 250
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("notification:claim-reward", {
-          detail: { amount },
-        }),
-      )
-    }
-    setItems((prev) => [
-      {
-        id: `claimed-${Date.now()}`,
-        title: "Reward Successfully Claimed",
-        description: `$${amount.toFixed(2)} has been credited to your account as part of the promotion.`,
-        timeLabel: "just now",
-        unread: false,
-      },
-      ...prev.filter((item) => item.id !== id),
-    ])
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(id)
-      return next
+    setItems((prev) => {
+      const source = prev.find((item) => item.id === id)
+      const amountFromCta = source?.ctaLabel?.match(/\$([0-9]+(?:\.[0-9]{1,2})?)/)?.[1]
+      const amountFromDescription = source?.description.match(/\$([0-9]+(?:\.[0-9]{1,2})?)/)?.[1]
+      const amount = Number(amountFromCta ?? amountFromDescription ?? "250")
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("notification:claim-reward", {
+            detail: { amount },
+          }),
+        )
+      }
+
+      const isChristmasReward = source?.id === "n-25" || source?.title.toLowerCase().includes("1st day of christmas")
+      setClaimAlertMessage(`Reward claimed! +$${amount.toFixed(2)} added to your balance.`)
+      window.setTimeout(() => setClaimAlertMessage(null), 2200)
+
+      return [
+        {
+          id: `claimed-${Date.now()}`,
+          title: isChristmasReward ? "Christmas Reward Successfully Claimed" : "Reward Successfully Claimed",
+          description: `$${amount.toFixed(2)} has been credited to your account as part of the promotion.`,
+          timeLabel: "just now",
+          unread: true,
+        },
+        ...prev.filter((item) => item.id !== id),
+      ]
     })
   }
 
   const removeItem = (id: string) => {
     setItems((prev) => prev.filter((n) => n.id !== id))
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(id)
-      return next
-    })
   }
 
   const notificationCtaClass =
-    "mt-3 h-9 rounded-small border border-gray-300 bg-white px-5 text-sm font-semibold !text-gray-800 hover:bg-gray-50 hover:!text-gray-800 active:bg-gray-100"
+    "mt-3 h-9 rounded-small bg-[var(--ds-primary,#ee3536)] px-4 text-xs font-semibold text-white hover:bg-[var(--ds-primary-hover,#d92d2f)]"
 
   const resolveCta = (
     item: NotificationItem,
@@ -475,211 +619,391 @@ export function NotificationHub() {
     }
     if (action === "open_poker") {
       if (typeof window !== "undefined") window.location.href = "/poker"
+      return
     }
+    if (action === "open_mystery_wheel") {
+      setMysteryWheelNotificationId(item.id)
+    }
+  }
+
+  const markAsRead = (id: string) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, unread: false } : item)),
+    )
+  }
+
+  const renderAvatar = (item: NotificationItem) => {
+    const text = `${item.title} ${item.description}`.toLowerCase()
+    if (item.type === "vip-progress" || item.type === "vip-cash" || text.includes("platinum") || text.includes("vip")) {
+      return (
+        <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <IconCrown className="h-5 w-5 text-[#c4ad30]" />
+        </div>
+      )
+    }
+    if (text.includes("deposit") || text.includes("bitcoin")) {
+      return (
+        <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <IconCurrencyDollar className="h-5 w-5 text-gray-700" />
+        </div>
+      )
+    }
+    if (text.includes("free spin") || text.includes("spin")) {
+      return (
+        <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <IconDice className="h-5 w-5 text-gray-700" />
+        </div>
+      )
+    }
+    if (text.includes("sport") || text.includes("bet")) {
+      return (
+        <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <IconBallFootball className="h-5 w-5 text-gray-700" />
+        </div>
+      )
+    }
+    if (text.includes("reward") || text.includes("bonus")) {
+      return (
+        <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <IconGift className="h-5 w-5 text-gray-700" />
+        </div>
+      )
+    }
+    return (
+      <div className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+        <IconBellRinging className="h-5 w-5 text-gray-700" />
+      </div>
+    )
   }
 
   return (
     <div className="mb-2">
-      <div className="mb-4 flex flex-col gap-2">
-        <div className="inline-flex w-fit max-w-full items-center rounded-full bg-gray-100 p-1">
+      <AnimatePresence>
+        {claimAlertMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: "easeOut" }}
+            className="mb-3 rounded-small border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
+          >
+            {claimAlertMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="mb-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setPreferencesOpen((prev) => !prev)}
+            className={cn(
+              "h-8 w-8 shrink-0 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+              preferencesOpen && "border-[var(--ds-primary,#ee3536)] text-[var(--ds-primary,#ee3536)]",
+            )}
+            aria-label="Notification preferences"
+            title="Notification preferences"
+          >
+            <IconSettings className="h-4 w-4" />
+          </Button>
+          <div className="inline-flex w-fit max-w-full items-center rounded-full bg-gray-100 p-1">
           <button
             type="button"
             onClick={() => setTab("all")}
             className={cn(
-              "inline-flex h-8 min-w-[90px] items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors appearance-none focus:outline-none",
+              "inline-flex h-8 min-w-[96px] items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors appearance-none focus:outline-none",
               tab === "all"
                 ? "bg-[var(--ds-primary,#ee3536)] text-white shadow-sm"
-                : "text-gray-600 hover:text-gray-900",
+                : "text-gray-700 hover:text-gray-900",
             )}
           >
             <span>All</span>
-            <span className={cn(
-              "inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-1.5 text-xs leading-none",
-              tab === "all" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
-            )}>
-              {items.length}
-            </span>
           </button>
           <button
             type="button"
             onClick={() => setTab("unread")}
             className={cn(
-              "inline-flex h-8 min-w-[90px] items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors appearance-none focus:outline-none",
+              "inline-flex h-8 min-w-[96px] items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors appearance-none focus:outline-none",
               tab === "unread"
                 ? "bg-[var(--ds-primary,#ee3536)] text-white shadow-sm"
-                : "text-gray-600 hover:text-gray-900",
+                : "text-gray-700 hover:text-gray-900",
             )}
           >
             <span>Unread</span>
             <span className={cn(
-              "inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-1.5 text-xs leading-none",
-              tab === "unread" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
+              "inline-flex h-5 min-w-[22px] items-center justify-center rounded-full px-1.5 text-[11px] leading-none",
+              tab === "unread" ? "bg-white/25 text-white" : "bg-gray-200 text-gray-600"
             )}>
               {unreadCount}
             </span>
           </button>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1">
-          <Button
-            variant="ghost"
-            className="h-7 px-2 text-[11px] text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-            onClick={toggleSelectAllFiltered}
-          >
-            {allFilteredSelected ? "Unselect All" : "Select All"}
-          </Button>
-          <Button
-            variant="ghost"
-            className="h-7 px-2 text-[11px] text-red-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
-            disabled={!hasSelection}
-            onClick={deleteSelected}
-          >
-            Delete Selected
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2 overflow-hidden">
-        <AnimatePresence mode="popLayout">
-          {filteredItems.map((item) => (
-            (() => {
-              const cta = resolveCta(item)
-              return (
-            <motion.div
-              key={item.id}
-              layout
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className={cn(
-                "relative overflow-hidden rounded-small border border-gray-200 bg-gray-50 p-4",
-                item.unread && "bg-gray-50",
-              )}
-              onTouchStart={(e) => {
-                if (!isMobile) return
-                const touch = e.touches[0]
-                const el = e.currentTarget
-                el.dataset.startX = touch.clientX.toString()
-                el.dataset.startY = touch.clientY.toString()
-                el.dataset.swiping = "false"
-              }}
-              onTouchMove={(e) => {
-                if (!isMobile) return
-                const el = e.currentTarget
-                const startX = parseFloat(el.dataset.startX || "0")
-                const startY = parseFloat(el.dataset.startY || "0")
-                const touch = e.touches[0]
-                const dx = touch.clientX - startX
-                const dy = touch.clientY - startY
-                if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-                  el.dataset.swiping = "true"
-                  e.stopPropagation()
-                  const inner = el.querySelector("[data-notification-inner]") as HTMLElement | null
-                  const reveal = el.querySelector("[data-notification-remove]") as HTMLElement | null
-                  if (inner && dx < 0) {
-                    const clamped = Math.max(dx, -112)
-                    inner.style.transform = `translateX(${clamped}px)`
-                    inner.style.transition = "none"
-                    if (reveal) reveal.style.opacity = `${Math.min(1, Math.abs(dx) / 60)}`
-                  }
-                }
-              }}
-              onTouchEnd={(e) => {
-                if (!isMobile) return
-                const el = e.currentTarget
-                const startX = parseFloat(el.dataset.startX || "0")
-                const touch = e.changedTouches[0]
-                const dx = touch.clientX - startX
-                const inner = el.querySelector("[data-notification-inner]") as HTMLElement | null
-                const reveal = el.querySelector("[data-notification-remove]") as HTMLElement | null
-                if (inner) {
-                  if (dx < -76) {
-                    inner.style.transition = "transform 0.2s ease-out"
-                    inner.style.transform = "translateX(-100%)"
-                    window.setTimeout(() => removeItem(item.id), 200)
-                  } else {
-                    inner.style.transition = "transform 0.2s ease-out"
-                    inner.style.transform = "translateX(0)"
-                    if (reveal) reveal.style.opacity = "0"
-                  }
-                }
-              }}
-            >
-              {isMobile && (
-                <div
-                  data-notification-remove
-                  className="pointer-events-none absolute inset-y-0 right-0 flex w-28 items-center justify-center bg-red-500/90 text-white opacity-0 transition-opacity"
-                >
-                  <div className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide">
-                    <IconTrash className="h-4 w-4" />
-                    Remove
-                  </div>
-                </div>
-              )}
-
-              <div data-notification-inner className="relative z-10">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-2 h-7 w-7 text-gray-400 hover:bg-gray-200 hover:text-gray-700"
-                  onClick={() => removeItem(item.id)}
-                >
-                  <IconTrash className="h-4 w-4" />
-                </Button>
-
-                <div className="flex items-start gap-3 pr-8">
-                <button
-                  type="button"
-                  onClick={() => toggleSelected(item.id)}
-                  className={cn(
-                    "mt-0.5 h-4.5 w-4.5 rounded-md border transition-colors",
-                    selectedIds.has(item.id)
-                      ? "border-[#ee3536] bg-[#ee3536]"
-                      : "border-gray-300 bg-white hover:border-gray-400",
-                  )}
-                >
-                  {selectedIds.has(item.id) && <IconCheck className="mx-auto h-3 w-3 text-white" />}
-                </button>
-                <div className={cn("mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full", item.unread ? "bg-[#ee3536]" : "bg-gray-300")} />
-
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
-                    {item.type === "vip-cash" && <IconCrown className="h-4 w-4 text-[#c4ad30]" />}
-                    <span>{item.title}</span>
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-gray-600">{item.description}</p>
-
-                  {item.type === "vip-progress" && (
-                    <div className="mt-3 rounded-small bg-gray-100 p-3.5">
-                      <div className="mb-2 text-sm font-semibold text-gray-700">
-                        {item.progressLabel ?? "Gold to Platinum I"}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={item.progressValue ?? 45} className="h-2 bg-gray-200 [&>div]:bg-[#c4ad30]" />
-                        <span className="text-sm font-semibold text-gray-600">{item.progressValue ?? 45}%</span>
-                      </div>
+        {preferencesOpen && (
+          <div className="rounded-small border border-gray-200 bg-white p-4 md:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-gray-900">Notification preferences</p>
+              <p className="text-xs text-gray-500">Manage channels and campaign topics</p>
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+              <div className="rounded-small bg-gray-50 p-3.5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Channels</p>
+                <div className="space-y-2">
+                  {CHANNELS.map((channel) => (
+                    <div key={channel.key} className="flex items-center justify-between gap-3 py-0.5">
+                      <span className="text-sm text-gray-700">{channel.label}</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={preferences.channels[channel.key]}
+                        onClick={() => toggleChannelPreference(channel.key)}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                          preferences.channels[channel.key] ? "bg-[var(--ds-primary,#ee3536)]" : "bg-gray-300",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "inline-block h-5 w-5 transform rounded-full bg-white transition-transform",
+                            preferences.channels[channel.key] ? "translate-x-5" : "translate-x-0.5",
+                          )}
+                        />
+                      </button>
                     </div>
-                  )}
-
-                  {cta && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => runCta(item, cta.action)}
-                      className={notificationCtaClass}
-                    >
-                      {cta.label}
-                    </Button>
-                  )}
-
-                  <p className="mt-2 text-xs text-gray-400">{item.timeLabel}</p>
-                </div>
+                  ))}
                 </div>
               </div>
-            </motion.div>
-              )
-            })()
-          ))}
-        </AnimatePresence>
+              <div className="rounded-small bg-gray-50 p-3.5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Campaigns</p>
+                <div className="space-y-2">
+                  {CAMPAIGNS.map((campaign) => (
+                    <div key={campaign.key} className="flex items-center justify-between gap-3 py-0.5">
+                      <span className="min-w-0 text-sm text-gray-700">
+                        {campaign.label}
+                        <span className="ml-1 whitespace-nowrap text-xs text-gray-500">({campaignCounts[campaign.key]})</span>
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={preferences.campaigns[campaign.key]}
+                        onClick={() => toggleCampaignPreference(campaign.key)}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                          preferences.campaigns[campaign.key] ? "bg-[var(--ds-primary,#ee3536)]" : "bg-gray-300",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "inline-block h-5 w-5 transform rounded-full bg-white transition-transform",
+                            preferences.campaigns[campaign.key] ? "translate-x-5" : "translate-x-0.5",
+                          )}
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="overflow-visible">
+        {groupedItems.map((group) => (
+          <section key={group.label} className="mb-4">
+            <h4 className="mb-1 text-[15px] font-semibold leading-6 text-gray-500">{group.label}</h4>
+            <div className="rounded-small bg-white">
+              <AnimatePresence initial={false}>
+                {group.items.map((item) => {
+                  const cta = resolveCta(item)
+                  return (
+                    <motion.div
+                      key={item.id}
+                      layout="position"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.16, ease: "easeOut" }}
+                      className={cn(
+                        "group relative border-b border-gray-100 last:border-b-0 transition-colors duration-200 hover:bg-gray-50/70",
+                        isMobile
+                          ? (activeMenuId === item.id ? "overflow-visible" : "overflow-hidden")
+                          : "overflow-visible",
+                        activeMenuId === item.id && "z-30"
+                      )}
+                      onTouchStart={(e) => {
+                        if (!isMobile) return
+                        const touch = e.touches[0]
+                        const el = e.currentTarget
+                        el.dataset.startX = touch.clientX.toString()
+                        el.dataset.startY = touch.clientY.toString()
+                        el.dataset.swiping = "0"
+                        el.dataset.translateX = "0"
+                        setActiveMenuId(null)
+                      }}
+                      onTouchMove={(e) => {
+                        if (!isMobile) return
+                        const el = e.currentTarget
+                        const startX = parseFloat(el.dataset.startX || "0")
+                        const startY = parseFloat(el.dataset.startY || "0")
+                        const touch = e.touches[0]
+                        const dx = touch.clientX - startX
+                        const dy = touch.clientY - startY
+                        const swiping = el.dataset.swiping || "0"
+                        const inner = el.querySelector("[data-notification-inner]") as HTMLElement | null
+                        const reveal = el.querySelector("[data-notification-remove]") as HTMLElement | null
+                        if (!inner || !reveal) return
+
+                        // Lock to vertical scroll unless we detect a clear horizontal swipe.
+                        if (swiping === "0") {
+                          if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+                            el.dataset.swiping = "vertical"
+                            return
+                          }
+                          if (dx < -10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                            el.dataset.swiping = "1"
+                          }
+                        }
+
+                        if (el.dataset.swiping === "1") {
+                          e.preventDefault()
+                          const clamped = Math.max(Math.min(dx, 0), -92)
+                          el.dataset.translateX = String(clamped)
+                          inner.style.transform = `translateX(${clamped}px)`
+                          inner.style.transition = "none"
+                          reveal.style.opacity = `${Math.min(1, Math.abs(clamped) / 40)}`
+                        }
+                      }}
+                      onTouchEnd={(e) => {
+                        if (!isMobile) return
+                        const el = e.currentTarget
+                        const swiping = el.dataset.swiping || "0"
+                        const translatedX = parseFloat(el.dataset.translateX || "0")
+                        const inner = el.querySelector("[data-notification-inner]") as HTMLElement | null
+                        const reveal = el.querySelector("[data-notification-remove]") as HTMLElement | null
+                        if (!inner || !reveal) return
+
+                        if (swiping === "1" && translatedX < -58) {
+                          inner.style.transition = "transform 0.18s ease-out"
+                          inner.style.transform = "translateX(-100%)"
+                          window.setTimeout(() => removeItem(item.id), 180)
+                        } else {
+                          inner.style.transition = "transform 0.18s ease-out"
+                          inner.style.transform = "translateX(0)"
+                          reveal.style.opacity = "0"
+                        }
+                        el.dataset.swiping = "0"
+                        el.dataset.translateX = "0"
+                      }}
+                      onTouchCancel={(e) => {
+                        if (!isMobile) return
+                        const el = e.currentTarget
+                        const inner = el.querySelector("[data-notification-inner]") as HTMLElement | null
+                        const reveal = el.querySelector("[data-notification-remove]") as HTMLElement | null
+                        if (!inner || !reveal) return
+                        inner.style.transition = "transform 0.18s ease-out"
+                        inner.style.transform = "translateX(0)"
+                        reveal.style.opacity = "0"
+                        el.dataset.swiping = "0"
+                        el.dataset.translateX = "0"
+                      }}
+                    >
+                      <div
+                        data-notification-remove
+                        className="pointer-events-none absolute right-0 top-2 bottom-2 flex w-24 items-center justify-center rounded-small bg-red-500 text-white opacity-0 transition-opacity"
+                      >
+                        <span className="text-[11px] font-semibold uppercase tracking-wide">Delete</span>
+                      </div>
+
+                      <div data-notification-inner className="relative z-10 w-full bg-white py-4 transition-colors duration-200 group-hover:bg-gray-50/40">
+                      <button
+                        type="button"
+                        className="absolute right-0 top-4 h-8 w-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveMenuId((prev) => (prev === item.id ? null : item.id))
+                        }}
+                        aria-label="More actions"
+                      >
+                        <IconDots className="h-4 w-4" />
+                      </button>
+                      {activeMenuId === item.id && (
+                        <div className="absolute right-0 top-12 z-[90] w-56 rounded-small border border-blue-100 bg-white p-2 shadow-lg">
+                          <button
+                            type="button"
+                            className="flex w-full items-center justify-between rounded-small px-3 py-2 text-left text-[15px] font-medium text-gray-900 hover:bg-gray-50"
+                            onClick={() => {
+                              markAsRead(item.id)
+                              setActiveMenuId(null)
+                            }}
+                          >
+                            <span>Mark as read</span>
+                            {!item.unread && <span className="text-[#0f6fff]">✓</span>}
+                          </button>
+                          <button
+                            type="button"
+                            className="mt-1 w-full rounded-small px-3 py-2 text-left text-[15px] font-medium text-gray-900 hover:bg-gray-50"
+                            onClick={() => {
+                              removeItem(item.id)
+                              setActiveMenuId(null)
+                            }}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            type="button"
+                            className="mt-1 w-full rounded-small px-3 py-2 text-left text-[15px] font-medium text-gray-900 hover:bg-gray-50"
+                            onClick={() => {
+                              setPreferencesOpen(true)
+                              setActiveMenuId(null)
+                            }}
+                          >
+                            Turn off notifications
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex items-start gap-3 pr-9">
+                        {renderAvatar(item)}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold text-gray-900 leading-snug">{item.title}</p>
+                          <p className="mt-1 text-[13px] leading-[1.4] text-gray-700">{item.description}</p>
+
+                          {item.type === "vip-progress" && (
+                            <div className="mt-3 rounded-small bg-gray-100 p-3.5">
+                              <div className="mb-2 text-sm font-semibold text-gray-700">
+                                {item.progressLabel ?? "Gold to Platinum I"}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Progress value={item.progressValue ?? 45} className="h-2 bg-gray-200 [&>div]:bg-[#c4ad30]" />
+                                <span className="text-sm font-semibold text-gray-600">{item.progressValue ?? 45}%</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {cta && (
+                            <Button
+                              variant="ghost"
+                              onClick={() => runCta(item, cta.action)}
+                              className={notificationCtaClass}
+                            >
+                              {cta.label}
+                            </Button>
+                          )}
+
+                          <p className="mt-2 text-xs text-gray-400">{item.timeLabel}</p>
+                        </div>
+                      </div>
+                      {item.unread && <div className="absolute right-2 top-11 h-2.5 w-2.5 rounded-full bg-[#ee3536]" />}
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </AnimatePresence>
+            </div>
+          </section>
+        ))}
       </div>
 
       {filteredItems.length === 0 && (
@@ -689,6 +1013,52 @@ export function NotificationHub() {
           <p className="mt-1 text-xs text-gray-500">You are all caught up.</p>
         </div>
       )}
+
+      <AnimatePresence>
+        {mysteryWheelNotificationId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10060] flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setMysteryWheelNotificationId(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 6 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="w-full max-w-sm rounded-small border border-white/20 bg-white p-4 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-base font-semibold text-gray-900">Mystery Wheel</p>
+              <p className="mt-1 text-sm text-gray-600">
+                Spin now to reveal your 5-day streak reward.
+              </p>
+              <div className="mt-4 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  className="h-9 rounded-small border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                  onClick={() => setMysteryWheelNotificationId(null)}
+                >
+                  Close
+                </Button>
+                <Button
+                  className="h-9 rounded-small bg-[var(--ds-primary,#ee3536)] px-4 text-sm font-semibold text-white hover:bg-[var(--ds-primary-hover,#d92d2f)]"
+                  onClick={() => {
+                    setMysteryWheelNotificationId(null)
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("notification:open-mystery-wheel"))
+                    }
+                  }}
+                >
+                  Spin now
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
