@@ -1,14 +1,122 @@
-# How to Add Knowledge to CH's Knowledge Base
+# How to Add Knowledge to the Design Assistant Knowledge Base
 
-CH's knowledge base includes:
+The knowledge base includes:
 - **Agnostic Design System** (from Figma)
-- **Stakeholders** (team members, roles, responsibilities)
 - **Processes** (workflows, procedures)
 - **Figma Files** (all design system files)
 
 ## File Location
 
 All knowledge is stored in: `lib/agent/knowledgeBase.ts`
+
+---
+
+## Project Consistency Skill (BOL Design Main)
+
+Use this section as a strict operating guide so changes stay aligned with the live product.
+
+### 1) Project Setup Snapshot
+
+- Framework: `Next.js 14` with App Router (`app/` directory)
+- UI stack: `React`, `TypeScript`, `Tailwind`, `shadcn/radix`, `framer-motion`
+- State: `zustand` stores (notably chat and cross-panel behavior)
+- Theme/customization: CSS variable-driven brand system in `components/design-customizer.tsx`
+- Key product surfaces:
+  - `app/page.tsx` (home/casino entry patterns)
+  - `app/casino/page.tsx`
+  - `app/sports/page.tsx`
+  - `app/sports/football/page.tsx`
+  - `app/library/page.tsx` (component source-of-truth governance)
+
+### 2) Non-Negotiable Consistency Rules
+
+1. **Never invent UI patterns** when a live equivalent exists.
+2. **Source of truth first**: copy structure/behavior from live page files before styling tweaks.
+3. **Keep existing interaction language**:
+   - motion timing/easing
+   - chip/tag/button grammar
+   - drawer/panel exclusivity behavior
+4. **New pages must keep the live global shell**:
+   - main top nav
+   - left side nav
+   - standard footer
+   - default approach: compose from or re-export closest live page shell
+5. **Do not introduce new libraries** for solved problems without explicit approval.
+6. **Use existing tokens/classes/utility patterns** before creating new ad-hoc styles.
+7. **Preserve current event contracts** (custom window events, existing action names).
+8. **No database dependency for assistant knowledge** (use in-repo source only).
+
+### 3) Panel/Drawer Safety Rule
+
+This repo enforces panel exclusivity. Follow `.cursor/rules/panel-exclusivity.mdc`:
+
+- Only one major panel open at a time (chat/sidebar/VIP/account/deposit families)
+- New panel/drawer work must include close logic for conflicting panels
+- If a change touches open/close behavior, verify this rule before finishing
+
+### 4) Component Structure Guidance
+
+- Prefer composition from existing domains:
+  - `components/chat/*`
+  - `components/account/*`
+  - `components/betslip/*`
+  - `components/ui/*`
+- When adding UI to sports/casino flows:
+  - Reuse existing card anatomy (header/meta/status/risk-actions)
+  - Keep typography and spacing scale consistent with nearby components
+  - Reuse existing icon family (`@tabler/icons-react`) unless already mixed in-file
+
+### 5) Dependency Guardrails
+
+Before adding any dependency:
+
+1. Check if existing stack already solves it (`framer-motion`, Radix, browser APIs, Next APIs).
+2. If needed, choose minimal/maintained package and explain why existing tools are insufficient.
+3. Verify bundle/runtime impact for mobile-heavy pages (`sports`, `casino`, drawers, overlays).
+
+### 6) Implementation Workflow (Required)
+
+For each new request:
+
+1. **Locate live reference** in `app/*` and `components/*`.
+2. **Map exact behavior** (states, events, edge cases, mobile behavior).
+3. **Implement with local parity** (same UX language, no made-up variants).
+4. **Validate**:
+   - desktop + mobile behavior
+   - lints/type checks
+   - no panel-exclusivity regressions
+5. **Document what changed** and why, with file paths.
+
+### 6.1) No-Database Knowledge Mode
+
+- Keep assistant knowledge in code:
+  - `lib/agent/knowledgeBase.ts`
+- Do not depend on runtime DB sync for assistant answers.
+- Treat Supabase setup/migration docs as legacy unless explicitly re-enabled for a new project.
+
+### 7) Definition of Done for UI Tasks
+
+- Matches live visual grammar and interaction style
+- No new inconsistency in wording (labels, button casing, status tags)
+- No orphaned mock behavior (all actions either functional or intentionally stubbed and labelled)
+- No regressions in tab/filter state flows
+- Lints clean for edited files
+
+### 8) Add This Skill to the Assistant Knowledge Base
+
+To make the assistant follow this behavior in chat responses as well:
+
+1. Add an `additionalNotes` entry in `lib/agent/knowledgeBase.ts` with these guardrails.
+2. Add a short `processes` entry named **"UI Consistency Review"**:
+   - Compare against live pages
+   - Reuse existing components/tokens
+   - Validate motion and panel behavior
+   - Confirm no invented designs
+3. Restart dev server and test with:
+   - "What are the UI consistency rules for this project?"
+   - "Before designing a new card, what is our source-of-truth process?"
+
+---
 
 ## Adding More Figma Files
 
@@ -32,33 +140,6 @@ Then extract the information from Figma and add it to:
 - `designSystem.patterns` (for patterns)
 - Or other relevant sections
 
-## Adding Stakeholders
-
-Add team members to the `stakeholders` array:
-
-```typescript
-stakeholders: [
-  {
-    name: 'CH',
-    role: 'Head of Design',
-    responsibilities: [
-      'Design system oversight',
-      'Design reviews',
-      'Team leadership',
-    ],
-    areas: ['All'], // or ['Casino', 'Sports', etc.]
-    contact: 'ch@example.com', // Optional
-  },
-  {
-    name: 'Lilly',
-    role: 'Designer',
-    responsibilities: ['Casino designs', 'Loyalty designs'],
-    areas: ['Casino', 'Loyalty'],
-  },
-  // Add more stakeholders...
-]
-```
-
 ## Adding Processes
 
 Add workflows and procedures to the `processes` array:
@@ -73,9 +154,8 @@ processes: [
       'Request assigned to designer based on area',
       'Designer creates Figma file',
       'Review and approval',
-      'Delivery to stakeholders',
+      'Delivery to product/design teams',
     ],
-    stakeholders: ['CH', 'Lilly', 'Sam', 'Nek', 'Victor'],
     areas: ['All'], // or specific areas
     tools: ['Figma', 'Mattermost', 'Craft.io'],
   },
@@ -84,12 +164,11 @@ processes: [
     description: 'How designs are reviewed and approved',
     steps: [
       'Designer shares Figma file',
-      'CH reviews design',
+      'Design lead reviews design',
       'Feedback provided',
       'Revisions made',
       'Final approval',
     ],
-    stakeholders: ['CH', 'Designers'],
     tools: ['Figma', 'Mattermost'],
   },
   // Add more processes...
@@ -142,29 +221,27 @@ additionalNotes: [
 After adding new knowledge:
 
 1. **Restart your dev server** (the knowledge base is loaded at startup)
-2. **Test with CH** - Ask questions about the new information
-3. **Verify accuracy** - Make sure CH's responses are correct
+2. **Test with the assistant** - Ask questions about the new information
+3. **Verify accuracy** - Make sure responses are correct
 
-## What CH Can Answer
+## What the Assistant Can Answer
 
-Once knowledge is added, CH can answer questions about:
+Once knowledge is added, the assistant can answer questions about:
 
 - ✅ Colors (tokens, hex codes, usage)
 - ✅ Typography (fonts, sizes, weights, styles)
 - ✅ Components (variants, props, usage)
 - ✅ Design patterns (when to use, examples)
 - ✅ Brands (color palettes, configurations)
-- ✅ Stakeholders (roles, responsibilities, areas)
-- ✅ Processes (steps, tools, stakeholders involved)
+- ✅ Processes (steps, tools, ownership workflow)
 - ✅ Figma files (what they contain, links)
 - ✅ Mockup ideas (using only design system components)
 
 ## Example Questions
 
-After adding knowledge, you can ask CH:
+After adding knowledge, you can ask:
 
 - "What colors does the Casino brand use?"
-- "Who works on Casino designs?"
 - "What's the design request process?"
 - "Show me a mockup idea for a login page"
 - "What components are available?"

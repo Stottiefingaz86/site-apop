@@ -3,28 +3,18 @@
  * 
  * This file contains all knowledge about:
  * - Agnostic Design System (from Figma)
- * - Stakeholders
  * - Processes
  * - Additional Figma files
  * 
- * This knowledge is used by CH to answer questions accurately.
+ * This knowledge is used by the design assistant to answer questions accurately.
  */
 
 import { DesignSystemInfo, designSystem, colorTokenMap } from './designSystem'
-
-export interface Stakeholder {
-  name: string
-  role: string
-  responsibilities?: string[]
-  contact?: string
-  areas?: string[] // Areas they work on (Casino, Sports, etc.)
-}
 
 export interface Process {
   name: string
   description: string
   steps?: string[]
-  stakeholders?: string[] // Names of stakeholders involved
   areas?: string[] // Areas this process applies to
   tools?: string[] // Tools used (Figma, Mattermost, Craft.io, etc.)
 }
@@ -120,7 +110,6 @@ export interface Website {
 export interface KnowledgeBase {
   designSystem: DesignSystemInfo
   colorTokens: typeof colorTokenMap
-  stakeholders: Stakeholder[]
   processes: Process[]
   figmaFiles: FigmaFile[]
   logos: LogoSpecs[]
@@ -132,68 +121,11 @@ export interface KnowledgeBase {
 
 /**
  * Comprehensive Knowledge Base
- * Add information here as you share more Figma files, stakeholder info, and processes
+ * Add information here as you share more Figma files, process info, and product knowledge
  */
 export const knowledgeBase: KnowledgeBase = {
   designSystem,
   colorTokens: colorTokenMap,
-  
-  // Stakeholders - Team members, their roles, and responsibilities
-  stakeholders: [
-    {
-      name: 'CH',
-      role: 'Head of Design',
-      responsibilities: [
-        'Design system oversight',
-        'Design reviews',
-        'Team leadership',
-        'Design request assignments',
-        'UX/CX strategy',
-      ],
-      areas: ['All', 'Other area'], // Handles requests for "Other area"
-    },
-    {
-      name: 'pjh',
-      role: 'Casino Stakeholder',
-      responsibilities: [
-        'Casino area oversight',
-        'Casino feature requests',
-        'Casino design feedback',
-      ],
-      areas: ['Casino', 'Loyalty'],
-    },
-    {
-      name: 'Kurt',
-      role: 'Sportsbook Stakeholder',
-      responsibilities: [
-        'Sportsbook area oversight',
-        'Sports betting feature requests',
-        'Sportsbook design feedback',
-      ],
-      areas: ['Sports'],
-    },
-    {
-      name: 'Dario',
-      role: 'Authentication & Cashier Stakeholder',
-      responsibilities: [
-        'Authentication area oversight',
-        'Cashier area oversight',
-        'Payment flow feedback',
-        'Account management feedback',
-      ],
-      areas: ['Authentication', 'Cashier'],
-    },
-    {
-      name: 'Agata',
-      role: 'Marketing Stakeholder',
-      responsibilities: [
-        'Marketing campaign oversight',
-        'Brand consistency',
-        'Marketing material feedback',
-      ],
-      areas: ['Marketing', 'All'], // Marketing touches all areas
-    },
-  ],
   
   // Processes - Add design processes, workflows, and procedures
   processes: [
@@ -210,7 +142,6 @@ export const knowledgeBase: KnowledgeBase = {
         'Designer creates Figma file using agnostic design system',
         'Design delivered as Figma file',
       ],
-      stakeholders: ['CH', 'Lilly', 'Sam', 'Nek', 'Victor'],
       areas: ['All'],
       tools: ['Figma', 'Mattermost', 'Craft.io', 'Design Request App'],
     },
@@ -223,9 +154,8 @@ export const knowledgeBase: KnowledgeBase = {
         'Loyalty area → Assigned to Lilly',
         'Authentication area → Assigned to Nek',
         'Poker area → Assigned to Victor',
-        'Other area → Assigned to CH (Head of Design)',
+        'Other area → Assigned based on current team capacity',
       ],
-      stakeholders: ['CH', 'Lilly', 'Sam', 'Nek', 'Victor'],
       areas: ['All'],
     },
   ],
@@ -497,8 +427,8 @@ export const knowledgeBase: KnowledgeBase = {
         'Craft.io - Project management and tracking',
       ],
       whenToEscalate: [
-        'Questions about brand strategy or high-level decisions → CH (Head of Design)',
-        'Questions about specific areas → Area designer (Lilly, Sam, Nek, Victor)',
+        'Questions about brand strategy or high-level decisions → Current design leadership',
+        'Questions about specific areas → Assigned area owner/designer',
         'Questions about processes → Reference process documentation',
         'Questions about design system → Use knowledge base and Figma files',
       ],
@@ -507,7 +437,7 @@ export const knowledgeBase: KnowledgeBase = {
       'Consistency - Using shared design tokens and components across all brands',
       'Quality - Professional, polished design that meets user needs',
       'Efficiency - Streamlined processes and clear communication',
-      'Collaboration - Working together with stakeholders and designers',
+      'Collaboration - Working together across design and product teams',
       'Innovation - Building on a solid design system foundation',
     ],
     designPrinciples: [
@@ -567,23 +497,12 @@ export const knowledgeBase: KnowledgeBase = {
  * Get all knowledge as a formatted string for AI prompts
  */
 export function getKnowledgeBasePrompt(): string {
-  const { designSystem, colorTokens, stakeholders, processes, figmaFiles, logos, brandGuidelines, uxReports, additionalNotes, websites } = knowledgeBase
+  const { designSystem, colorTokens, processes, figmaFiles, logos, brandGuidelines, uxReports, additionalNotes, websites } = knowledgeBase
   
   // Format color tokens
   const colorTokensList = Object.entries(colorTokens)
     .map(([token, info]) => `  - ${token}: ${info.hex}${info.description ? ` (${info.description})` : ''}`)
     .join('\n')
-  
-  // Format stakeholders
-  const stakeholdersList = stakeholders.length > 0
-    ? stakeholders.map(s => {
-        let desc = `  - ${s.name}: ${s.role}`
-        if (s.responsibilities?.length) desc += `\n    Responsibilities: ${s.responsibilities.join(', ')}`
-        if (s.areas?.length) desc += `\n    Areas: ${s.areas.join(', ')}`
-        if (s.contact) desc += `\n    Contact: ${s.contact}`
-        return desc
-      }).join('\n\n')
-    : '  (No stakeholders added yet)'
   
   // Format processes
   const processesList = processes.length > 0
@@ -592,7 +511,6 @@ export function getKnowledgeBasePrompt(): string {
         if (p.steps?.length) {
           desc += `\n    Steps:\n${p.steps.map((step, i) => `      ${i + 1}. ${step}`).join('\n')}`
         }
-        if (p.stakeholders?.length) desc += `\n    Stakeholders: ${p.stakeholders.join(', ')}`
         if (p.areas?.length) desc += `\n    Areas: ${p.areas.join(', ')}`
         if (p.tools?.length) desc += `\n    Tools: ${p.tools.join(', ')}`
         return desc
@@ -770,9 +688,6 @@ ${brandList}
 
 **VIP TIERS (Loyalty brand):**
 - black vip, bronze vip, diamond vip, elite vip, gold vip, platinum vip, silver vip
-
-**STAKEHOLDERS:**
-${stakeholdersList}
 
 **PROCESSES:**
 ${processesList}
@@ -969,13 +884,6 @@ ${websites && websites.length > 0
  */
 export function addFigmaFile(file: FigmaFile): void {
   knowledgeBase.figmaFiles.push(file)
-}
-
-/**
- * Add a stakeholder to the knowledge base
- */
-export function addStakeholder(stakeholder: Stakeholder): void {
-  knowledgeBase.stakeholders.push(stakeholder)
 }
 
 /**

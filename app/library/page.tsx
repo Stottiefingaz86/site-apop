@@ -4737,7 +4737,7 @@ export default function LibraryPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('all')
-  const [strictSourceMode, setStrictSourceMode] = useState(true)
+  const strictSourceMode = true
 
   const verifiedLibrary = LIBRARY.filter(isEntrySourceVerified)
   const auditedLibrary = LIBRARY.filter((entry) => isEntrySourceVerified(entry) && isEntryAudited(entry))
@@ -4794,17 +4794,9 @@ export default function LibraryPage() {
 
           {/* Search + governance */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setStrictSourceMode((prev) => !prev)}
-              className={cn(
-                'h-9 px-3 rounded-lg border text-[11px] font-medium transition-colors',
-                strictSourceMode
-                  ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-              )}
-            >
-              {strictSourceMode ? 'Audit-Locked: ON' : 'Audit-Locked: OFF'}
-            </button>
+            <div className="h-9 px-3 rounded-lg border text-[11px] font-medium transition-colors border-cyan-500/40 bg-cyan-500/10 text-cyan-300 flex items-center">
+              Audit-Locked: ON
+            </div>
           <div className="relative w-72">
             <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input

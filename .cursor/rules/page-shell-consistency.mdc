@@ -1,0 +1,21 @@
+---
+description: Enforce global page shell on new routes
+globs: app/**/*.tsx
+---
+
+# Page Shell Consistency Rule
+
+All newly created pages must retain the existing global shell pattern seen in live pages.
+
+## Required Shell Regions
+
+- Main top navigation
+- Left side navigation
+- Standard footer
+
+## Hard Requirements
+
+- Start from the closest live route and reuse its shell structure.
+- Prefer composing from or re-exporting a live shell page when introducing a new route.
+- Do not create a standalone page layout that omits nav/sidebar/footer unless the request explicitly asks for a focused/isolated surface.
+- If a page intentionally differs, state that exception clearly before implementation.

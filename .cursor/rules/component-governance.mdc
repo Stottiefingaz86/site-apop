@@ -1,0 +1,41 @@
+# Component Governance Rule
+
+Use this codebase with strict component governance. Do not invent new UI patterns when live equivalents exist.
+
+## Source-of-Truth Priority
+
+When implementing or proposing UI:
+
+1. First reference live pages:
+   - `app/page.tsx`
+   - `app/casino/page.tsx`
+   - `app/sports/page.tsx`
+   - `app/sports/football/page.tsx`
+2. Then use shared components from `components/*`.
+3. Treat `app/library/page.tsx` as an audited catalog only when entries are live-source + audited.
+
+## Hard Rules
+
+- Do not use stale, legacy, or unverified components for new screens.
+- Match existing structure, spacing scale, token usage, and interaction behaviors.
+- Reuse existing CTA styles, status tags, and motion patterns from live flows.
+- New routes must preserve the global page shell used by live pages:
+  - main top navigation
+  - left side navigation
+  - standard footer
+- Do not build standalone page layouts that omit these shell regions unless explicitly requested.
+- If no verified component exists, explicitly mark as "new pattern required" and request source confirmation.
+
+## Library Governance
+
+- Keep audit lock enforced for library browsing.
+- Show only entries that are both:
+  - Source-verified (`LIVE_SOURCE_PATHS`)
+  - Audited (`AUDITED_ENTRY_IDS`)
+
+## Assistant Behavior
+
+- If asked to create a new page, start from closest live page pattern first.
+- For new pages, compose from or re-export an existing live shell page so nav/sidebar/footer remain present by default.
+- Never suggest "made-up" components.
+- If confidence is low on component provenance, say so and ask for a live source path.

@@ -392,8 +392,8 @@ function SecurityBadge({ name, iconPath, className }: { name: string; iconPath: 
         <Image
           src={iconPath}
           alt={name}
-          width={80}
-          height={30}
+          width={52}
+          height={20}
           className="object-contain opacity-80 hover:opacity-100 transition-opacity"
           onError={() => setImageError(true)}
         />
@@ -1403,7 +1403,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
                     <Image
                       src="/banners/n_BOL_Promo_Card_720x454_83480_Daily_Cash_48afc09a78.jpg"
                       alt="Daily Cash Race"
-                      width={64}
+                      width={52}
                       height={64}
                       className="w-full h-full object-cover"
                       unoptimized
@@ -6258,7 +6258,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       src={leagueData.icon as unknown as string} 
                       alt={leagueName}
                       width={24}
-                      height={24}
+                      height={20}
                       className="object-contain"
                       decoding="sync"
                     />

@@ -1411,7 +1411,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
                     <Image
                       src="/banners/n_BOL_Promo_Card_720x454_83480_Daily_Cash_48afc09a78.jpg"
                       alt="Daily Cash Race"
-                      width={64}
+                      width={52}
                       height={64}
                       className="w-full h-full object-cover"
                       unoptimized
@@ -4651,7 +4651,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                       src={leagueData.icon as string} 
                       alt="Premier League"
                       width={24}
-                      height={24}
+                      height={20}
                       className="object-contain"
                     />
                   ) : (
@@ -4863,7 +4863,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             src="/banners/sports_league/man_city.png" 
                             alt="Manchester City"
                             width={24}
-                            height={24}
+                            height={20}
                             className="object-contain flex-shrink-0"
                             quality={100}
                             unoptimized
@@ -4883,7 +4883,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                             src="/banners/sports_league/liverpool.png" 
                             alt="Liverpool"
                             width={24}
-                            height={24}
+                            height={20}
                             className="object-contain flex-shrink-0"
                             quality={100}
                             unoptimized
@@ -5015,7 +5015,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               src="/banners/sports_league/man_city.png" 
                               alt="Manchester City"
                               width={24}
-                              height={24}
+                              height={20}
                               className="object-contain flex-shrink-0"
                               quality={100}
                               unoptimized
@@ -5035,7 +5035,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                               src="/banners/sports_league/liverpool.png" 
                               alt="Liverpool"
                               width={24}
-                              height={24}
+                              height={20}
                               className="object-contain flex-shrink-0"
                               quality={100}
                               unoptimized

@@ -5,19 +5,8 @@ export async function GET() {
   try {
     const suggestions: string[] = []
     
-    // Try to load UX reports from Supabase first for more up-to-date data
-    let uxReports = knowledgeBase.uxReports
-    try {
-      const { isSupabaseConfigured } = await import('@/lib/supabase/client')
-      const supabaseKnowledgeBase = await import('@/lib/supabase/knowledgeBase')
-      
-      if (isSupabaseConfigured() && (supabaseKnowledgeBase as any).getUXReports) {
-        uxReports = await (supabaseKnowledgeBase as any).getUXReports()
-      }
-    } catch (error) {
-      // Fallback to in-memory knowledge base
-      console.log('Using in-memory knowledge base for suggestions')
-    }
+    // In-memory UX reports only (legacy DB path removed)
+    const uxReports = knowledgeBase.uxReports
     
     // Add suggestions based on what's available in knowledge base
     const { logos, brandGuidelines, additionalNotes } = knowledgeBase

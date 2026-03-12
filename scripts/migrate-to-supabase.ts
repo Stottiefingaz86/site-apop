@@ -125,31 +125,6 @@ async function migrateDesignTokens() {
   console.log(`✅ Migrated ${tokens.length} design tokens`)
 }
 
-async function migrateStakeholders() {
-  console.log('👥 Migrating stakeholders...')
-  
-  const { stakeholders } = knowledgeBase
-  
-  for (const stakeholder of stakeholders) {
-    const { error } = await supabase
-      .from('stakeholders')
-      .upsert({
-        id: stakeholder.name.toLowerCase().replace(/\s+/g, '-'),
-        name: stakeholder.name,
-        role: stakeholder.role,
-        responsibilities: stakeholder.responsibilities || [],
-        contact: stakeholder.contact,
-        areas: stakeholder.areas || [],
-      }, { onConflict: 'id' })
-    
-    if (error) {
-      console.error(`❌ Error migrating stakeholder ${stakeholder.name}:`, error.message)
-    }
-  }
-  
-  console.log(`✅ Migrated ${stakeholders.length} stakeholders`)
-}
-
 async function migrateProcesses() {
   console.log('🔄 Migrating processes...')
   
@@ -163,7 +138,6 @@ async function migrateProcesses() {
         name: process.name,
         description: process.description,
         steps: process.steps || [],
-        stakeholders: process.stakeholders || [],
         areas: process.areas || [],
         tools: process.tools || [],
       }, { onConflict: 'id' })
@@ -336,7 +310,6 @@ async function main() {
   
   try {
     await migrateDesignTokens()
-    await migrateStakeholders()
     await migrateProcesses()
     await migrateUXReports()
     await migrateFigmaFiles()
@@ -347,7 +320,6 @@ async function main() {
     console.log('\n✅ Migration complete!')
     console.log('\n📋 Summary:')
     console.log(`  - Design tokens: Migrated from colorTokenMap and designSystem`)
-    console.log(`  - Stakeholders: ${knowledgeBase.stakeholders.length}`)
     console.log(`  - Processes: ${knowledgeBase.processes.length}`)
     console.log(`  - UX Reports: ${knowledgeBase.uxReports.length}`)
     console.log(`  - Figma Files: ${knowledgeBase.figmaFiles.length}`)

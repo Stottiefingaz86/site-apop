@@ -1,0 +1,6 @@
+This is a local mock Apple Wallet pass response.
+ticketType=bundled_pending_bets
+betCount=4
+betIds=765735663537735,765735663537739,765735663537744,765735663537745
+generatedAt=2026-03-06T21:47:04.994Z
+To enable real Wallet adds, return a valid signed .pkpass file.

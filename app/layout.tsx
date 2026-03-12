@@ -5,6 +5,7 @@ import GlobalChatWrapper from '@/components/chat/global-chat-wrapper'
 import GlobalBetslip from '@/components/betslip/global-betslip'
 import { DesignCustomizer } from '@/components/design-customizer'
 import { PreventOverscroll } from '@/components/prevent-overscroll'
+import EsportsLinkFix from '@/components/navigation/esports-link-fix'
 import './globals.css'
 
 const figtree = Figtree({
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="en" className={figtree.variable} suppressHydrationWarning>
       <body style={{ fontFamily: 'var(--font-figtree), sans-serif' }}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="theme">
+          <EsportsLinkFix />
           <PreventOverscroll />
           <GlobalChatWrapper>
             {children}

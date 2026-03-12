@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
-import { UXReport } from '@/lib/agent/knowledgeBase'
+import { UXReport, addUXReport as addUXReportToKnowledgeBase, knowledgeBase } from '@/lib/agent/knowledgeBase'
 import { scrapeJurniiReport, parseReportWithAI } from '@/lib/utils/jurniiScraper'
 import { analyzeWebsite } from '@/lib/utils/websiteAnalyzer'
 import { crawlGoogleReviews } from '@/lib/utils/googleReviewsCrawler'
 import { processAllReports } from '@/lib/utils/reportExtractor'
 import { compareJurniiReports, formatComparison } from '@/lib/utils/jurniiComparison'
-import { getUXReports, addUXReport as addUXReportToSupabase } from '@/lib/supabase/knowledgeBase'
 
 /**
  * API endpoint to add UX reports to the knowledge base
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
         priority: reportData.priority,
       }
 
-      await addUXReportToSupabase(report)
+      await addUXReportToKnowledgeBase(report)
 
       return NextResponse.json({
         success: true,
@@ -89,7 +88,7 @@ export async function POST(request: Request) {
               priority: 'high',
             }
 
-            await addUXReportToSupabase(report)
+            await addUXReportToKnowledgeBase(report)
 
             return NextResponse.json({
               success: true,
@@ -169,7 +168,7 @@ export async function POST(request: Request) {
                   let comparison = null
                   if (compareWithPrevious) {
                     try {
-                      const previousReports = await getUXReports()
+                      const previousReports = knowledgeBase.uxReports
                       // Find the most recent Jurnii report with the same URL (or similar title)
                       const previousReport = previousReports
                         .filter(r => r.source === 'Jurnii' && r.id !== report.id)
@@ -186,7 +185,7 @@ export async function POST(request: Request) {
                     }
                   }
 
-                  await addUXReportToSupabase(report)
+                  await addUXReportToKnowledgeBase(report)
 
                   return NextResponse.json({
                     success: true,
@@ -225,7 +224,7 @@ export async function POST(request: Request) {
               priority: 'high',
             }
 
-            await addUXReportToSupabase(report)
+            await addUXReportToKnowledgeBase(report)
 
             return NextResponse.json({
               success: true,
@@ -266,7 +265,7 @@ export async function POST(request: Request) {
               totalReviews: searchSummary.totalReviews,
               themes: searchSummary.themes,
             }
-            await addUXReportToSupabase(report)
+            await addUXReportToKnowledgeBase(report)
             return NextResponse.json({
               success: true,
               message: 'Google web search completed and insights added to knowledge base',
@@ -337,13 +336,7 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
-    // Try Supabase first, then fallback to in-memory
-    let reports: UXReport[] = []
-    
-    // Fallback to in-memory knowledge base
-    // Supabase integration can be added later if needed
-    const { knowledgeBase } = await import('@/lib/agent/knowledgeBase')
-    reports = knowledgeBase.uxReports
+    const reports: UXReport[] = knowledgeBase.uxReports
     
     return NextResponse.json({
       success: true,

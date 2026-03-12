@@ -5,7 +5,6 @@
  * - UX Reports
  * - Figma Assets
  * - Design Tokens
- * - Stakeholders
  * - Processes
  * - Knowledge Notes
  */

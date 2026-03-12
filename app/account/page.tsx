@@ -449,12 +449,11 @@ const recentTransactions = [
 function DashboardBetHistory({ onNavigate }: { onNavigate: (section: AccountSection) => void }) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'cash_out' | 'in_play' | 'pending' | 'graded'>('all')
   const [expandedBetId, setExpandedBetId] = useState<number | null>(null)
-
   const filterTabs = [
     { key: 'all' as const, label: 'All', count: sampleBets.length },
-    { key: 'cash_out' as const, label: 'Cash Out', count: sampleBets.filter(b => b.cashOutValue || b.status === 'cashed_out').length },
-    { key: 'in_play' as const, label: 'In-Play', count: sampleBets.filter(b => b.isLive && !b.status).length },
-    { key: 'pending' as const, label: 'Pending', count: sampleBets.filter(b => !b.status && !b.isLive).length },
+    { key: 'cash_out' as const, label: 'Cash Out', count: sampleBets.filter((b) => b.cashOutValue || b.status === 'cashed_out').length },
+    { key: 'in_play' as const, label: 'In-Play', count: sampleBets.filter((b) => b.isLive && !b.status).length },
+    { key: 'pending' as const, label: 'Pending', count: sampleBets.filter((b) => !b.status && !b.isLive).length },
     { key: 'graded' as const, label: 'Graded', count: null },
   ]
 
@@ -707,8 +706,8 @@ function SecurityBadge({ name, iconPath, className }: { name: string; iconPath: 
         <Image
           src={iconPath}
           alt={name}
-          width={80}
-          height={30}
+          width={52}
+          height={20}
           className="object-contain opacity-80 hover:opacity-100 transition-opacity"
           onError={() => setImageError(true)}
         />
@@ -719,7 +718,17 @@ function SecurityBadge({ name, iconPath, className }: { name: string; iconPath: 
   )
 }
 
-function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: AccountSection) => void; onOpenVipHub?: () => void }) {
+function DashboardSection({
+  onNavigate,
+  onOpenVipHub,
+  onOpenNotifications,
+  unreadNotifications = 0,
+}: {
+  onNavigate: (section: AccountSection) => void
+  onOpenVipHub?: () => void
+  onOpenNotifications?: () => void
+  unreadNotifications?: number
+}) {
   const isMobile = useIsMobile()
   const [favCarouselApi, setFavCarouselApi] = React.useState<any>(null)
   const [favCanScrollPrev, setFavCanScrollPrev] = React.useState(false)
@@ -749,7 +758,7 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
   }, [selectedPnlData])
 
   return (
-    <div className="px-4 md:px-6 pt-4 md:pt-6 pb-8 w-full">
+    <div className="px-4 md:px-6 pt-4 md:pt-6 pb-8 w-full max-w-[1200px] mx-auto">
 
       {/* ═══ Account Overview ═══ */}
       <Card className="bg-white/5 border-white/10 mb-4 overflow-hidden">
@@ -782,44 +791,68 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
           </div>
         </div>
             </div>
-          <button
-              onClick={() => onNavigate('profile')}
-              className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors flex-shrink-0"
-            >
-              <IconSettings className="w-4 h-4 text-white/40" />
-          </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => onOpenNotifications?.()}
+                className="relative w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                aria-label="Open notifications"
+              >
+                <IconBell className="w-4 h-4 text-white/40" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center border border-[#1a1a1a]">
+                    {unreadNotifications}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => onNavigate('profile')}
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                aria-label="Open profile settings"
+              >
+                <IconSettings className="w-4 h-4 text-white/40" />
+              </button>
+            </div>
       </div>
 
           {/* Balance section — darker inset */}
           <div className="bg-white/[0.03] border-t border-white/[0.06] px-4 md:px-5 py-4">
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4 max-w-[760px]">
               <div className="bg-[#2d2d2d] rounded-lg p-3 border border-white/[0.06]">
                 <div className="text-[11px] text-white/40 mb-1">Available Balance</div>
                 <div className="text-xl font-bold text-white tabular-nums leading-tight">$100,000.00</div>
+                <div className="mt-3 grid grid-cols-2 gap-2 items-center">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('payments')}
+                    className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-[11px] font-semibold text-white transition-colors"
+                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                  >
+                    <IconWallet className="h-3.5 w-3.5" />
+                    Deposit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('payments')}
+                    className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-white/15 bg-white/[0.04] text-[11px] font-semibold text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors"
+                  >
+                    <IconCreditCard className="h-3.5 w-3.5" />
+                    Withdraw
+                  </button>
+                </div>
             </div>
               <div className="bg-[#2d2d2d] rounded-lg p-3 border border-white/[0.06]">
                 <div className="text-[11px] text-white/40 mb-1">Free Bet</div>
                 <div className="text-xl font-bold text-emerald-400 tabular-nums leading-tight">$25.00</div>
+                <button
+                  type="button"
+                  onClick={() => window.location.assign('/sports')}
+                  className="mt-3 inline-flex h-8 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] px-3 text-[11px] font-semibold text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                >
+                  Use Now
+                </button>
         </div>
       </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                size="sm"
-                onClick={() => onNavigate('payments')}
-                className="h-9 text-xs font-semibold text-white rounded-lg w-full"
-                style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
-              >
-                Deposit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onNavigate('payments')}
-                className="h-9 text-xs font-semibold text-white/70 border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white rounded-lg w-full"
-              >
-                Withdraw
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -1047,9 +1080,6 @@ function DashboardSection({ onNavigate, onOpenVipHub }: { onNavigate: (section: 
           </Carousel>
         </div>
       </div>
-
-      {/* ═══ Recent Bets ═══ */}
-      <DashboardBetHistory onNavigate={onNavigate} />
     </div>
   )
 }
@@ -1063,6 +1093,15 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
   const [expandedBetId, setExpandedBetId] = useState<number | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [pnlRange, setPnlRange] = useState<'thisWeek' | 'lastWeek'>('thisWeek')
+  const [isDailyFiguresMinimized, setIsDailyFiguresMinimized] = useState(false)
+  const [selectedPnlDay, setSelectedPnlDay] = useState<string | null>(null)
+  const [filtersPanelOpen, setFiltersPanelOpen] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState('Status')
+  const [dateRangePreset, setDateRangePreset] = useState('Last 7 Days')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+  const [wagerTypeFilters, setWagerTypeFilters] = useState<string[]>([])
 
   React.useEffect(() => {
     if (initialFilter) {
@@ -1071,14 +1110,6 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
       setExpandedBetId(null)
     }
   }, [initialFilter])
-
-  const filterTabs = [
-    { key: 'all' as const, label: 'All', count: sampleBets.length },
-    { key: 'cash_out' as const, label: 'Cash Out', count: sampleBets.filter(b => b.cashOutValue || b.status === 'cashed_out').length },
-    { key: 'in_play' as const, label: 'In-Play', count: sampleBets.filter(b => b.isLive && !b.status).length },
-    { key: 'pending' as const, label: 'Pending', count: sampleBets.filter(b => !b.status && !b.isLive).length },
-    { key: 'graded' as const, label: 'Graded', count: null },
-  ]
 
   const filteredBets = sampleBets.filter(bet => {
     if (activeFilter === 'all') return true
@@ -1089,8 +1120,25 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
     return true
   })
 
-  const totalPages = Math.ceil(filteredBets.length / rowsPerPage)
-  const paginatedBets = filteredBets.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+  const betsFilteredByPnlDay = React.useMemo(() => {
+    if (!selectedPnlDay) return filteredBets
+    return filteredBets.filter((bet) => {
+      const datePart = bet.datePlaced.split(',')[0]?.trim()
+      if (!datePart) return false
+      const parsed = new Date(datePart)
+      if (Number.isNaN(parsed.getTime())) return false
+      const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][parsed.getDay()]
+      return weekday === selectedPnlDay
+    })
+  }, [filteredBets, selectedPnlDay])
+
+  const totalPages = Math.max(1, Math.ceil(betsFilteredByPnlDay.length / rowsPerPage))
+  const paginatedBets = betsFilteredByPnlDay.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+  const selectedPnlData = accountPnlByWeek[pnlRange]
+  const pnlSummary = React.useMemo(() => {
+    const net = selectedPnlData.reduce((sum, day) => sum + day.amount, 0)
+    return { net }
+  }, [selectedPnlData])
 
   const getStatusBadge = (bet: typeof sampleBets[0]) => {
     if (bet.status === 'won') return (
@@ -1152,6 +1200,19 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
         stake: bet.amount,
       }])
     }
+  }
+
+  const toggleWagerTypeFilter = (value: string) => {
+    setWagerTypeFilters((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    )
+  }
+
+  const formatDateChip = (value: string) => {
+    if (!value) return ''
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) return value
+    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   const renderExpandedBet = (bet: typeof sampleBets[0]) => {
@@ -1284,72 +1345,205 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
   }
 
   return (
-    <div className={cn("pb-4", isMobile ? "px-3" : "px-5")}>
+    <>
+      <div className="px-4 md:px-6 pb-4 w-full max-w-[1200px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 pt-4 mb-2">
         <h1 className="text-lg font-bold text-white">Bet History</h1>
         <IconInfoCircle className="w-4 h-4 text-white/40 cursor-pointer hover:text-white/60 transition-colors" />
       </div>
 
-      {/* Sub-Nav Tabs — animated pill style matching site sub-navs */}
-      <div className={cn("mb-5", isMobile && "overflow-x-auto scrollbar-hide -mx-2 px-2")}>
-        <div className="bg-white/5 p-0.5 rounded-3xl inline-flex items-center gap-1" style={isMobile ? { minWidth: 'max-content' } : undefined}>
-        {filterTabs.map((tab) => (
-          <button
-            key={tab.key}
-              onClick={() => { setActiveFilter(tab.key); setCurrentPage(1); setExpandedBetId(null) }}
-            className={cn(
-                "relative px-4 py-1.5 h-8 text-xs font-medium rounded-2xl whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 z-10 transition-colors duration-200",
-              activeFilter === tab.key
-                  ? "text-white"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-            )}
+      {/* Daily Figures in place of old bet-state subnav */}
+      <div className="mb-4 rounded-lg border border-white/10 bg-white/5 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-white">Daily Figures</h3>
+            <button
+              type="button"
+              onClick={() => setIsDailyFiguresMinimized((prev) => !prev)}
+              className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-white/70 hover:text-white hover:border-white/30 transition-colors"
+              aria-label={isDailyFiguresMinimized ? 'Expand daily figures' : 'Minimize daily figures'}
+            >
+              {isDailyFiguresMinimized ? <IconChevronDown className="h-3.5 w-3.5" /> : <IconChevronUp className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          <AnimateTabs
+            value={pnlRange}
+            onValueChange={(value) => {
+              setPnlRange(value as 'thisWeek' | 'lastWeek')
+              setSelectedPnlDay(null)
+              setCurrentPage(1)
+            }}
+            className="w-auto self-start sm:ml-auto"
           >
-              {activeFilter === tab.key && (
-                <motion.div
-                  layoutId="activeMyBetsTab"
-                  className="absolute inset-0 rounded-2xl -z-10"
-                  style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 40
-                  }}
-                />
-              )}
-              <span className="relative z-10">{tab.label}</span>
-            {tab.count !== null && (
-              <span className={cn(
-                  "relative z-10 px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none",
-                  activeFilter === tab.key ? "bg-white/20 text-white" : "bg-white/10 text-white/50"
-                )}>
-                  {tab.count}
-                </span>
-            )}
-          </button>
-        ))}
+            <AnimateTabsList className="bg-[#1f1f1f] border border-white/15 p-0.5 h-auto gap-1 rounded-small relative">
+              {[
+                { value: 'lastWeek', label: 'Last Week' },
+                { value: 'thisWeek', label: 'This Week' },
+              ].map((tab) => (
+                <TabsTab
+                  key={tab.value}
+                  value={tab.value}
+                  className="relative z-10 h-8 px-4 rounded-[8px] text-xs font-semibold text-white/75 hover:text-white focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                >
+                  {pnlRange === tab.value && (
+                    <motion.div
+                      layoutId="betHistoryDailyFiguresRangeTab"
+                      className="absolute inset-0 rounded-[8px] -z-10"
+                      style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                      initial={false}
+                      transition={{ type: 'spring', stiffness: 450, damping: 40 }}
+                    />
+                  )}
+                  <span className="relative z-10">{tab.label}</span>
+                </TabsTab>
+              ))}
+            </AnimateTabsList>
+          </AnimateTabs>
         </div>
+
+        {!isDailyFiguresMinimized && (
+          <div className="px-4 py-3">
+            <div className="rounded-small border border-white/10 bg-[#2d2d2d] overflow-hidden">
+              <table className="w-full table-fixed border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">Wk</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">M</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">T</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">W</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">T</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">F</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">S</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">S</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-white/70">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-3 py-3 text-center text-sm text-white/85 font-semibold tabular-nums">
+                      {pnlRange === 'thisWeek' ? '35' : '34'}
+                    </td>
+                    {selectedPnlData.map((day) => (
+                      <td key={`${day.day}-${day.date}`} className="px-2 py-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedPnlDay((prev) => (prev === day.day ? null : day.day))
+                            setCurrentPage(1)
+                            setExpandedBetId(null)
+                          }}
+                          className={cn(
+                            'w-full rounded-[6px] px-1 py-1 text-sm font-semibold tabular-nums transition-colors',
+                            day.amount > 0 ? 'text-emerald-400' : day.amount < 0 ? 'text-red-400' : 'text-white/60',
+                            selectedPnlDay === day.day && 'bg-white/10 ring-1 ring-white/20'
+                          )}
+                          title={`Filter bets placed on ${day.day}`}
+                        >
+                          {day.amount > 0 ? '+' : ''}{day.amount.toFixed(2)}
+                        </button>
+                      </td>
+                    ))}
+                    <td
+                      className={cn(
+                        'px-3 py-3 text-center text-sm font-bold tabular-nums',
+                        pnlSummary.net >= 0 ? 'text-emerald-400' : 'text-red-400'
+                      )}
+                    >
+                      {pnlSummary.net >= 0 ? '+' : ''}{pnlSummary.net.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Add Filter */}
-      <div className="flex items-center gap-2 mb-3 text-sm">
-        <button className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors">
+      {/* Filter trigger */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+        <button
+          type="button"
+          onClick={() => setFiltersPanelOpen(true)}
+          className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
+        >
           <IconFilter className="w-4 h-4" />
-          <span className="font-medium">ADD FILTER</span>
+          <span className="font-medium">APPLY FILTERS</span>
         </button>
         <span className="text-white/30">|</span>
-        <span className="text-white/40">No filters applied</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center h-7 rounded-full border border-white/15 bg-white/[0.04] px-3 text-xs font-medium text-white/85">
+            Last 7 Days
+          </span>
+          {selectedStatus !== 'Status' && (
+            <button
+              type="button"
+              onClick={() => setSelectedStatus('Status')}
+              className="inline-flex items-center gap-1 h-7 rounded-full border border-white/15 bg-white/[0.04] px-2.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] transition-colors"
+            >
+              {selectedStatus}
+              <IconX className="h-3 w-3" />
+            </button>
+          )}
+          {selectedPnlDay && (
+            <button
+              type="button"
+              onClick={() => setSelectedPnlDay(null)}
+              className="inline-flex items-center gap-1 h-7 rounded-full border border-white/15 bg-white/[0.04] px-2.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] transition-colors"
+            >
+              {selectedPnlDay}
+              <IconX className="h-3 w-3" />
+            </button>
+          )}
+          {fromDate && (
+            <button
+              type="button"
+              onClick={() => setFromDate('')}
+              className="inline-flex items-center gap-1 h-7 rounded-full border border-white/15 bg-white/[0.04] px-2.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] transition-colors"
+            >
+              From {formatDateChip(fromDate)}
+              <IconX className="h-3 w-3" />
+            </button>
+          )}
+          {toDate && (
+            <button
+              type="button"
+              onClick={() => setToDate('')}
+              className="inline-flex items-center gap-1 h-7 rounded-full border border-white/15 bg-white/[0.04] px-2.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] transition-colors"
+            >
+              To {formatDateChip(toDate)}
+              <IconX className="h-3 w-3" />
+            </button>
+          )}
+          {wagerTypeFilters.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setWagerTypeFilters((prev) => prev.filter((item) => item !== type))}
+              className="inline-flex items-center gap-1 h-7 rounded-full border border-white/15 bg-white/[0.04] px-2.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] transition-colors"
+            >
+              {type}
+              <IconX className="h-3 w-3" />
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content: Bet List with inline accordion */}
       <div>
         <div className="flex-1 min-w-0">
           <div className="border border-white/10 rounded-lg overflow-hidden">
-            {paginatedBets.map((bet, index) => {
-              const isExpanded = expandedBetId === bet.id
-              return (
-                <div key={bet.id} className={cn(index !== 0 && "border-t border-white/5")}>
+            {paginatedBets.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-white/45">
+                {selectedPnlDay
+                  ? `No bets found for ${selectedPnlDay}.`
+                  : 'No bets found.'}
+              </div>
+            ) : (
+              paginatedBets.map((bet, index) => {
+                const isExpanded = expandedBetId === bet.id
+                return (
+                  <div key={bet.id} className={cn(index !== 0 && "border-t border-white/5")}>
                   <div
                     role="button"
                     tabIndex={0}
@@ -1423,9 +1617,10 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
                   <AnimatePresence>
                     {isExpanded && renderExpandedBet(bet)}
             </AnimatePresence>
-          </div>
-              )
-            })}
+                  </div>
+                )
+              })
+            )}
       </div>
 
       {/* Pagination */}
@@ -1464,7 +1659,135 @@ function BetHistoryContent({ initialFilter }: { initialFilter?: 'all' | 'cash_ou
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      <AnimatePresence>
+        {filtersPanelOpen && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close filters panel"
+              className="fixed inset-0 z-[70] bg-black/55"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setFiltersPanelOpen(false)}
+            />
+            <motion.aside
+              className="fixed right-0 top-0 z-[80] h-full w-full max-w-[360px] bg-white text-black shadow-2xl"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.24, ease: 'easeOut' }}
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
+                  <h2 className="text-[26px] font-semibold leading-none">Sort &amp; Filters</h2>
+                  <button
+                    type="button"
+                    onClick={() => setFiltersPanelOpen(false)}
+                    className="rounded-md p-1 text-black/60 hover:bg-black/5 hover:text-black transition-colors"
+                    aria-label="Close filters"
+                  >
+                    <IconX className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-5 py-6">
+                  <div className="space-y-6">
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/60">Select a Status</p>
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="h-11 w-full rounded-md border border-black/20 bg-white px-3 text-sm text-black focus:border-black/40 focus:outline-none"
+                      >
+                        <option>Status</option>
+                        <option>Open</option>
+                        <option>Settled</option>
+                        <option>Won</option>
+                        <option>Lost</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/60">Select a Custom Date Range</p>
+                      <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-black/45">Date Range</label>
+                      <select
+                        value={dateRangePreset}
+                        onChange={(e) => setDateRangePreset(e.target.value)}
+                        className="h-11 w-full rounded-md border border-black/20 bg-white px-3 text-sm text-black focus:border-black/40 focus:outline-none"
+                      >
+                        <option>Last 7 Days</option>
+                        <option>Last 15 Day</option>
+                        <option>Last 30 Day</option>
+                        <option>This Month</option>
+                        <option>Last Month</option>
+                        <option>Custom</option>
+                      </select>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <input
+                          type="date"
+                          value={fromDate}
+                          onChange={(e) => setFromDate(e.target.value)}
+                          className="h-10 rounded-md border border-black/20 bg-white px-2 text-sm text-black focus:border-black/40 focus:outline-none"
+                        />
+                        <input
+                          type="date"
+                          value={toDate}
+                          onChange={(e) => setToDate(e.target.value)}
+                          className="h-10 rounded-md border border-black/20 bg-white px-2 text-sm text-black focus:border-black/40 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-black/60">Wager Type</p>
+                      <div className="space-y-3">
+                        {['SportsBook', 'Spread', 'Spread FB', 'Money Line', 'Total'].map((type) => (
+                          <label key={type} className="flex items-center gap-2.5 text-sm text-black/85">
+                            <input
+                              type="checkbox"
+                              checked={wagerTypeFilters.includes(type)}
+                              onChange={() => toggleWagerTypeFilter(type)}
+                              className="h-4 w-4 rounded-full border border-black/40 text-black focus:ring-0"
+                            />
+                            <span>{type}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 border-t border-black/10 p-5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedStatus('Status')
+                      setDateRangePreset('Last 7 Days')
+                      setFromDate('')
+                      setToDate('')
+                      setWagerTypeFilters([])
+                    }}
+                    className="h-11 rounded-md border border-black/30 text-sm font-semibold text-black hover:bg-black/5 transition-colors"
+                  >
+                    CLEAR ALL
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFiltersPanelOpen(false)}
+                    className="h-11 rounded-md bg-[#7fbf2f] text-sm font-semibold text-white hover:bg-[#73af2b] transition-colors"
+                  >
+                    APPLY
+                  </button>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -2516,6 +2839,10 @@ function AccountPageContent() {
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
   }, [trackClick])
+  const openNotificationsDrawer = useCallback(() => {
+    setAccountDrawerView('notifications')
+    openAccountDrawer()
+  }, [openAccountDrawer])
 
   const handleDepositDrawerOpenChange = useCallback((open: boolean) => {
     setDepositDrawerOpen(open)
@@ -3416,13 +3743,6 @@ function AccountPageContent() {
           {/* Spacer for fixed sub-nav on mobile */}
           {isMobile && <div style={{ height: 52 }} />}
 
-          {/* Greeting — dashboard only */}
-          {activeSection === 'dashboard' && (
-            <div className="px-4 md:px-6 pt-5 pb-1">
-              <h1 className="text-2xl font-bold text-white">Hello, Christopher</h1>
-            </div>
-          )}
-
             {/* Content Area */}
             <AnimatePresence mode="wait">
               <motion.div
@@ -3432,7 +3752,14 @@ function AccountPageContent() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.15 }}
               >
-              {activeSection === 'dashboard' && <DashboardSection onNavigate={setActiveSection} onOpenVipHub={openVipDrawer} />}
+              {activeSection === 'dashboard' && (
+                <DashboardSection
+                  onNavigate={setActiveSection}
+                  onOpenVipHub={openVipDrawer}
+                  onOpenNotifications={openNotificationsDrawer}
+                  unreadNotifications={webInboxUnreadCount}
+                />
+              )}
                 {activeSection === 'bet-history' && <BetHistoryContent />}
               {activeSection === 'transactions' && <TransactionsContent />}
               {activeSection === 'my-bonus' && <BonusContent />}

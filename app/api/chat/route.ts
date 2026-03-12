@@ -3,7 +3,7 @@ import { designSystem, colorTokenMap, getDesignSystemResponse } from '@/lib/agen
 import { getKnowledgeBasePrompt, knowledgeBase } from '@/lib/agent/knowledgeBase'
 
 /**
- * AI-powered chat endpoint for CH
+ * AI-powered design assistant chat endpoint
  * Uses OpenAI API if available, otherwise falls back to enhanced design system responses
  */
 export async function POST(request: Request) {
@@ -181,38 +181,12 @@ export async function POST(request: Request) {
 
 /**
  * Build system prompt with comprehensive knowledge base
- * STRICT: Only use information from the knowledge base (Figma, stakeholders, processes)
+ * STRICT: Only use information from the knowledge base (Figma, processes, reports)
  */
 async function buildSystemPrompt(): Promise<string> {
   // Get comprehensive knowledge base (always get fresh content)
   // Import fresh to ensure we have the latest reports
   const { getKnowledgeBasePrompt: getFreshPrompt } = require('@/lib/agent/knowledgeBase')
-  
-  // Try to load UX reports from Supabase and merge into knowledge base
-  try {
-    const { isSupabaseConfigured } = await import('@/lib/supabase/client')
-    const supabaseKnowledgeBase = await import('@/lib/supabase/knowledgeBase')
-    
-    if (isSupabaseConfigured() && (supabaseKnowledgeBase as any).getUXReports) {
-      const supabaseReports = await (supabaseKnowledgeBase as any).getUXReports()
-      if (supabaseReports && supabaseReports.length > 0) {
-        // Temporarily add Supabase reports to knowledge base for this prompt
-        const { knowledgeBase } = require('@/lib/agent/knowledgeBase')
-        knowledgeBase.uxReports = supabaseReports
-        console.log(`✅ Loaded ${supabaseReports.length} UX reports from Supabase for system prompt`)
-        // Debug: Log report titles and sources
-        const researchReports = supabaseReports.filter((r: any) => r.source === 'Research Report')
-        const jurniiReports = supabaseReports.filter((r: any) => r.source === 'Jurnii')
-        console.log(`📊 All reports loaded:`, supabaseReports.map((r: any) => `${r.title} (${r.source})`).join(', '))
-        console.log(`📋 Research Reports (surveys): ${researchReports.length}`, researchReports.map((r: any) => r.title).join(', '))
-        console.log(`📋 Jurnii Reports: ${jurniiReports.length}`, jurniiReports.map((r: any) => r.title).join(', '))
-      } else {
-        console.log(`⚠️  No UX reports found in Supabase`)
-      }
-    }
-  } catch (error) {
-    console.log('Could not load UX reports from Supabase, using in-memory knowledge base:', error)
-  }
   
   const knowledgeBaseContent = getFreshPrompt()
   
@@ -222,7 +196,7 @@ async function buildSystemPrompt(): Promise<string> {
   console.log(`📚 Contains UX Reports: ${knowledgeBaseContent.includes('UX REPORTS')}`)
   console.log(`📚 Contains Design System: ${knowledgeBaseContent.includes('DESIGN SYSTEM') || knowledgeBaseContent.includes('COLORS')}`)
 
-  return `You are CH, the Head of Design for an online gambling company. You are a design expert who provides advice, ideas, and guidance utilizing your comprehensive knowledge of our brand and design system.
+  return `You are the Design Assistant for an online gambling company. You are a design expert who provides advice, ideas, and guidance utilizing your comprehensive knowledge of our brand and design system.
 
 === COMPREHENSIVE KNOWLEDGE BASE ===
 
@@ -246,11 +220,10 @@ CRITICAL RULES - YOU MUST FOLLOW THESE STRICTLY:
 3. **CRITICAL: Competitor queries take priority over brand queries**: If the user mentions a competitor name (e.g., "Paddy Power", "Stake", "DraftKings", "FanDuel", "BetMGM", "Caesars", etc.) OR if the conversation context is about competitors, you MUST provide competitor information from UX reports, NOT our brand colors. Only show our brand colors when explicitly asked about OUR brands (BetOnline, Wild Casino, Tiger Gaming, etc.) or when the user explicitly asks "what are our brand colors" or "show me BetOnline colors".
 4. For brand color questions about OUR brands, **ALWAYS reference the exact brand information from the BRANDS section** - use the exact color tokens, hex codes, and descriptions provided
 5. For brand guidelines, communication, and tone of voice questions, use the brand guidelines section and make reasonable inferences based on our design system and brand values
-5. For process questions, reference the actual process steps and stakeholders involved
-6. For stakeholder questions, reference their actual roles, responsibilities, and areas
+6. For process questions, reference the actual process steps and documented ownership workflow
 7. **If you don't have specific information in the knowledge base, say so explicitly** - do NOT guess or make up information
 8. For mockup ideas and design suggestions, **ONLY use components, colors, and patterns from this knowledge base**
-9. Always reference specific tokens, components, patterns, stakeholders, or processes when suggesting designs
+9. Always reference specific tokens, components, patterns, or processes when suggesting designs
 10. Follow the tone of voice principles: be direct, clear, professional yet approachable, and helpful
 11. **When asked about a brand's color palette, list ALL colors from the BRANDS section** - primary, secondary, accent, neutral, and background colors
 12. **Always provide rich, useful responses with source citations**: When you have relevant information in the knowledge base, provide a comprehensive, well-structured response. Always cite your sources - mention which report, study, or source each piece of information comes from. For example: "According to the [Report Name] ([Source], [Date]), users reported..." or "Based on the UX Analysis: BetOnline (Website Analysis), the main issues are..." Include specific findings, statistics, and recommendations with their sources.
@@ -300,6 +273,7 @@ Instead, summarize the key insights from the reports and cite your sources. **IM
 The UX_FINDINGS directive will be added separately for visual display, but your main response should include actual competitor names, scores, and category comparisons when available in the reports.
 
 14. **CRITICAL: For broad/general questions - ALWAYS ask for clarification FIRST**: When asked "tell me about X" or "what can you tell me about X" where X is ANY general topic (users, sportsbook, casino, etc.), you MUST FIRST ask what specific aspect they want to know about. DO NOT dump all information. Instead, respond with: "I have information on several areas related to [topic]. What would you like to know about specifically?" Then offer clear options such as: Design system & components, UX issues & findings, User insights & feedback, Navigation & information architecture, Mobile experience, Accessibility, Performance, Colors & typography, etc. ONLY provide detailed information when the user specifies what they want, or explicitly asks for "everything" or "all details". This prevents information overload and ensures responses are useful and targeted.
+15. **CRITICAL: Component governance is strict**: Never invent new component patterns. Prefer audited live-source components from current app routes (`app/page.tsx`, `app/casino/page.tsx`, `app/sports/page.tsx`, `app/sports/football/page.tsx`) and shared components under `components/*`. If unsure whether a component is live and audited, explicitly say so and ask for a source reference.
 
 YOUR EXPERTISE (as Head of UX/CX and Design):
 - **User Experience (UX)**: Deep understanding of user needs, pain points, and behavior patterns
@@ -309,7 +283,7 @@ YOUR EXPERTISE (as Head of UX/CX and Design):
 - **UX Research & Insights**: Analysis of UX reports from Jurnii, website analysis, Google reviews, and user feedback
 - **Competitive Intelligence**: Understanding of competitor analysis and market insights
 - **Brand Strategy**: Brand guidelines, communication principles, and multi-brand design (Casino, Sports, Loyalty, Authentication, Poker)
-- **Design Processes**: Design workflows, team structure, and stakeholder collaboration
+- **Design Processes**: Design workflows, ownership model, and collaboration patterns
 - **Data-Driven Design**: Making design decisions based on UX findings, user feedback, and analytics
 - **Visual Design**: Image analysis and generation of design mockups using DALL-E based on our design system. You can generate visual mockups when users ask for designs, mockups, or visual examples. Always offer to generate mockups when discussing design ideas or components.
 - **Design Leadership**: Strategic thinking, prioritization, and guidance for the design team
@@ -330,8 +304,8 @@ When answering questions:
 7. For logo questions, ONLY use format "LOGO_IMAGE:brand:type:color:figmaLink:downloadUrl" when the user EXPLICITLY asks to see or display a logo. Do NOT include LOGO_IMAGE directives unless the user specifically requests to see a logo (e.g., "show me the BetOnline logo", "what does the logo look like", "display the logo"). If the user is just asking about logo usage, guidelines, or general logo information, provide text-only responses without LOGO_IMAGE directives.
 8. Reference specific tokens/components when suggesting designs
 9. For mockup ideas, list specific components, colors, and patterns you'd use
-10. For process questions, reference the actual process steps and stakeholders
-11. For stakeholder questions, reference their actual roles and responsibilities
+10. For process questions, reference the actual process steps and ownership workflow
+11. If a question asks for ownership details not present in the knowledge base, state that clearly
 12. Always include Figma deeplinks when mentioning tokens, colors, or components (use the main Figma file URL from knowledge base)
 13. If asked about something not in the knowledge base, say you don't have that information
 
@@ -439,7 +413,7 @@ Example response for process questions:
 2. Request assigned to designer based on area
 3. Designer creates Figma file
 4. Review and approval
-5. Delivery to stakeholders
+5. Delivery to product/design teams
 
 The process uses Figma, Mattermost, and Craft.io tools."
 
@@ -1060,27 +1034,10 @@ async function processAIResponse(aiResponse: string, userMessage: string): Promi
       lowerMessage.includes('user experience')
     )
   
-  // Always check knowledge base for UX reports, but only auto-include findings for specific queries
+  // Always check in-memory knowledge base for UX reports, but only auto-include findings for specific queries
   // This helps answer questions like "who are our competitors?" or "what can jurnii tell me?"
   if (isUXQuery || (!isBroadQuery && (lowerMessage.includes('competitor') || lowerMessage.includes('jurnii')))) {
-    // Try Supabase first, then fallback to in-memory
-    let reportsToCheck: typeof knowledgeBase.uxReports = []
-    
-    try {
-      const { isSupabaseConfigured } = await import('@/lib/supabase/client')
-      const supabaseKnowledgeBase = await import('@/lib/supabase/knowledgeBase')
-      
-      if (isSupabaseConfigured() && (supabaseKnowledgeBase as any).getUXReports) {
-        reportsToCheck = await (supabaseKnowledgeBase as any).getUXReports()
-        console.log(`✅ Loaded ${reportsToCheck.length} UX reports from Supabase for query processing`)
-      } else {
-        throw new Error('Supabase not configured')
-      }
-    } catch (error) {
-      console.log('Could not load from Supabase, using in-memory knowledge base:', error)
-      // Fallback to in-memory knowledge base
-      reportsToCheck = knowledgeBase.uxReports
-    }
+    const reportsToCheck: typeof knowledgeBase.uxReports = knowledgeBase.uxReports
     
     if (reportsToCheck.length > 0) {
       // Find relevant reports
@@ -1254,7 +1211,7 @@ function enhanceResponse(
 
   // Default: return base response with a friendly tone
   if (baseResponse.includes("I'm here to help")) {
-    return `Hey! I'm CH, head of design. I can help you with our design system - colors, typography, components, spacing, patterns, brands, you name it. What do you need?`
+    return `Hey! I'm your design assistant. I can help you with our design system - colors, typography, components, spacing, patterns, brands, you name it. What do you need?`
   }
 
   // For other responses, add a bit of personality

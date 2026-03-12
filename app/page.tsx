@@ -343,8 +343,8 @@ function SecurityBadge({ name, iconPath, className }: { name: string; iconPath: 
         <Image
           src={iconPath}
           alt={name}
-          width={80}
-          height={30}
+          width={52}
+          height={20}
           className="object-contain opacity-80 hover:opacity-100 transition-opacity"
           onError={() => setImageError(true)}
         />

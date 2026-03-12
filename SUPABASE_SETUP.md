@@ -56,8 +56,7 @@ The knowledge base will store:
 - **ux_reports**: UX findings, Jurnii reports, website analyses, Google search results
 - **figma_assets**: Extracted components, colors, typography, logos from Figma
 - **design_tokens**: Color tokens, spacing, typography tokens
-- **stakeholders**: Team members and their roles
 - **processes**: Design processes and workflows
 - **knowledge_notes**: Additional notes and insights
 
-All data is automatically synced and available to CH (Head of UX/CX and Design).
+All data is automatically synced and available to the design assistant.
