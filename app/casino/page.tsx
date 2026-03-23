@@ -8123,6 +8123,20 @@ function NavTestPageContent() {
   const [casinoPokerCanScrollNext, setCasinoPokerCanScrollNext] = useState(false)
   const [casinoPokerCurrentIndex, setCasinoPokerCurrentIndex] = useState(0)
   
+  const [worldCupCarouselApi, setWorldCupCarouselApi] = useState<CarouselApi>()
+  const [worldCupCanScrollPrev, setWorldCupCanScrollPrev] = useState(false)
+  const [worldCupCanScrollNext, setWorldCupCanScrollNext] = useState(false)
+  const [worldCupGames, setWorldCupGames] = useState<Array<{
+    id: number
+    title: string
+    image: string
+    provider: string
+    features: string[]
+    tileIndex: number
+  }>>([])
+  const [worldCupGamesLoading, setWorldCupGamesLoading] = useState(true)
+  const [worldCupGamesError, setWorldCupGamesError] = useState<string | null>(null)
+
   const [halloweenCarouselApi, setHalloweenCarouselApi] = useState<CarouselApi>()
   const [halloweenCanScrollPrev, setHalloweenCanScrollPrev] = useState(false)
   const [halloweenCanScrollNext, setHalloweenCanScrollNext] = useState(false)
@@ -8241,6 +8255,16 @@ function NavTestPageContent() {
   }, [casinoPokerCarouselApi])
   
   useEffect(() => {
+    if (!worldCupCarouselApi) return
+    setWorldCupCanScrollPrev(worldCupCarouselApi.canScrollPrev())
+    setWorldCupCanScrollNext(worldCupCarouselApi.canScrollNext())
+    worldCupCarouselApi.on('select', () => {
+      setWorldCupCanScrollPrev(worldCupCarouselApi.canScrollPrev())
+      setWorldCupCanScrollNext(worldCupCarouselApi.canScrollNext())
+    })
+  }, [worldCupCarouselApi])
+
+  useEffect(() => {
     if (!halloweenCarouselApi) return
     setHalloweenCanScrollPrev(halloweenCarouselApi.canScrollPrev())
     setHalloweenCanScrollNext(halloweenCarouselApi.canScrollNext())
@@ -8345,6 +8369,51 @@ function NavTestPageContent() {
       setTournamentCanScrollNext(tournamentCarouselApi.canScrollNext())
     })
   }, [tournamentCarouselApi])
+
+  const loadWorldCupGames = useCallback(() => {
+    setWorldCupGamesLoading(true)
+    setWorldCupGamesError(null)
+
+    try {
+      const worldCupNames = [
+        'Penalty Shootout',
+        'Road to Glory',
+        'Golden Boot Spins',
+        'Final Whistle Reels',
+        'Stadium Stars',
+        'Extra Time Jackpot',
+      ]
+
+      const worldCupFeatures = [
+        ['World Cup Theme', 'Bonus Multiplier Moments'],
+        ['Tournament Ladder Bonuses', 'Free Spin Kickoff'],
+        ['Golden Boot Wilds', 'Championship Free Rounds'],
+      ]
+
+      const nextGames = Array.from({ length: 15 }).map((_, index) => {
+        const tileIndex = index + 120
+        return {
+          id: tileIndex,
+          title: worldCupNames[index % worldCupNames.length],
+          image: squareTileImages[index % squareTileImages.length],
+          provider: getTileVendor(tileIndex),
+          features: worldCupFeatures[index % worldCupFeatures.length],
+          tileIndex,
+        }
+      })
+
+      setWorldCupGames(nextGames)
+    } catch {
+      setWorldCupGames([])
+      setWorldCupGamesError('Unable to load World Cup games right now.')
+    } finally {
+      setWorldCupGamesLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadWorldCupGames()
+  }, [loadWorldCupGames])
 
   // Activity table state
   const [casinoActivityTab, setCasinoActivityTab] = useState<'All Bets' | 'Jackpot Winners' | 'High Rollers' | 'Daily Race'>('All Bets')
@@ -12607,6 +12676,172 @@ function NavTestPageContent() {
                           </div>
                         )}
                         
+                        {/* Feature Section - Rain Background (World Cup) */}
+                        <div className={cn(
+                          "relative w-full rounded-lg overflow-hidden mb-8",
+                          isMobile ? "mx-3" : "-mx-6"
+                        )}>
+                          <RainBackground
+                            className="rounded-lg min-h-[400px]"
+                            count={150}
+                            intensity={1}
+                            angle={15}
+                            color="rgba(174, 194, 224, 0.5)"
+                            lightning={true}
+                          >
+                            <div className={cn(
+                              "relative z-10",
+                              isMobile ? "p-8" : "pt-8 pb-8 pr-8 pl-14"
+                            )}>
+                              <div className="mb-2">
+                                <span className="inline-block bg-cyan-600/80 text-white text-xs font-semibold px-3 py-1 rounded-small">
+                                  World Cup
+                                </span>
+                              </div>
+
+                              <h2 id="world-cup-games-heading" className="text-4xl md:text-3xl font-bold text-white mb-3">
+                                WORLD CUP
+                              </h2>
+
+                              <p className="text-white/90 text-sm md:text-base max-w-2xl mb-6">
+                                Discover football-inspired casino games featuring tournament energy, extra-time jackpots, and championship-level wins.
+                              </p>
+
+                              <div className="flex items-center justify-between mb-6 pointer-events-auto">
+                                <Button
+                                  variant="ghost"
+                                  className="text-white/70 hover:text-white hover:bg-white/5 text-sm px-6 py-2.5 border border-white/20 rounded-small flex items-center gap-2"
+                                  onClick={() => {
+                                    setSelectedCategory('World Cup')
+                                    setShowAllGames(true)
+                                    setActiveSubNav('For You')
+                                  }}
+                                >
+                                  <IconBallFootball className="w-4 h-4" />
+                                  All Games
+                                </Button>
+                                {!isMobile && (
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 rounded-small bg-black/40 backdrop-blur-sm border border-white/20 hover:bg-black/60 hover:border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                      onClick={() => {
+                                        if (worldCupCarouselApi) {
+                                          const currentIndex = worldCupCarouselApi.selectedScrollSnap()
+                                          const targetIndex = Math.max(0, currentIndex - 2)
+                                          worldCupCarouselApi.scrollTo(targetIndex)
+                                        }
+                                      }}
+                                      disabled={!worldCupCarouselApi || !worldCupCanScrollPrev}
+                                    >
+                                      <IconChevronLeft className="h-4 w-4" strokeWidth={2} />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 rounded-small bg-black/40 backdrop-blur-sm border border-white/20 hover:bg-black/60 hover:border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                      onClick={() => {
+                                        if (worldCupCarouselApi) {
+                                          const currentIndex = worldCupCarouselApi.selectedScrollSnap()
+                                          const slideCount = worldCupCarouselApi.scrollSnapList().length
+                                          const targetIndex = Math.min(slideCount - 1, currentIndex + 2)
+                                          worldCupCarouselApi.scrollTo(targetIndex)
+                                        }
+                                      }}
+                                      disabled={!worldCupCarouselApi || !worldCupCanScrollNext}
+                                    >
+                                      <IconChevronRight className="h-4 w-4" strokeWidth={2} />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="pointer-events-auto -mx-6">
+                                {worldCupGamesLoading ? (
+                                  <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide px-3 md:px-8 pb-1">
+                                    {Array.from({ length: 6 }).map((_, index) => (
+                                      <div
+                                        key={`world-cup-loading-${index}`}
+                                        className="w-[160px] h-[160px] rounded-small bg-white/10 border border-white/20 animate-pulse flex-shrink-0"
+                                      />
+                                    ))}
+                                  </div>
+                                ) : worldCupGamesError ? (
+                                  <Card className="mx-3 md:mx-8 bg-black/40 border-white/20">
+                                    <CardContent className="py-5 px-4 flex items-center justify-between gap-4">
+                                      <p className="text-sm text-white/90">{worldCupGamesError}</p>
+                                      <Button
+                                        variant="outline"
+                                        className="border-white/30 text-white hover:bg-white/10"
+                                        onClick={loadWorldCupGames}
+                                      >
+                                        Retry
+                                      </Button>
+                                    </CardContent>
+                                  </Card>
+                                ) : worldCupGames.length === 0 ? (
+                                  <Card className="mx-3 md:mx-8 bg-black/40 border-white/20">
+                                    <CardContent className="py-5 px-4">
+                                      <p className="text-sm text-white/90">
+                                        No World Cup games are available at the moment. Check back soon.
+                                      </p>
+                                    </CardContent>
+                                  </Card>
+                                ) : (
+                                  <Carousel
+                                    setApi={setWorldCupCarouselApi}
+                                    className="w-full relative"
+                                    aria-labelledby="world-cup-games-heading"
+                                    aria-label="World Cup games carousel"
+                                    opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}
+                                  >
+                                    <CarouselContent className="ml-0 -mr-2 md:-mr-4">
+                                      {worldCupGames.map((game, index) => (
+                                        <CarouselItem key={game.id} className={cn(
+                                          "pr-0 basis-auto flex-shrink-0",
+                                          index === 0 ? (isMobile ? "pl-3" : "pl-8") : "pl-2 md:pl-3"
+                                        )}>
+                                          <div
+                                            data-content-item
+                                            className="w-[160px] h-[160px] rounded-small bg-white/10 cursor-pointer transition-all duration-300 relative overflow-hidden group border border-white/20"
+                                            onMouseEnter={(e) => {
+                                              e.currentTarget.style.backgroundColor = `${getComputedStyle(document.documentElement).getPropertyValue('--ds-primary').trim() || '#ee3536'}33`
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                                            }}
+                                            onClick={() => {
+                                              setSelectedGame({
+                                                title: game.title,
+                                                image: game.image,
+                                                provider: game.provider,
+                                                features: game.features,
+                                              })
+                                            }}
+                                          >
+                                            {game.image && (
+                                              <Image
+                                                src={game.image}
+                                                alt={`World Cup Game ${index + 1}`}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                sizes="160px"
+                                              />
+                                            )}
+                                            <GameTagBadge tag={getMetaTag(game.tileIndex)} vendor={getTileVendor(game.tileIndex)} />
+                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'color-mix(in srgb, var(--ds-primary, #ee3536) 10%, transparent)' }} />
+                                          </div>
+                                        </CarouselItem>
+                                      ))}
+                                    </CarouselContent>
+                                  </Carousel>
+                                )}
+                              </div>
+                            </div>
+                          </RainBackground>
+                        </div>
+
                         {/* Feature Section - Rain Background */}
                         <div className={cn(
                           "relative w-full rounded-lg overflow-hidden mb-8",
