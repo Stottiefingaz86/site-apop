@@ -5931,7 +5931,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 { label: 'Home', page: 'home' },
                 { label: 'Sports', page: 'sports' },
                 { label: 'Live Betting', page: 'liveBetting' },
-                { label: 'Casino', page: 'casino' },
+                { label: 'Games', page: 'casino' },
                 { label: 'Live Casino', page: 'liveCasino' },
                 { label: 'Poker', page: 'poker' },
                 { label: 'VIP Rewards', page: 'vipRewards' },
@@ -10103,7 +10103,7 @@ function NavTestPageContent() {
                   { label: 'Home', onClick: () => { router.push('/'); setQuickLinksOpen(false); } },
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
+                  { label: 'Games', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
@@ -10119,7 +10119,7 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
-                      (item.label === 'Casino' && !showSports && !showVipRewards) ||
+                      (item.label === 'Games' && !showSports && !showVipRewards) ||
                       (item.label === 'Sports' && showSports) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
                         ? "text-white"
@@ -10298,7 +10298,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Casino</span>
+                      <span className="relative z-10">Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   

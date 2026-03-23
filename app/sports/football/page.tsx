@@ -5803,7 +5803,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 { label: 'Home', page: 'home' as const },
                 { label: 'Sports', page: 'sports' as const },
                 { label: 'Live Betting', page: 'liveBetting' as const },
-                { label: 'Casino', page: 'casino' as const },
+                { label: 'Games', page: 'casino' as const },
                 { label: 'Live Casino', page: 'liveCasino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
@@ -10761,7 +10761,7 @@ function NavTestPageContent() {
                   { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); setShowSports(true); setShowVipRewards(false); router.push('/sports/football'); setQuickLinksOpen(false); } },
                   { label: 'Esports', onClick: () => { trackNav('esports', 'Esports'); trackPageView('esports', 'Esports'); setShowSports(true); setShowVipRewards(false); router.push('/esports'); setQuickLinksOpen(false); } },
                   { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
+                  { label: 'Games', onClick: () => { trackNav('casino', 'Games'); trackPageView('casino', 'Games'); router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); trackPageView('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); trackPageView('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
@@ -10777,7 +10777,7 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
-                      (item.label === 'Casino' && !showSports && !showVipRewards) ||
+                      (item.label === 'Games' && !showSports && !showVipRewards) ||
                       (item.label === 'Sports' && isSportsProductActive) ||
                       (item.label === 'Esports' && isEsportsProductActive) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
@@ -10949,8 +10949,8 @@ function NavTestPageContent() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        trackNav('casino', 'Casino')
-                        trackPageView('casino', 'Casino')
+                        trackNav('casino', 'Games')
+                        trackPageView('casino', 'Games')
                         router.push('/casino')
                       }}
                     >
@@ -10963,7 +10963,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Casino</span>
+                      <span className="relative z-10">Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
