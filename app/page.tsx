@@ -126,6 +126,7 @@ import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { NotificationHub } from '@/components/account/notification-hub'
+import { HomepageSportsbookCarousel } from '@/components/homepage-sportsbook-carousel'
 
 // Helper function to get vendor icon path
 const getVendorIconPath = (vendorName: string): string => {
@@ -2393,6 +2394,8 @@ function HomePageContent() {
             </Carousel>
           </div>
         )}
+
+        <HomepageSportsbookCarousel isMobile={isMobile} />
 
         {/* Top Sports Carousel */}
         <div className="mb-6">
