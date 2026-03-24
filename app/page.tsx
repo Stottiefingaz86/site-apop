@@ -126,6 +126,7 @@ import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { NotificationHub } from '@/components/account/notification-hub'
+import { ExitIntentPopup } from '@/components/marketing/exit-intent-popup'
 
 // Helper function to get vendor icon path
 const getVendorIconPath = (vendorName: string): string => {
@@ -4979,6 +4980,7 @@ function HomePageContent() {
           showFavorites={false}
         />
       )}
+      <ExitIntentPopup />
       </div>
     </div>
   )

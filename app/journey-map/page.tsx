@@ -1551,6 +1551,76 @@ function QuickStats({ events, pageStats, flowEdges, sessionFlows, uniqueUsers }:
   )
 }
 
+const EXIT_INTENT_FEATURE_ID = 'cmn4ktng40000ddi8ax3mb9nm'
+
+function ApopFeaturePerformance({ events }: { events: TrackingEvent[] }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const { impressions, clicks, ctr, lastSeen } = useMemo(() => {
+    const featureEvents = events.filter((event) => {
+      const featureId = event.meta?.featureId
+      return typeof featureId === 'string' && featureId === EXIT_INTENT_FEATURE_ID
+    })
+
+    const impressionsCount = featureEvents.filter((event) => event.meta?.eventType === 'impression').length
+    const clicksCount = featureEvents.filter((event) => event.meta?.eventType === 'click').length
+    const ctrValue = impressionsCount > 0 ? (clicksCount / impressionsCount) * 100 : 0
+    const latest = featureEvents.length > 0 ? featureEvents[featureEvents.length - 1].ts : null
+
+    return {
+      impressions: impressionsCount,
+      clicks: clicksCount,
+      ctr: ctrValue,
+      lastSeen: latest,
+    }
+  }, [events])
+
+  const metrics = [
+    { label: 'Impressions', value: mounted ? impressions.toLocaleString() : '–', color: '#22c55e' },
+    { label: 'Clicks', value: mounted ? clicks.toLocaleString() : '–', color: '#f59e0b' },
+    { label: 'CTR', value: mounted ? `${ctr.toFixed(1)}%` : '–', color: '#6366f1' },
+  ]
+
+  return (
+    <div
+      className="rounded-xl border border-white/[0.06] p-4"
+      style={{ backgroundColor: '#1a1a1a' }}
+      data-apop-feature-id={EXIT_INTENT_FEATURE_ID}
+    >
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h3 className="text-[11px] font-semibold text-white">APOP Feature Performance</h3>
+          <p className="text-[10px] text-white/35">
+            Exit Intent popup live metrics
+          </p>
+        </div>
+        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/50">
+          MARKETING
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5"
+          >
+            <div className="text-[10px] text-white/45">{metric.label}</div>
+            <div className="text-sm font-semibold" style={{ color: metric.color }}>
+              {metric.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-2 text-[10px] text-white/30">
+        {lastSeen ? `Last feature event: ${formatDate(lastSeen)}` : 'No feature events captured yet.'}
+      </div>
+    </div>
+  )
+}
+
 // ─── Site Architecture Map — all possible user flows ─────────────────
 
 interface SiteNode {
@@ -4409,6 +4479,9 @@ export default function JourneyMapPage() {
 
         <div className="mb-6">
           <QuickStats events={events} pageStats={pageStats} flowEdges={flowEdges} sessionFlows={sessionFlows} uniqueUsers={userOverview.totalUniqueUsers} />
+        </div>
+        <div className="mb-6">
+          <ApopFeaturePerformance events={events} />
         </div>
 
         {/* Global Date Range Filter + User Filter */}
