@@ -1,12 +1,14 @@
 'use client'
 import { useRainBalance } from '@/hooks/use-rain-balance'
+import { ReferralCodeField } from '@/components/auth/referral-code-field'
 import { StreakCounter } from '@/components/vip/streak-counter'
 import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 
 // Home page - uses global header, Top Events carousel, hero banner, no sidebar
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useChatStore } from '@/lib/store/chatStore'
 import { useBetslipStore } from '@/lib/store/betslipStore'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -58,7 +60,7 @@ import {
   IconLifebuoy,
   IconEye,
   IconEyeOff,
-  IconFingerprint,
+  IconKey,
   IconRosetteFilled,
 } from '@tabler/icons-react'
 import { colorTokenMap } from '@/lib/agent/designSystem'
@@ -126,6 +128,12 @@ import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { NotificationHub } from '@/components/account/notification-hub'
+
+/** Sign-up country (USA / CAN share +1); `iso` is stored on the form. */
+const AUTH_COUNTRY_OPTIONS = [
+  { iso: 'US', dial: '+1', label: 'United States' },
+  { iso: 'CA', dial: '+1', label: 'Canada' },
+] as const
 
 // Helper function to get vendor icon path
 const getVendorIconPath = (vendorName: string): string => {
@@ -1302,19 +1310,26 @@ function HomePageContent() {
     fullName: '',
     email: '',
     password: '',
-    countryCode: '+1',
+    countryIso: 'US' as 'US' | 'CA',
     phone: '',
     dob: '',
   })
   const [createAccountAlias, setCreateAccountAlias] = useState('')
   const [createAccountTouched, setCreateAccountTouched] = useState(false)
   const [createAccountPasswordVisible, setCreateAccountPasswordVisible] = useState(false)
+  const [referralCode, setReferralCode] = useState('')
+  const [referralExpanded, setReferralExpanded] = useState(false)
+  const authCountryTriggerRef = useRef<HTMLButtonElement>(null)
+  const authCountryListRef = useRef<HTMLDivElement>(null)
+  const [authCountryMenuOpen, setAuthCountryMenuOpen] = useState(false)
+  const [authCountryMenuRect, setAuthCountryMenuRect] = useState<{
+    top: number
+    left: number
+    width: number
+  } | null>(null)
   const [loginForm, setLoginForm] = useState({ identifier: '', password: '', keepLoggedIn: false })
   const [loginPasswordVisible, setLoginPasswordVisible] = useState(false)
   const [createAccountDob, setCreateAccountDob] = useState({ day: '', month: '', year: '' })
-  const dobDayRef = useRef<HTMLInputElement>(null)
-  const dobMonthRef = useRef<HTMLInputElement>(null)
-  const dobYearRef = useRef<HTMLInputElement>(null)
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
     if (typeof window === 'undefined') return true
     try {
@@ -1349,7 +1364,7 @@ function HomePageContent() {
   }, [isUserLoggedIn])
 
   const createAccountErrors = {
-    fullName: createAccountForm.fullName.trim().length >= 2 ? '' : 'Please enter your full name',
+    fullName: createAccountForm.fullName.trim().length >= 2 ? '' : 'Please enter a username',
     email: /\S+@\S+\.\S+/.test(createAccountForm.email.trim()) ? '' : 'Please enter a valid email',
     password: createAccountForm.password.trim().length >= 6 ? '' : 'Use at least 6 characters',
     phone: createAccountForm.phone.trim().length >= 7 ? '' : 'Please enter a valid phone number',
@@ -1371,8 +1386,73 @@ function HomePageContent() {
   createAccountErrors.dob = isCreateAccountDobValid ? '' : 'Please add a valid date of birth'
   const createAccountInputClass = "h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill:hover]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill:focus]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
   const createAccountSelectClass = "h-11 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_white] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+
+  const isAuthDrawerView =
+    accountDrawerView === 'login' ||
+    accountDrawerView === 'createAccount' ||
+    accountDrawerView === 'createAccountConfirmation'
+  const authFieldClass =
+    "h-11 w-full rounded-lg border border-white/12 bg-[#1a1a1a] px-3 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-white/15 focus:border-white/22 [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#1a1a1a] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]"
+  const authSelectTriggerClass =
+    "h-11 w-full rounded-lg border border-white/12 bg-[#1a1a1a] px-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/15 focus:border-white/22 flex items-center justify-between"
+  const authCardClass = "rounded-xl border border-white/10 bg-[#1f1f1f] p-4 space-y-3"
+  const authPrimaryBtnClass =
+    "w-full h-12 rounded-lg font-semibold text-white bg-gradient-to-r from-[#ee3536] to-[#c42a2a] hover:opacity-95 shadow-md shadow-black/20 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
   const canSubmitLogin = loginForm.identifier.trim().length > 0 && loginForm.password.trim().length >= 6
+  const selectedAuthCountry =
+    AUTH_COUNTRY_OPTIONS.find((o) => o.iso === createAccountForm.countryIso) ?? AUTH_COUNTRY_OPTIONS[0]
   const isCreateAccountStepValid = Object.values(createAccountErrors).every((value) => value === '')
+
+  const updateAuthCountryMenuRect = useCallback(() => {
+    const el = authCountryTriggerRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    setAuthCountryMenuRect({ top: r.bottom + 4, left: r.left, width: Math.max(r.width, 200) })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!authCountryMenuOpen) {
+      setAuthCountryMenuRect(null)
+      return
+    }
+    updateAuthCountryMenuRect()
+    window.addEventListener('resize', updateAuthCountryMenuRect)
+    return () => window.removeEventListener('resize', updateAuthCountryMenuRect)
+  }, [authCountryMenuOpen, updateAuthCountryMenuRect])
+
+  useEffect(() => {
+    if (!authCountryMenuOpen) return
+    const onPointerDown = (e: PointerEvent) => {
+      const t = e.target as Node
+      if (authCountryTriggerRef.current?.contains(t)) return
+      if (authCountryListRef.current?.contains(t)) return
+      setAuthCountryMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [authCountryMenuOpen])
+
+  useEffect(() => {
+    if (!authCountryMenuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAuthCountryMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [authCountryMenuOpen])
+
+  useEffect(() => {
+    if (!accountDrawerOpen || accountDrawerView !== 'createAccount') {
+      setAuthCountryMenuOpen(false)
+    }
+  }, [accountDrawerOpen, accountDrawerView])
+
+  /** Reset drawer tab after close so reopen defaults to account — delayed to match Vaul exit so we don’t flash white (auth → account theme) mid-animation. */
+  useEffect(() => {
+    if (accountDrawerOpen) return
+    const id = window.setTimeout(() => setAccountDrawerView('account'), 320)
+    return () => clearTimeout(id)
+  }, [accountDrawerOpen])
 
   // Mutual exclusion helpers — only one drawer open at a time
   const openAccountDrawer = useCallback(() => {
@@ -1396,6 +1476,41 @@ function HomePageContent() {
     setDepositDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
   }, [trackClick])
+
+  const handleLoginWithPasskey = useCallback(async () => {
+    const finish = () => {
+      setIsUserLoggedIn(true)
+      setAccountDrawerOpen(false)
+      setAccountDrawerView('account')
+    }
+    if (
+      typeof window !== 'undefined' &&
+      typeof PublicKeyCredential !== 'undefined' &&
+      typeof navigator.credentials?.get === 'function'
+    ) {
+      try {
+        const challenge = new Uint8Array(32)
+        crypto.getRandomValues(challenge)
+        const rpId = window.location.hostname.replace(/^www\./, '')
+        const credential = await navigator.credentials.get({
+          publicKey: {
+            challenge,
+            rpId,
+            timeout: 60_000,
+            userVerification: 'preferred',
+            allowCredentials: [],
+          },
+        })
+        if (credential) {
+          finish()
+          return
+        }
+      } catch {
+        // User dismissed, no passkey, or invalid session — prototype still completes sign-in
+      }
+    }
+    finish()
+  }, [])
 
   // Panel exclusivity: when chat opens, close all drawers + collapse sidebar
   useEffect(() => {
@@ -3835,9 +3950,7 @@ function HomePageContent() {
           open={accountDrawerOpen} 
           onOpenChange={(open) => {
             setAccountDrawerOpen(open)
-            if (!open) {
-              setAccountDrawerView('account')
-            } else {
+            if (open) {
               setVipDrawerOpen(false)
               setDepositDrawerOpen(false)
             }
@@ -3848,8 +3961,10 @@ function HomePageContent() {
           <DrawerContent 
             showOverlay={isMobile}
             className={cn(
-              "w-full sm:max-w-md bg-white text-gray-900 flex flex-col",
-              "border-l border-gray-200",
+              "w-full sm:max-w-md flex flex-col",
+              isAuthDrawerView
+                ? "bg-[#262626] text-white border-l border-white/10"
+                : "bg-white text-gray-900 border-l border-gray-200",
               isMobile && "rounded-t-[10px]"
             )}
             style={isMobile ? {
@@ -3860,11 +3975,11 @@ function HomePageContent() {
             } : undefined}
           >
             {isMobile && <DrawerHandle />}
-            <DrawerHeader className={cn("flex-shrink-0", isMobile ? "px-4 pt-4 pb-3" : "px-4 pt-4 pb-3")}>
-              <div className="flex items-center justify-between gap-3">
-                {accountDrawerView === 'notifications' ? (
-                  <div className="flex items-center gap-3 flex-1">
-                    <Button 
+            <DrawerHeader className={cn("flex-shrink-0", isMobile ? "px-4 pt-4 pb-2" : "px-4 pt-5 pb-3")}>
+              {accountDrawerView === 'notifications' ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Button
                       variant="ghost"
                       onClick={() => setAccountDrawerView('account')}
                       className="h-8 w-8 p-0 hover:bg-gray-100 -ml-2"
@@ -3873,70 +3988,129 @@ function HomePageContent() {
                     </Button>
                     <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
                   </div>
-                ) : accountDrawerView === 'createAccount' || accountDrawerView === 'createAccountConfirmation' || accountDrawerView === 'login' ? (
-                  <div className="flex items-center gap-3 flex-1">
-                    {accountDrawerView === 'createAccount' || accountDrawerView === 'login' ? (
-                      <Button
-                        variant="ghost"
-                        onClick={() => setAccountDrawerView('account')}
-                        className="h-8 w-8 p-0 hover:bg-gray-100 -ml-2"
-                      >
-                        <IconChevronLeft className="h-5 w-5 text-gray-600" />
-                      </Button>
-                    ) : (
-                      <div className="w-6" />
+                  <div className="flex items-center gap-2">
+                    {!isMobile && (
+                      <DrawerClose asChild>
+                        <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200">
+                          <IconX className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </DrawerClose>
                     )}
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      {accountDrawerView === 'createAccount' ? 'Create Account' : accountDrawerView === 'login' ? 'Log In' : 'Confirm Your Email'}
-                    </h2>
                   </div>
-                ) : isUserLoggedIn ? (
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="h-10 w-10 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-semibold">
-                        CH
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium text-gray-900 text-left">CH</div>
-                      <div className="text-xs text-gray-500 text-left">b1767721</div>
+                </div>
+              ) : accountDrawerView === 'createAccount' || accountDrawerView === 'login' ? (
+                <div className="w-full space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <h2 className="text-lg font-bold leading-tight text-white">
+                        {accountDrawerView === 'createAccount' ? 'Create account' : 'Log in'}
+                      </h2>
+                      <p className="mt-1 text-xs leading-relaxed text-white/50">
+                        {accountDrawerView === 'createAccount'
+                          ? 'Join BetOnline in seconds and unlock welcome bonuses.'
+                          : 'Welcome back — sign in to pick up where you left off.'}
+                      </p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="h-10 w-10 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-semibold">
-                        G
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium text-gray-900 text-left">Guest</div>
-                      <div className="text-xs text-gray-500 text-left">Not signed in</div>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  {accountDrawerView !== 'account' || !isUserLoggedIn ? null : (
-                    <button 
-                      onClick={() => setAccountDrawerView('notifications')}
-                      className={cn(
-                        "h-8 w-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
-                        "bg-gray-100 hover:bg-gray-200 relative"
-                      )}
-                    >
-                      <IconBell className="h-4 w-4 text-gray-600" />
-                      <div className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 border-2 border-white" />
-                    </button>
-                  )}
-                  {!isMobile && (
                     <DrawerClose asChild>
-                      <button className="h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors flex-shrink-0">
-                        <IconX className="h-4 w-4 text-gray-600" />
+                      <button
+                        type="button"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+                        aria-label="Close"
+                      >
+                        <IconX className="h-4 w-4" />
                       </button>
                     </DrawerClose>
-                  )}
+                  </div>
+                  <div className="flex rounded-full bg-black/35 p-0.5 ring-1 ring-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setAccountDrawerView('createAccount')}
+                      className={cn(
+                        'flex-1 rounded-full py-2 text-center text-xs font-semibold transition-colors',
+                        accountDrawerView === 'createAccount'
+                          ? 'bg-white/15 text-white shadow-sm'
+                          : 'text-white/45 hover:text-white/70'
+                      )}
+                    >
+                      Create account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAccountDrawerView('login')}
+                      className={cn(
+                        'flex-1 rounded-full py-2 text-center text-xs font-semibold transition-colors',
+                        accountDrawerView === 'login'
+                          ? 'bg-white/15 text-white shadow-sm'
+                          : 'text-white/45 hover:text-white/70'
+                      )}
+                    >
+                      Login
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : accountDrawerView === 'createAccountConfirmation' ? (
+                <div className="flex w-full items-center justify-between gap-2">
+                  <h2 className="text-lg font-bold text-white">Confirm your email</h2>
+                  <DrawerClose asChild>
+                    <button
+                      type="button"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition-colors hover:bg-white/10"
+                      aria-label="Close"
+                    >
+                      <IconX className="h-4 w-4" />
+                    </button>
+                  </DrawerClose>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  {isUserLoggedIn ? (
+                    <div className="flex flex-1 items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-gray-200">
+                        <AvatarFallback className="flex items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
+                          CH
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <div className="text-left text-sm font-medium text-gray-900">CH</div>
+                        <div className="text-left text-xs text-gray-500">b1767721</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-1 items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-gray-200">
+                        <AvatarFallback className="flex items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
+                          G
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <div className="text-left text-sm font-medium text-gray-900">Guest</div>
+                        <div className="text-left text-xs text-gray-500">Not signed in</div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    {accountDrawerView === 'account' && isUserLoggedIn ? (
+                      <button
+                        onClick={() => setAccountDrawerView('notifications')}
+                        className={cn(
+                          'relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors',
+                          'bg-gray-100 hover:bg-gray-200'
+                        )}
+                      >
+                        <IconBell className="h-4 w-4 text-gray-600" />
+                        <div className="absolute right-0 top-0 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+                      </button>
+                    ) : null}
+                    {!isMobile && (
+                      <DrawerClose asChild>
+                        <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200">
+                          <IconX className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </DrawerClose>
+                    )}
+                  </div>
+                </div>
+              )}
             </DrawerHeader>
             
             <div
@@ -4104,16 +4278,16 @@ function HomePageContent() {
                         <Button
                           variant="ghost"
                           onClick={() => setAccountDrawerView('login')}
-                          className="h-10 rounded-small border border-gray-300 bg-white !text-gray-900 hover:bg-gray-100 hover:!text-gray-900"
+                          className="h-10 rounded-lg border border-gray-300 bg-white !text-gray-900 hover:bg-gray-100 hover:!text-gray-900"
                         >
                           Login
                         </Button>
                         <Button
                           variant="ghost"
                           onClick={() => setAccountDrawerView('createAccount')}
-                          className="h-10 rounded-small border border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-500 hover:border-emerald-500"
+                          className="h-10 rounded-lg border-0 bg-gradient-to-r from-[#ee3536] to-[#c42a2a] text-white shadow-sm hover:opacity-95"
                         >
-                          Create Account
+                          Create account
                         </Button>
                       </div>
 
@@ -4154,348 +4328,391 @@ function HomePageContent() {
                 </>
               ) : accountDrawerView === 'login' ? (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-700">Email or Account Number</label>
+                  <div className={authCardClass}>
+                    <input
+                      value={loginForm.identifier}
+                      onChange={(e) => setLoginForm((prev) => ({ ...prev, identifier: e.target.value }))}
+                      placeholder="Email or account number"
+                      autoComplete="username"
+                      className={authFieldClass}
+                      aria-label="Email or account number"
+                    />
+                    <div className="relative">
                       <input
-                        value={loginForm.identifier}
-                        onChange={(e) => setLoginForm((prev) => ({ ...prev, identifier: e.target.value }))}
-                        placeholder="Email or Account Number"
-                        className={createAccountInputClass}
+                        type={loginPasswordVisible ? 'text' : 'password'}
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                        placeholder="Password"
+                        autoComplete="current-password"
+                        className={`${authFieldClass} pr-10`}
+                        aria-label="Password"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setLoginPasswordVisible((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                        aria-label={loginPasswordVisible ? 'Hide password' : 'Show password'}
+                      >
+                        {loginPasswordVisible ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                      </button>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-gray-700">Password</label>
-                        <button type="button" className="text-xs font-semibold text-gray-600 hover:text-gray-900">Forgot Password?</button>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type={loginPasswordVisible ? 'text' : 'password'}
-                          value={loginForm.password}
-                          onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                          placeholder="Password"
-                          className={`${createAccountInputClass} pr-10`}
+                    <div className="flex items-center justify-between pt-0.5">
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <Checkbox
+                          checked={loginForm.keepLoggedIn}
+                          onCheckedChange={(checked) => setLoginForm((prev) => ({ ...prev, keepLoggedIn: checked === true }))}
+                          className="h-5 w-5 rounded-[4px] border-white/25 bg-[#1a1a1a] data-[state=checked]:border-[#ee3536] data-[state=checked]:bg-[#ee3536]"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setLoginPasswordVisible((prev) => !prev)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          aria-label={loginPasswordVisible ? 'Hide password' : 'Show password'}
-                        >
-                          {loginPasswordVisible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
-                        </button>
-                      </div>
+                        <span className="text-sm text-white/70">Keep me logged in</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button type="button" className="text-white/40 hover:text-white/65">
+                              <IconInfoCircle className="h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            align="center"
+                            side="top"
+                            className="w-[300px] border border-white/10 bg-[#2a2a2a] p-4 text-white/90 shadow-xl"
+                          >
+                            <p className="text-sm leading-relaxed">
+                              Choosing <span className="font-semibold text-white">&quot;Keep me logged in&quot;</span> reduces how often you&apos;re asked to sign in on this device.
+                            </p>
+                            <p className="mt-3 text-sm leading-relaxed text-white/75">
+                              Use this only on personal devices, not shared or public ones.
+                            </p>
+                          </PopoverContent>
+                        </Popover>
+                      </label>
+                      <button type="button" className="text-xs font-semibold text-[#ee3536] hover:text-[#ff5a5a]">
+                        Forgot password?
+                      </button>
                     </div>
-                    <label className="flex items-center gap-2 pt-1 cursor-pointer">
-                      <Checkbox
-                        checked={loginForm.keepLoggedIn}
-                        onCheckedChange={(checked) => setLoginForm((prev) => ({ ...prev, keepLoggedIn: checked === true }))}
-                        className="h-5 w-5 rounded-[4px] border-gray-300 bg-white data-[state=checked]:bg-[#ee3536] data-[state=checked]:border-[#ee3536]"
-                      />
-                      <span className="text-sm text-gray-700">Keep me logged in</span>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button type="button" className="text-gray-500 hover:text-gray-700">
-                            <IconInfoCircle className="h-4 w-4" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent align="center" side="top" className="w-[320px] bg-white border border-gray-300 text-gray-700 p-4 shadow-xl">
-                          <p className="text-sm leading-relaxed">
-                            Choosing <span className="font-semibold">"Keep me logged in"</span> reduces the number of times you&apos;re asked to Log-In on this device.
-                          </p>
-                          <p className="text-sm leading-relaxed mt-3">
-                            To keep your account secure, use this option only on your personal devices (do not use on shared or public devices).
-                          </p>
-                        </PopoverContent>
-                      </Popover>
-                    </label>
                   </div>
 
-                  {isMobile && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full h-11 rounded-small border border-gray-300 bg-white text-gray-900 hover:bg-gray-100"
-                      onClick={() => {
-                        setLoginForm((prev) => ({ ...prev, identifier: 'face-id@betonline.com', password: '******' }))
-                        setIsUserLoggedIn(true)
-                        setAccountDrawerOpen(false)
-                        setAccountDrawerView('account')
-                      }}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <IconFingerprint className="h-4 w-4" />
-                        <span>Use Biometrics</span>
-                      </span>
-                    </Button>
-                  )}
-
-                  <Button
+                  <button
                     type="button"
                     disabled={!canSubmitLogin}
-                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white disabled:bg-gray-300 disabled:text-gray-500"
+                    className={authPrimaryBtnClass}
                     onClick={() => {
                       setIsUserLoggedIn(true)
                       setAccountDrawerOpen(false)
                       setAccountDrawerView('account')
                     }}
                   >
-                    Log In
-                  </Button>
+                    Log in
+                  </button>
+
+                  <div className="relative py-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10" />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-[#262626] px-3 text-[11px] font-medium uppercase tracking-wide text-white/40">
+                        Or
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/12 bg-[#1a1a1a] text-sm font-medium text-white/90 hover:bg-white/5"
+                    onClick={() => void handleLoginWithPasskey()}
+                  >
+                    <IconKey className="h-4 w-4" aria-hidden />
+                    Sign in with passkey
+                  </button>
 
                   <div className="text-center">
                     <button
                       type="button"
-                      className="text-xs font-medium text-gray-700 hover:text-gray-900"
+                      className="text-xs font-medium text-white/55 hover:text-white/80"
                       onClick={() => setAccountDrawerView('createAccount')}
                     >
-                      Don&apos;t have an account yet? <span className="text-[#ee3536] font-semibold">Sign Up!</span>
+                      Don&apos;t have an account?{' '}
+                      <span className="font-semibold text-[#ee3536]">Create one</span>
                     </button>
                   </div>
                 </div>
               ) : accountDrawerView === 'createAccount' ? (
                 <div className="space-y-4">
-                  <div className="overflow-hidden rounded-xl">
-                    <Image
-                      src="/banners/casino/casino_banner1.svg"
-                      alt="Signup offer banner"
-                      width={1200}
-                      height={360}
-                      className="w-full h-auto"
-                      sizes="(max-width: 768px) 100vw, 600px"
+                  <div className={authCardClass}>
+                    <input
+                      type="email"
+                      value={createAccountForm.email}
+                      onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, email: e.target.value }))}
+                      placeholder="Email address"
+                      autoComplete="email"
+                      className={authFieldClass}
+                      aria-label="Email address"
                     />
-                  </div>
-                  <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-700">Full Name *</label>
+                    {createAccountTouched && createAccountErrors.email && (
+                      <p className="text-xs text-[#ee3536]">{createAccountErrors.email}</p>
+                    )}
+                    <input
+                      value={createAccountForm.fullName}
+                      onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                      placeholder="Username"
+                      autoComplete="username"
+                      className={authFieldClass}
+                      aria-label="Username"
+                    />
+                    {createAccountTouched && createAccountErrors.fullName && (
+                      <p className="text-xs text-[#ee3536]">{createAccountErrors.fullName}</p>
+                    )}
+                    <div className="relative">
                       <input
-                        value={createAccountForm.fullName}
-                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                        placeholder="Your full name"
-                        className={createAccountInputClass}
+                        type={createAccountPasswordVisible ? 'text' : 'password'}
+                        value={createAccountForm.password}
+                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, password: e.target.value }))}
+                        placeholder="Create password"
+                        autoComplete="new-password"
+                        className={`${authFieldClass} pr-10`}
+                        aria-label="Create password"
                       />
-                      {createAccountTouched && createAccountErrors.fullName && (
-                        <p className="text-xs text-[#ee3536]">{createAccountErrors.fullName}</p>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setCreateAccountPasswordVisible((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                        aria-label={createAccountPasswordVisible ? 'Hide password' : 'Show password'}
+                      >
+                        {createAccountPasswordVisible ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                      </button>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-700">Email *</label>
+                    {createAccountTouched && createAccountErrors.password && (
+                      <p className="text-xs text-[#ee3536]">{createAccountErrors.password}</p>
+                    )}
+                    <ReferralCodeField
+                      value={referralCode}
+                      onChange={setReferralCode}
+                      expanded={referralExpanded}
+                      onToggle={() => setReferralExpanded((v) => !v)}
+                      inputClassName={authFieldClass}
+                    />
+                    <div className="grid grid-cols-[auto_1fr] gap-2">
+                      <button
+                        ref={authCountryTriggerRef}
+                        type="button"
+                        onClick={() => {
+                          setAuthCountryMenuOpen((o) => !o)
+                        }}
+                        aria-expanded={authCountryMenuOpen}
+                        aria-haspopup="listbox"
+                        title={selectedAuthCountry.label}
+                        className={cn(
+                          authSelectTriggerClass,
+                          'h-11 min-w-[3.25rem] shrink-0 gap-2 px-3',
+                        )}
+                        aria-label={`Dial code ${selectedAuthCountry.dial}, ${selectedAuthCountry.label}`}
+                      >
+                        <span className="text-sm font-semibold tabular-nums text-white">
+                          {selectedAuthCountry.dial}
+                        </span>
+                        <IconChevronDown
+                          className={cn(
+                            'h-4 w-4 shrink-0 text-white/45 transition-transform',
+                            authCountryMenuOpen && 'rotate-180',
+                          )}
+                        />
+                      </button>
+                      {authCountryMenuOpen && authCountryMenuRect && typeof document !== 'undefined'
+                        ? createPortal(
+                            <div
+                              ref={authCountryListRef}
+                              role="listbox"
+                              aria-label="Select country"
+                              className="fixed z-[100000] overflow-hidden rounded-lg border border-white/10 bg-[#2a2a2a] py-1 shadow-xl ring-1 ring-black/40"
+                              style={{
+                                top: authCountryMenuRect.top,
+                                left: authCountryMenuRect.left,
+                                minWidth: authCountryMenuRect.width,
+                              }}
+                            >
+                              {AUTH_COUNTRY_OPTIONS.map((opt) => (
+                                <button
+                                  key={opt.iso}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={createAccountForm.countryIso === opt.iso}
+                                  className={cn(
+                                    'flex w-full px-3 py-2.5 text-left text-sm text-white hover:bg-white/10',
+                                    createAccountForm.countryIso === opt.iso && 'bg-white/5',
+                                  )}
+                                  onClick={() => {
+                                    setCreateAccountForm((prev) => ({ ...prev, countryIso: opt.iso }))
+                                    setAuthCountryMenuOpen(false)
+                                  }}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>,
+                            document.body,
+                          )
+                        : null}
                       <input
-                        type="email"
-                        value={createAccountForm.email}
-                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, email: e.target.value }))}
-                        placeholder="Email"
-                        className={createAccountInputClass}
+                        type="tel"
+                        value={createAccountForm.phone}
+                        onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, phone: e.target.value }))}
+                        placeholder="Mobile number"
+                        autoComplete="tel"
+                        className={authFieldClass}
+                        aria-label="Mobile number"
                       />
-                      {createAccountTouched && createAccountErrors.email && (
-                        <p className="text-xs text-[#ee3536]">{createAccountErrors.email}</p>
-                      )}
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-700">Password *</label>
+                    {createAccountTouched && createAccountErrors.phone && (
+                      <p className="text-xs text-[#ee3536]">{createAccountErrors.phone}</p>
+                    )}
+                    <div className="grid grid-cols-3 gap-2">
                       <div className="relative">
-                        <input
-                          type={createAccountPasswordVisible ? 'text' : 'password'}
-                          value={createAccountForm.password}
-                          onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, password: e.target.value }))}
-                          placeholder="Password"
-                          className={`${createAccountInputClass} pr-10`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setCreateAccountPasswordVisible((prev) => !prev)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          aria-label={createAccountPasswordVisible ? 'Hide password' : 'Show password'}
-                        >
-                          {createAccountPasswordVisible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      {createAccountTouched && createAccountErrors.password && (
-                        <p className="text-xs text-[#ee3536]">{createAccountErrors.password}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-700">Phone Number *</label>
-                      <div className="grid grid-cols-[120px_1fr] gap-2 mt-1">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button type="button" className={`${createAccountSelectClass} flex items-center justify-between`}>
-                              <span className="flex items-center gap-2">
-                                <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200">
-                                  {createAccountForm.countryCode === '+1' ? '🇺🇸' : createAccountForm.countryCode === '+44' ? '🇬🇧' : createAccountForm.countryCode === '+34' ? '🇪🇸' : '🇦🇺'}
-                                </span>
-                                <span>
-                                  {createAccountForm.countryCode === '+1' ? 'US +1' : createAccountForm.countryCode === '+44' ? 'UK +44' : createAccountForm.countryCode === '+34' ? 'ES +34' : 'AU +61'}
-                                </span>
-                              </span>
-                              <IconChevronDown className="h-4 w-4 text-gray-600" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="w-[150px] bg-white border border-gray-200">
-                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+1' }))} className="text-gray-900 hover:bg-gray-100">
-                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇺🇸</span>
-                              US +1
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+44' }))} className="text-gray-900 hover:bg-gray-100">
-                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇬🇧</span>
-                              UK +44
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+34' }))} className="text-gray-900 hover:bg-gray-100">
-                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇪🇸</span>
-                              ES +34
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCreateAccountForm((prev) => ({ ...prev, countryCode: '+61' }))} className="text-gray-900 hover:bg-gray-100">
-                              <span className="inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-white text-xs ring-1 ring-gray-200 mr-2">🇦🇺</span>
-                              AU +61
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <input
-                          type="tel"
-                          value={createAccountForm.phone}
-                          onChange={(e) => setCreateAccountForm((prev) => ({ ...prev, phone: e.target.value }))}
-                          placeholder="Phone Number"
-                          className={createAccountInputClass}
-                        />
-                      </div>
-                      {createAccountTouched && createAccountErrors.phone && (
-                        <p className="text-xs text-[#ee3536] mt-1">{createAccountErrors.phone}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-700">Date of Birth *</label>
-                      <div className="grid grid-cols-3 gap-2 mt-1">
-                        <input
-                          ref={dobDayRef}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={2}
+                        <select
                           value={createAccountDob.day}
-                          onChange={(e) => {
-                            const next = e.target.value.replace(/\D/g, '').slice(0, 2)
-                            setCreateAccountDob((prev) => ({ ...prev, day: next }))
-                            if (next.length === 2) dobMonthRef.current?.focus()
-                          }}
-                          placeholder="DD"
-                          className={createAccountInputClass}
-                        />
-                        <input
-                          ref={dobMonthRef}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={2}
-                          value={createAccountDob.month}
-                          onChange={(e) => {
-                            const next = e.target.value.replace(/\D/g, '').slice(0, 2)
-                            setCreateAccountDob((prev) => ({ ...prev, month: next }))
-                            if (next.length === 2) dobYearRef.current?.focus()
-                          }}
-                          placeholder="MM"
-                          className={createAccountInputClass}
-                        />
-                        <input
-                          ref={dobYearRef}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={4}
-                          value={createAccountDob.year}
-                          onChange={(e) => {
-                            const next = e.target.value.replace(/\D/g, '').slice(0, 4)
-                            setCreateAccountDob((prev) => ({ ...prev, year: next }))
-                          }}
-                          placeholder="YYYY"
-                          className={createAccountInputClass}
-                        />
+                          onChange={(e) => setCreateAccountDob((prev) => ({ ...prev, day: e.target.value }))}
+                          className={`${authFieldClass} appearance-none pr-8 text-white/80`}
+                          aria-label="Day of birth"
+                        >
+                          <option value="">DD</option>
+                          {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </select>
+                        <IconChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                       </div>
-                      {createAccountTouched && createAccountErrors.dob && (
-                        <p className="text-xs text-[#ee3536] mt-1">{createAccountErrors.dob}</p>
-                      )}
+                      <div className="relative">
+                        <select
+                          value={createAccountDob.month}
+                          onChange={(e) => setCreateAccountDob((prev) => ({ ...prev, month: e.target.value }))}
+                          className={`${authFieldClass} appearance-none pr-8 text-white/80`}
+                          aria-label="Month of birth"
+                        >
+                          <option value="">MM</option>
+                          {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((m) => (
+                            <option key={m} value={m}>
+                              {m}
+                            </option>
+                          ))}
+                        </select>
+                        <IconChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                      </div>
+                      <div className="relative">
+                        <select
+                          value={createAccountDob.year}
+                          onChange={(e) => setCreateAccountDob((prev) => ({ ...prev, year: e.target.value }))}
+                          className={`${authFieldClass} appearance-none pr-8 text-white/80`}
+                          aria-label="Year of birth"
+                        >
+                          <option value="">YYYY</option>
+                          {Array.from({ length: 100 }, (_, i) => currentYear - 18 - i).map((y) => (
+                            <option key={y} value={String(y)}>
+                              {y}
+                            </option>
+                          ))}
+                        </select>
+                        <IconChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                      </div>
                     </div>
+                    {createAccountTouched && createAccountErrors.dob && (
+                      <p className="text-xs text-[#ee3536]">{createAccountErrors.dob}</p>
+                    )}
                   </div>
 
-                  <Button
+                  <button
+                    type="button"
                     onClick={() => {
                       setCreateAccountTouched(true)
                       if (!isCreateAccountStepValid) return
                       setAccountDrawerView('createAccountConfirmation')
                     }}
                     disabled={!isCreateAccountStepValid}
-                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white disabled:bg-gray-300 disabled:text-gray-500"
+                    className={authPrimaryBtnClass}
                   >
-                    Continue
-                  </Button>
+                    Create account
+                  </button>
+
                   <div className="text-center">
                     <button
                       type="button"
-                      className="text-xs font-medium text-gray-600 hover:text-gray-900 underline underline-offset-2"
+                      className="text-xs font-medium text-white/55 hover:text-white/80"
                       onClick={() => setAccountDrawerView('login')}
                     >
-                      Already have an account? Log in
+                      Already have an account?{' '}
+                      <span className="font-semibold text-[#ee3536]">Log in</span>
                     </button>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="border-t border-white/10 pt-4">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center text-gray-600 gap-1.5">
-                          <IconShield className="text-green-600 w-3.5 h-3.5" />
-                          <span className="text-xs font-medium">SAFE &amp; SECURE</span>
+                      <div className="flex items-center gap-3 text-white/45">
+                        <div className="flex items-center gap-1.5">
+                          <IconShield className="h-3.5 w-3.5 text-emerald-400/90" />
+                          <span className="text-xs font-medium">Safe &amp; secure</span>
                         </div>
-                        <div className="w-px h-3.5 bg-gray-300" />
-                        <div className="flex items-center text-gray-600 gap-1.5">
-                          <IconLock className="text-blue-600 w-3.5 h-3.5" />
-                          <span className="text-xs font-medium">TRUSTED EXPERIENCE</span>
+                        <div className="h-3.5 w-px bg-white/15" />
+                        <div className="flex items-center gap-1.5">
+                          <IconLock className="h-3.5 w-3.5 text-[#ee3536]/80" />
+                          <span className="text-xs font-medium">Trusted</span>
                         </div>
                       </div>
-                      <p className="text-gray-500 text-center text-xs">
-                        Your details are encrypted and protected.
-                      </p>
+                      <p className="text-center text-xs text-white/35">Your details are encrypted and protected.</p>
                     </div>
                   </div>
                 </div>
               ) : accountDrawerView === 'createAccountConfirmation' ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-[#ee3536]" />
-                    <div className="flex-1 h-1.5 rounded-full bg-[#ee3536]" />
+                    <div className="h-1.5 flex-1 rounded-full bg-[#ee3536]" />
+                    <div className="h-1.5 flex-1 rounded-full bg-[#ee3536]" />
                   </div>
-                  <div className="text-xs text-gray-500">Step 2 of 2: Verify your email</div>
+                  <div className="text-xs text-white/45">Step 2 of 2: Verify your email</div>
 
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-4">
+                  <div className="rounded-xl border border-white/10 bg-[#1f1f1f] px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="h-5 w-5 rounded-full bg-[#059669] flex items-center justify-center">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600">
                         <IconCheck className="h-3.5 w-3.5 text-white" />
                       </span>
-                      <p className="text-sm font-semibold text-gray-900">Account created</p>
+                      <p className="text-sm font-semibold text-white">Account created</p>
                     </div>
-                    <p className="mt-1 text-sm text-gray-600">
-                      We sent an activation email to <span className="font-medium text-gray-900">{createAccountForm.email || 'your email'}</span>. Activate your account from that email to start betting.
+                    <p className="mt-2 text-sm leading-relaxed text-white/65">
+                      We sent an activation email to{' '}
+                      <span className="font-medium text-white">{createAccountForm.email || 'your email'}</span>. Open it to
+                      activate your account and start betting.
                     </p>
-                    <div className="mt-3 space-y-1">
-                      <label className="text-xs font-medium text-gray-700">Alias / Nickname (optional)</label>
+                    <div className="mt-4 space-y-1.5">
+                      <label className="text-xs font-medium text-white/50">Alias / nickname (optional)</label>
                       <input
                         value={createAccountAlias}
                         onChange={(e) => setCreateAccountAlias(e.target.value)}
                         placeholder="How should we display your name?"
-                        className={createAccountInputClass}
+                        className={authFieldClass}
                       />
                     </div>
                   </div>
 
-                  <Button
+                  <button
+                    type="button"
                     onClick={() => {
                       setAccountDrawerView('account')
                       setCreateAccountTouched(false)
                       setCreateAccountPasswordVisible(false)
                       setCreateAccountDob({ day: '', month: '', year: '' })
                       setCreateAccountAlias('')
-                      setCreateAccountForm({ fullName: '', email: '', password: '', countryCode: '+1', phone: '', dob: '' })
+                      setCreateAccountForm({
+                        fullName: '',
+                        email: '',
+                        password: '',
+                        countryIso: 'US',
+                        phone: '',
+                        dob: '',
+                      })
+                      setReferralCode('')
+                      setReferralExpanded(false)
                     }}
-                    className="w-full h-11 rounded-small bg-[#059669] hover:bg-[#10b981] text-white"
+                    className={authPrimaryBtnClass}
                   >
                     Done
-                  </Button>
+                  </button>
                 </div>
               ) : (
                 <>
