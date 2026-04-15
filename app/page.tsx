@@ -128,6 +128,7 @@ import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { NotificationHub } from '@/components/account/notification-hub'
+import { HomepageSportsbookCarousel } from '@/components/homepage-sportsbook-carousel'
 
 /** Sign-up country (USA / CAN share +1); `iso` is stored on the form. */
 const AUTH_COUNTRY_OPTIONS = [
@@ -2508,6 +2509,8 @@ function HomePageContent() {
             </Carousel>
           </div>
         )}
+
+        <HomepageSportsbookCarousel isMobile={isMobile} />
 
         {/* Top Sports Carousel */}
         <div className="mb-6">
