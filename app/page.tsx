@@ -2090,7 +2090,7 @@ function HomePageContent() {
               { label: 'Home', onClick: () => { setQuickLinksOpen(false); } },
               { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
               { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-              { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
+              { label: 'Games', onClick: () => { trackNav('casino', 'Games'); router.push('/casino'); setQuickLinksOpen(false); } },
               { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
               { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
               { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true'); setQuickLinksOpen(false); } },
@@ -2182,9 +2182,9 @@ function HomePageContent() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => { trackNav('casino', 'Casino'); router.push('/casino') }}
+                    onClick={() => { trackNav('casino', 'Games'); router.push('/casino') }}
                   >
-                    Casino
+                    Games
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

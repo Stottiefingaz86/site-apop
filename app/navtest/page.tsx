@@ -4056,7 +4056,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 { label: 'Home', page: 'home' as const },
                 { label: 'Sports', page: 'sports' as const },
                 { label: 'Live Betting', page: 'liveBetting' as const },
-                { label: 'Casino', page: 'casino' as const },
+                { label: 'Games', page: 'casino' as const },
                 { label: 'Live Casino', page: 'liveCasino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
@@ -7306,7 +7306,7 @@ function NavTestPageContent() {
                   { label: 'Home', onClick: () => { setShowSports(false); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
+                  { label: 'Games', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
                   { label: 'Live Casino', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { window.location.href = '/casino?poker=true'; setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); } },
@@ -7320,7 +7320,7 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors",
-                      (item.label === 'Casino' && !showSports && !showVipRewards) ||
+                      (item.label === 'Games' && !showSports && !showVipRewards) ||
                       (item.label === 'Sports' && showSports) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
                         ? "text-white"
@@ -7498,7 +7498,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Casino</span>
+                      <span className="relative z-10">Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
