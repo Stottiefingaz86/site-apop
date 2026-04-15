@@ -10419,6 +10419,8 @@ function NavTestPageContent() {
 {/* Deposit Button - Desktop only */}
             {!isMobile && (
               <Button
+                data-apop-feature-id="cmo0gy5qw0015dd0etheq96fg"
+                data-apop-element-id="main-nav-wallet"
                 variant="ghost"
                 onClick={(e) => {
                   e.preventDefault()
@@ -10435,7 +10437,7 @@ function NavTestPageContent() {
                 style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
               >
                 <IconWallet className="w-3.5 h-3.5 text-white" />
-                <span className="text-white">DEPOSIT</span>
+                <span className="text-white">WALLET</span>
               </Button>
             )}
 

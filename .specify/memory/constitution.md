@@ -1,50 +1,90 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: template -> 1.0.0
+- Modified principles:
+  - [PRINCIPLE_1_NAME] -> I. Next.js App Router + TypeScript First
+  - [PRINCIPLE_2_NAME] -> II. shadcn/ui + Tailwind Token Fidelity
+  - [PRINCIPLE_3_NAME] -> III. Component-First Extension
+  - [PRINCIPLE_4_NAME] -> IV. Journey Map Instrumentation (APOP)
+  - [PRINCIPLE_5_NAME] -> V. Quality Gates and Build Safety
+- Added sections:
+  - Technology Guardrails
+  - Delivery Workflow and Review Requirements
+- Removed sections:
+  - None
+- Templates requiring updates:
+  - ✅ /workspace/.specify/templates/plan-template.md (compatible with constitution gates model)
+  - ✅ /workspace/.specify/templates/spec-template.md (supports requirements and measurable outcomes)
+  - ✅ /workspace/.specify/templates/tasks-template.md (supports traceable, story-based execution)
+  - ⚠ pending /workspace/.specify/templates/commands/*.md (directory not present in this repository layout)
+- Deferred TODOs:
+  - None
+-->
+
+# Site APOP Product Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Next.js App Router + TypeScript First
+All production features MUST be implemented within the Next.js App Router codebase and
+typed with TypeScript. New work MUST align with existing route organization and shared
+project conventions before introducing novel structure.
+Rationale: consistent routing and typing reduce integration defects and speed reviews.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. shadcn/ui + Tailwind Token Fidelity
+UI implementation MUST use existing design tokens and primitives already shipped in
+`src/app/globals.css`, `tailwind.config.ts`, and `src/components/ui` (or equivalent
+project paths). Teams MUST avoid introducing a parallel visual system.
+Rationale: token fidelity preserves brand consistency and prevents style fragmentation.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Component-First Extension
+Before creating new UI blocks, contributors MUST search existing app and component
+directories for equivalent interaction patterns and extend those components through
+props/variants when feasible. One-off duplicate components are prohibited unless a
+documented constraint makes extension impossible.
+Rationale: extension-first design improves maintainability and visual parity.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Journey Map Instrumentation (APOP)
+Every newly created product block/component that appears in user journeys MUST include
+`data-apop-feature-id` on its root element and MUST emit impression/click telemetry
+through the tracking pipeline with route context.
+Rationale: roadmap performance requires comparable, real-time behavioral metrics.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Quality Gates and Build Safety
+Changes MUST pass linting, type checks, and production build validation before merge.
+When modifying navigation or high-visibility surfaces, acceptance must include both a
+primary path and an edge-condition validation scenario.
+Rationale: broad-surface regressions are high impact and must be prevented early.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology Guardrails
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Required stack: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui.
+- Data persistence, when needed, MUST use Supabase Postgres through Prisma ORM unless
+  an approved exception is recorded in the implementation plan.
+- New dependencies MUST be minimized and justified by a gap in the current stack.
+- Journey tracking events MUST use the shared endpoint contract:
+  `POST /api/tracking/events` with `{ events: [{ featureId, eventType, route?, elementId? }] }`.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Delivery Workflow and Review Requirements
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- All feature work MUST run through spec-driven phases: constitution alignment,
+  specification, planning, task generation, and implementation traceability artifacts.
+- Specs, plans, and tasks MUST be committed on the feature branch with implementation.
+- Reviews MUST verify component reuse search evidence for UI-pattern changes.
+- Navigation updates MUST validate wording clarity and parity across desktop/mobile nav
+  surfaces where the label appears.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the highest-priority engineering policy for this repository.
+Every pull request MUST include a constitution compliance check in its planning and
+review artifacts. Amendments require: (1) documented rationale, (2) updates to
+dependent templates/guidance when needed, and (3) semantic version updates:
+MAJOR for incompatible governance changes, MINOR for new/expanded principles, PATCH
+for clarifications and wording-only improvements.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Compliance reviews are mandatory during planning and before merge. Exceptions must be
+explicitly documented in the implementation plan with why the simpler compliant option
+was not viable.
+
+**Version**: 1.0.0 | **Ratified**: 2026-04-15 | **Last Amended**: 2026-04-15

@@ -6,6 +6,7 @@ import GlobalBetslip from '@/components/betslip/global-betslip'
 import { DesignCustomizer } from '@/components/design-customizer'
 import { PreventOverscroll } from '@/components/prevent-overscroll'
 import EsportsLinkFix from '@/components/navigation/esports-link-fix'
+import ApopFeatureTracker from '@/components/tracking/apop-feature-tracker'
 import './globals.css'
 
 const figtree = Figtree({
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body style={{ fontFamily: 'var(--font-figtree), sans-serif' }}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="theme">
           <EsportsLinkFix />
+          <ApopFeatureTracker />
           <PreventOverscroll />
           <GlobalChatWrapper>
             {children}

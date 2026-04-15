@@ -1,0 +1,13 @@
+- [x] T001 Create feature spec directory and seed spec/checklist artifacts in `specs/001-wallet-nav-label/`
+- [x] T002 Update constitution for Next.js/shadcn/component-first/journey tracking governance in `.specify/memory/constitution.md`
+- [x] T003 Generate implementation plan in `specs/001-wallet-nav-label/plan.md`
+- [x] T004 Author research decisions in `specs/001-wallet-nav-label/research.md`
+- [x] T005 Author data model in `specs/001-wallet-nav-label/data-model.md`
+- [x] T006 Document tracking contract in `specs/001-wallet-nav-label/contracts/tracking-events.md`
+- [x] T007 Write validation quickstart in `specs/001-wallet-nav-label/quickstart.md`
+- [x] T008 Implement APOP tracker component in `components/tracking/apop-feature-tracker.tsx`
+- [x] T009 Integrate tracker in app shell `app/layout.tsx`
+- [x] T010 Add APOP tracking API bridge route in `app/api/tracking/events/route.ts`
+- [x] T011 Update nav label copy and feature-id attributes in route pages under `app/**/page.tsx`
+- [x] T012 Align tracked wallet click label in route pages under `app/**/page.tsx`
+- [x] T013 Run production build validation with `npm run build`
