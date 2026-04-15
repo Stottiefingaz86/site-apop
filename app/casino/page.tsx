@@ -7988,7 +7988,7 @@ function NavTestPageContent() {
   }, [CASINO_FEATURE_TOUR_KEY])
 
   // ─── Product visibility (from Design Customizer brand toggles) ───
-  const ALL_ON: ProductToggles = { sports: true, liveBetting: true, casino: true, liveCasino: true, poker: true, vipRewards: true }
+  const ALL_ON: ProductToggles = { sports: true, casino: true, poker: true, vipRewards: true }
   const [visibleProducts, setVisibleProducts] = useState<ProductToggles>(ALL_ON)
 
   useEffect(() => {

@@ -5930,9 +5930,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               {[
                 { label: 'Home', page: 'home' },
                 { label: 'Sports', page: 'sports' },
-                { label: 'Live Betting', page: 'liveBetting' },
                 { label: 'Casino', page: 'casino' },
-                { label: 'Live Casino', page: 'liveCasino' },
                 { label: 'Poker', page: 'poker' },
                 { label: 'VIP Rewards', page: 'vipRewards' },
               ].map((item) => {
@@ -5946,12 +5944,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         router.push('/')
                       } else if (item.page === 'sports') {
                         // Already on sports
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (item.page === 'casino') {
                         router.push('/casino')
-                      } else if (item.page === 'liveCasino') {
-                        router.push('/casino?liveCasino=true')
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')
                       } else if (item.page === 'vipRewards') {
@@ -10102,9 +10096,7 @@ function NavTestPageContent() {
                 {[
                   { label: 'Home', onClick: () => { router.push('/'); setQuickLinksOpen(false); } },
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
@@ -10255,23 +10247,6 @@ function NavTestPageContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "data-[active=true]:bg-white/10 data-[active=true]:text-white",
-                        "text-white/70 active:bg-white/10 cursor-pointer"
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        window.location.href = '/live-betting'
-                      }}
-                    >
-                      Live Betting
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -10302,34 +10277,6 @@ function NavTestPageContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "text-white/70 cursor-pointer",
-                        !showSports && !showVipRewards && activeSubNav === 'Live' && "!text-white"
-                      )}
-                      style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                      data-active={!showSports && !showVipRewards && activeSubNav === 'Live'}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        router.push('/casino?tab=live')
-                      }}
-                    >
-                      {!showSports && !showVipRewards && activeSubNav === 'Live' && (
-                        <motion.div
-                          layoutId="sportsNavPill" layout="position"
-                          className="absolute inset-0 rounded-small"
-                          style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                        />
-                      )}
-                      <span className="relative z-10">Live Casino</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -11345,19 +11292,6 @@ function NavTestPageContent() {
                                         e.stopPropagation()
                                         setShowQuickLinksMenu(false)
                                         setOpenMobile(false)
-                                        window.location.href = '/live-betting'
-                                        setQuickLinksOpen(false)
-                                      }}
-                                    >
-                                      Live Betting
-                                    </button>
-                                    <button
-                                      className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
-                                      onClick={(e) => {
-                                        e.preventDefault()
-                                        e.stopPropagation()
-                                        setShowQuickLinksMenu(false)
-                                        setOpenMobile(false)
                                           setShowSports(false)
                                           setShowVipRewards(false)
                                           setActiveSubNav('For You')
@@ -11366,25 +11300,6 @@ function NavTestPageContent() {
                                       }}
                                     >
                                       Casino
-                                    </button>
-                                    <button
-                                      className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
-                                      onClick={(e) => {
-                                        e.preventDefault()
-                                        e.stopPropagation()
-                                        setShowQuickLinksMenu(false)
-                                        setOpenMobile(false)
-                                          setShowSports(false)
-                                          setShowVipRewards(false)
-                                          setActiveSubNav('Live')
-                                          setShowAllGames(false)
-                                          setSelectedCategory('')
-                                          setSelectedVendor('')
-                                          setQuickLinksOpen(false)
-                                          window.scrollTo(0, 0)
-                                      }}
-                                    >
-                                      Live Casino
                                     </button>
                                     <button
                                       className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"

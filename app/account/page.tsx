@@ -2880,7 +2880,7 @@ function AccountPageContent() {
   }, [])
 
   // ─── Product visibility (from Design Customizer brand toggles) ───
-  const ALL_ON: ProductToggles = { sports: true, liveBetting: true, casino: true, liveCasino: true, poker: true, vipRewards: true }
+  const ALL_ON: ProductToggles = { sports: true, casino: true, poker: true, vipRewards: true }
   const [visibleProducts, setVisibleProducts] = useState<ProductToggles>(ALL_ON)
 
   useEffect(() => {
@@ -3015,9 +3015,7 @@ function AccountPageContent() {
             {[
               { label: 'Home', onClick: () => { trackNav('home', 'Home'); router.push('/') } },
               ...(visibleProducts.sports ? [{ label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football') } }] : []),
-              ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' } }] : []),
               ...(visibleProducts.casino ? [{ label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino') } }] : []),
-              ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino') } }] : []),
               ...(visibleProducts.poker ? [{ label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true') } }] : []),
               ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') } }] : []),
             ].map((item) => (
@@ -3134,20 +3132,6 @@ function AccountPageContent() {
                 </SidebarMenuItem>
                 )}
 
-                {visibleProducts.liveBetting && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className={cn(
-                      "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
-                      "hover:bg-white/5 hover:text-white transition-colors",
-                      "text-white/70 active:bg-white/10 cursor-pointer"
-                    )}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' }}
-                  >
-                    Live Betting
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                )}
 
                 {visibleProducts.casino && (
                 <SidebarMenuItem>
@@ -3165,21 +3149,6 @@ function AccountPageContent() {
                 </SidebarMenuItem>
                 )}
 
-                {visibleProducts.liveCasino && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className={cn(
-                      "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
-                      "hover:bg-white/5 hover:text-white transition-colors",
-                      "text-white/70 cursor-pointer"
-                    )}
-                    style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('casino', 'Live Casino'); router.push('/casino') }}
-                  >
-                    <span className="relative z-10">Live Casino</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                )}
 
                 {visibleProducts.poker && (
                 <SidebarMenuItem>
@@ -3475,9 +3444,7 @@ function AccountPageContent() {
                 {[
                   { label: 'Home', page: 'home' as const },
                   ...(visibleProducts.sports ? [{ label: 'Sports', page: 'sports' as const }] : []),
-                  ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', page: 'liveBetting' as const }] : []),
                   ...(visibleProducts.casino ? [{ label: 'Casino', page: 'casino' as const }] : []),
-                  ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', page: 'liveCasino' as const }] : []),
                   ...(visibleProducts.poker ? [{ label: 'Poker', page: 'poker' as const }] : []),
                   ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', page: 'vipRewards' as const }] : []),
                 ].map((item) => (
@@ -3488,11 +3455,9 @@ function AccountPageContent() {
                       setOpenMobile(false)
                       if (item.page === 'sports') {
                         router.push('/sports/football')
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (item.page === 'home') {
                         router.push('/')
-                      } else if (item.page === 'casino' || item.page === 'liveCasino') {
+                      } else if (item.page === 'casino') {
                         router.push('/casino')
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')
