@@ -7308,9 +7308,7 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
               {[
                 { label: 'Home', page: 'home' as const },
                 { label: 'Sports', page: 'sports' as const },
-                { label: 'Live Betting', page: 'liveBetting' as const },
                 { label: 'Casino', page: 'casino' as const },
-                { label: 'Live Casino', page: 'liveCasino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
               ].map((item) => {
@@ -7322,8 +7320,6 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
                       setOpenMobile(false)
                       if (item.page === 'sports') {
                         router.push('/sports/football')
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (onNavigate) {
                         onNavigate(item.page as any)
                       }
@@ -9010,9 +9006,7 @@ function NavTestPageContent() {
                 {[
                   { label: 'Home', product: null, onClick: () => { trackNav('home', 'Home'); trackPageView('home', 'Home'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setQuickLinksOpen(false); } },
                   { label: 'Sports', product: 'sports' as const, onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', product: 'liveBetting' as const, onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
                   { label: 'Casino', product: 'casino' as const, onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', product: 'liveCasino' as const, onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', product: 'poker' as const, onClick: () => { trackNav('poker', 'Poker'); setShowPoker(true); setShowSports(false); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', product: 'vipRewards' as const, onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setShowSports(false); setShowPoker(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', product: null, onClick: () => { setQuickLinksOpen(false); } },
@@ -9161,26 +9155,6 @@ function NavTestPageContent() {
                   </SidebarMenuItem>
                   )}
                   
-                  {visibleProducts.liveBetting && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "data-[active=true]:bg-white/10 data-[active=true]:text-white",
-                        "text-white/70 active:bg-white/10 cursor-pointer"
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        window.location.href = '/live-betting'
-                      }}
-                    >
-                      Live Betting
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  )}
-                  
                   {visibleProducts.casino && (
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -9215,45 +9189,6 @@ function NavTestPageContent() {
                         />
                       )}
                       <span className="relative z-10">Casino</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  )}
-                  
-                  {visibleProducts.liveCasino && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "text-white/70 cursor-pointer",
-                        !showSports && !showVipRewards && !showPoker && activeSubNav === 'Live' && "!text-white"
-                      )}
-                      style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                      data-active={!showSports && !showVipRewards && !showPoker && activeSubNav === 'Live'}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                          setShowSports(false)
-                          setShowVipRewards(false)
-                          setShowPoker(false)
-                          setActiveSubNav('Live')
-                          setShowAllGames(false)
-                          setSelectedCategory('')
-                          setSelectedVendor('')
-                          setSelectedVendor('')
-                          window.scrollTo(0, 0)
-                      }}
-                    >
-                      {!showSports && !showVipRewards && !showPoker && activeSubNav === 'Live' && (
-                        <motion.div
-                          layoutId="casinoNavPill" layout="position"
-                          className="absolute inset-0 rounded-small"
-                          style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                        />
-                      )}
-                      <span className="relative z-10">Live Casino</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   )}
@@ -10056,9 +9991,7 @@ function NavTestPageContent() {
                   {[
                     { label: 'Home', page: 'home' as const },
                     ...(visibleProducts.sports ? [{ label: 'Sports', page: 'sports' as const }] : []),
-                    ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', page: 'liveBetting' as const }] : []),
                     ...(visibleProducts.casino ? [{ label: 'Casino', page: 'casino' as const }] : []),
-                    ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', page: 'liveCasino' as const }] : []),
                     ...(visibleProducts.poker ? [{ label: 'Poker', page: 'poker' as const }] : []),
                     ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', page: 'vipRewards' as const }] : []),
                   ].map((item) => {
@@ -10070,8 +10003,6 @@ function NavTestPageContent() {
                           setOpenMobile(false)
                           if (item.page === 'sports') {
                             router.push('/sports/football')
-                          } else if (item.page === 'liveBetting') {
-                            window.location.href = '/live-betting'
                           } else if (item.page === 'home') {
                             setShowSports(false)
                             setShowVipRewards(false)
@@ -10082,15 +10013,6 @@ function NavTestPageContent() {
                             setShowVipRewards(false)
                             setShowPoker(false)
                             setActiveSubNav('For You')
-                            window.scrollTo(0, 0)
-                          } else if (item.page === 'liveCasino') {
-                            setShowSports(false)
-                            setShowVipRewards(false)
-                            setShowPoker(false)
-                            setActiveSubNav('Live')
-                            setShowAllGames(false)
-                            setSelectedCategory('')
-                            setSelectedVendor('')
                             window.scrollTo(0, 0)
                           } else if (item.page === 'poker') {
                             trackNav('poker', 'Poker')
