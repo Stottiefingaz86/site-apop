@@ -128,6 +128,7 @@ import ChatNavToggle from '@/components/chat/chat-nav-toggle'
 import DynamicIsland from '@/components/dynamic-island'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
 import { NotificationHub } from '@/components/account/notification-hub'
+import { SportsLeagueCarouselRail, type SportsLeagueRailItem } from '@/components/sports/sports-league-carousel-rail'
 
 /** Sign-up country (USA / CAN share +1); `iso` is stored on the form. */
 const AUTH_COUNTRY_OPTIONS = [
@@ -1996,6 +1997,22 @@ function HomePageContent() {
     return globalBets.some(bet => bet.eventId === eventId && bet.marketTitle === 'Moneyline' && bet.selection === selection)
   }, [globalBets])
 
+  const handleSportsLeagueClick = useCallback((league: SportsLeagueRailItem) => {
+    trackClick(`sports-league:${league.id}`, league.name, {
+      featureId: 'cmnja5p59000pddpqzzxhmxz4',
+      sport: league.sport,
+      href: league.href,
+    })
+    trackNav(league.href.replace(/^\//, ''), league.name)
+  }, [trackClick, trackNav])
+
+  const handleSportsLeagueImpression = useCallback(() => {
+    trackAction('sports-league-carousel-impression', 'Sports League Carousel Impression', {
+      featureId: 'cmnja5p59000pddpqzzxhmxz4',
+      rail: 'sports-league-carousel',
+    })
+  }, [trackAction])
+
   if (!mounted) {
   return (
       <div className="w-full bg-[#1a1a1a] text-white font-figtree overflow-x-hidden min-h-screen flex items-center justify-center">
@@ -2027,6 +2044,19 @@ function HomePageContent() {
       </svg>
     )
   }
+
+  const sportsLeagueItems: SportsLeagueRailItem[] = [
+    { id: 'nfl', name: 'NFL', sport: 'Football', icon: '/banners/sports_league/NFL.svg', href: '/sports/football/nfl', elementId: 'sports-league-nfl' },
+    { id: 'nba', name: 'NBA', sport: 'Basketball', icon: '/banners/sports_league/nba.svg', href: '/sports/basketball/nba', elementId: 'sports-league-nba' },
+    { id: 'mlb', name: 'MLB', sport: 'Baseball', icon: '/banners/sports_league/MLB.svg', href: '/sports/baseball/mlb', elementId: 'sports-league-mlb' },
+    { id: 'nhl', name: 'NHL', sport: 'Hockey', icon: '/banners/sports_league/NHL.svg', href: '/sports/hockey/nhl', elementId: 'sports-league-nhl' },
+    { id: 'premier-league', name: 'Premier League', sport: 'Soccer', icon: '/banners/sports_league/prem.svg', href: '/sports/soccer/premier-league', elementId: 'sports-league-premier-league' },
+    { id: 'la-liga', name: 'La Liga', sport: 'Soccer', icon: '/banners/sports_league/laliga.svg', href: '/sports/soccer/la-liga', elementId: 'sports-league-la-liga' },
+    { id: 'champions-league', name: 'Champions League', sport: 'Soccer', icon: '/banners/sports_league/champions.svg', href: '/sports/soccer/champions-league', elementId: 'sports-league-champions-league' },
+    { id: 'mls', name: 'MLS', sport: 'Soccer', icon: '/banners/sports_league/mls.svg', href: '/sports/soccer/mls', elementId: 'sports-league-mls' },
+    { id: 'atp-tour', name: 'ATP Tour', sport: 'Tennis', icon: '/banners/sports_league/ATP.svg', href: '/sports/tennis/atp', elementId: 'sports-league-atp-tour' },
+    { id: 'formula-1', name: 'Formula 1', sport: 'Auto Racing', icon: '/banners/sports_league/f1.svg', href: '/sports', elementId: 'sports-league-formula-1' },
+  ]
 
   // Top Sports data - Mix of Premier League, NFL, MLB, NHL
   const topEventsData = [
@@ -2508,6 +2538,16 @@ function HomePageContent() {
             </Carousel>
           </div>
         )}
+
+        {/* Top Sports Carousel */}
+        <SportsLeagueCarouselRail
+          title="Top Leagues"
+          items={sportsLeagueItems}
+          viewAllHref="/sports"
+          viewAllLabel="Sportsbook"
+          onLeagueClick={handleSportsLeagueClick}
+          onImpression={handleSportsLeagueImpression}
+        />
 
         {/* Top Sports Carousel */}
         <div className="mb-6">
