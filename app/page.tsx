@@ -13,6 +13,7 @@ import { useChatStore } from '@/lib/store/chatStore'
 import { useBetslipStore } from '@/lib/store/betslipStore'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTracking } from '@/hooks/use-tracking'
+import { useApopTracking } from '@/hooks/use-apop-tracking'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -1287,6 +1288,7 @@ function HomePageContent() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('home')
+  const { trackClick: trackApopClick } = useApopTracking('cmo0ioroz002idd0esox25314')
   
   // Global betslip store for adding bets from homepage Top Sports
   const globalBets = useBetslipStore((s) => s.bets)
@@ -2089,9 +2091,7 @@ function HomePageContent() {
             {[
               { label: 'Home', onClick: () => { setQuickLinksOpen(false); } },
               { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
-              { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
               { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
-              { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
               { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
               { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true'); setQuickLinksOpen(false); } },
               { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
@@ -2126,6 +2126,7 @@ function HomePageContent() {
       {/* Global Header - Same as casino page */}
       <motion.header 
         data-nav-header
+        data-apop-feature-id="cmo0ioroz002idd0esox25314"
         className={cn(
           "bg-[#2D2E2C] dark:bg-[#2D2E2C] border-b border-white/10 h-16 flex items-center justify-between z-[101] fixed left-0 right-0",
           isMobile ? "px-3" : "px-6",
@@ -2140,6 +2141,7 @@ function HomePageContent() {
           ease: "linear",
           duration: 0.3
         }}
+        onClick={() => trackApopClick('main-nav')}
         style={{ 
           pointerEvents: 'auto',
           top: isMobile ? (quickLinksOpen ? 40 : 0) : 0,
@@ -2173,26 +2175,10 @@ function HomePageContent() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => { trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' }}
-                  >
-                    Live Betting
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
                     className="h-10 min-w-[80px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
                     onClick={() => { trackNav('casino', 'Casino'); router.push('/casino') }}
                   >
                     Casino
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
-                    onClick={() => { trackNav('casino', 'Live Casino'); router.push('/casino?tab=live') }}
-                  >
-                    Live Casino
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

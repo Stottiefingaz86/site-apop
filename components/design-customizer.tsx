@@ -11,9 +11,7 @@ import { useRouter } from 'next/navigation'
 // ── Product definitions ───────────────────────────────────────────
 export const ALL_PRODUCTS = [
   { key: 'sports', label: 'Sports' },
-  { key: 'liveBetting', label: 'Live Betting' },
   { key: 'casino', label: 'Casino' },
-  { key: 'liveCasino', label: 'Live Casino' },
   { key: 'poker', label: 'Poker' },
   { key: 'vipRewards', label: 'VIP Rewards' },
 ] as const
@@ -46,9 +44,7 @@ export interface BrandTokens {
 
 const ALL_PRODUCTS_ON: ProductToggles = {
   sports: true,
-  liveBetting: true,
   casino: true,
-  liveCasino: true,
   poker: true,
   vipRewards: true,
 }
@@ -115,9 +111,7 @@ export const BRANDS: BrandTokens[] = [
     lockupSrc: '/brands/wildcasino_lockup.svg',
     products: {
       sports: false,
-      liveBetting: false,
       casino: true,
-      liveCasino: true,
       poker: false,
       vipRewards: true,
     },
@@ -140,9 +134,7 @@ export const BRANDS: BrandTokens[] = [
     lockupSrc: '/brands/superslot_lockup.svg',
     products: {
       sports: false,
-      liveBetting: false,
       casino: true,
-      liveCasino: true,
       poker: false,
       vipRewards: true,
     },
@@ -164,9 +156,7 @@ export const BRANDS: BrandTokens[] = [
     lockupSrc: '/brands/sportsbetting_lockup.svg',
     products: {
       sports: true,
-      liveBetting: true,
       casino: true,
-      liveCasino: true,
       poker: true,
       vipRewards: true,
     },
@@ -188,9 +178,7 @@ export const BRANDS: BrandTokens[] = [
     lockupSrc: '/brands/tiger_lockup.svg',
     products: {
       sports: true,
-      liveBetting: true,
       casino: true,
-      liveCasino: true,
       poker: true,
       vipRewards: false,
     },

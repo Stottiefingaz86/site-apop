@@ -5802,9 +5802,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               {[
                 { label: 'Home', page: 'home' as const },
                 { label: 'Sports', page: 'sports' as const },
-                { label: 'Live Betting', page: 'liveBetting' as const },
                 { label: 'Casino', page: 'casino' as const },
-                { label: 'Live Casino', page: 'liveCasino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
               ].map((item) => {
@@ -5818,12 +5816,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         router.push('/')
                       } else if (item.page === 'sports') {
                         // Already on sports
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (item.page === 'casino') {
                         router.push('/casino')
-                      } else if (item.page === 'liveCasino') {
-                        router.push('/casino?live=true')
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')
                       } else if (item.page === 'vipRewards') {
@@ -10760,9 +10754,7 @@ function NavTestPageContent() {
                   { label: 'Home', onClick: () => { trackNav('home', 'Home'); trackPageView('home', 'Home'); router.push('/'); setQuickLinksOpen(false); } },
                   { label: 'Sports', onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); setShowSports(true); setShowVipRewards(false); router.push('/sports/football'); setQuickLinksOpen(false); } },
                   { label: 'Esports', onClick: () => { trackNav('esports', 'Esports'); trackPageView('esports', 'Esports'); setShowSports(true); setShowVipRewards(false); router.push('/esports'); setQuickLinksOpen(false); } },
-                  { label: 'Live Betting', onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); trackPageView('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); trackPageView('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
@@ -10917,24 +10909,6 @@ function NavTestPageContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "data-[active=true]:bg-white/10 data-[active=true]:text-white",
-                        "text-white/70 active:bg-white/10 cursor-pointer"
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        trackNav('live-betting', 'Live Betting')
-                        window.location.href = '/live-betting'
-                      }}
-                    >
-                      Live Betting
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -10967,36 +10941,6 @@ function NavTestPageContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
-                        "hover:bg-white/5 hover:text-white transition-colors",
-                        "text-white/70 cursor-pointer",
-                        !showSports && !showVipRewards && activeSubNav === 'Live' && "!text-white"
-                      )}
-                      style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                      data-active={!showSports && !showVipRewards && activeSubNav === 'Live'}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        trackNav('casino', 'Live Casino')
-                        trackPageView('live-casino', 'Live Casino')
-                        router.push('/casino?tab=live')
-                      }}
-                    >
-                      {!showSports && !showVipRewards && activeSubNav === 'Live' && (
-                        <motion.div
-                          layoutId="sportsNavPill" layout="position"
-                          className="absolute inset-0 rounded-small"
-                          style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                        />
-                      )}
-                      <span className="relative z-10">Live Casino</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -12046,19 +11990,6 @@ function NavTestPageContent() {
                                         e.stopPropagation()
                                         setShowQuickLinksMenu(false)
                                         setOpenMobile(false)
-                                        window.location.href = '/live-betting'
-                                        setQuickLinksOpen(false)
-                                      }}
-                                    >
-                                      Live Betting
-                                    </button>
-                                    <button
-                                      className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
-                                      onClick={(e) => {
-                                        e.preventDefault()
-                                        e.stopPropagation()
-                                        setShowQuickLinksMenu(false)
-                                        setOpenMobile(false)
                                         setShowSports(false)
                                           setShowVipRewards(false)
                                           setActiveSubNav('For You')
@@ -12067,25 +11998,6 @@ function NavTestPageContent() {
                                       }}
                                     >
                                       Casino
-                                    </button>
-                                    <button
-                                      className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
-                                      onClick={(e) => {
-                                        e.preventDefault()
-                                        e.stopPropagation()
-                                        setShowQuickLinksMenu(false)
-                                        setOpenMobile(false)
-                                        setShowSports(false)
-                                          setShowVipRewards(false)
-                                          setActiveSubNav('Live')
-                                          setShowAllGames(false)
-                                          setSelectedCategory('')
-                                          setSelectedVendor('')
-                                          setQuickLinksOpen(false)
-                                          window.scrollTo(0, 0)
-                                      }}
-                                    >
-                                      Live Casino
                                     </button>
                                     <button
                                       className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"

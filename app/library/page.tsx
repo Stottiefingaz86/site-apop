@@ -451,9 +451,7 @@ function QuickLinksPreview() {
   const items = [
     { label: 'Home', isPrimary: true },
     { label: 'Sports' },
-    { label: 'Live Betting' },
     { label: 'Casino' },
-    { label: 'Live Casino' },
     { label: 'Poker' },
     { label: 'VIP Rewards' },
     { label: 'Other' },
@@ -579,9 +577,8 @@ function SportsSubNavPreview() {
 function MainNavPreview() {
   const [active, setActive] = useState('Casino')
   const [otherOpen, setOtherOpen] = useState(false)
-  const navItems = ['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
-  // Items that get the animated pill (layoutId shared)
-  const pillItems = ['Sports', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const navItems = ['Sports', 'Casino', 'Poker', 'VIP Rewards']
+  const pillItems = ['Sports', 'Casino', 'Poker', 'VIP Rewards']
   return (
     <div className="w-full rounded-lg overflow-hidden border border-white/10 relative">
       <div
@@ -780,7 +777,7 @@ function SidebarNavPreview() {
     { icon: IconBuilding, label: 'Banking' },
     { icon: IconLifebuoy, label: 'Need Help' },
   ]
-  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const quickLinks = ['Home', 'Sports', 'Casino', 'Poker', 'VIP Rewards']
   const otherLinks = ['Esports', 'Racebook', 'Contests', 'Virtuals']
 
   // Sidebar width
@@ -2626,7 +2623,7 @@ useEffect(() => {
   {
     id: 'main-nav-header',
     name: 'Main Navigation (Header)',
-    description: 'Global header bar used on casino, poker, sports, account. Left: sidebar toggle, divider, animated nav pills (Sports, Live Betting, Casino, Live Casino, Poker, VIP Rewards) with shared layoutId spring pill, "Other" dropdown. Right: VIP crown (gold), divider, avatar with red notification dot + balance (NumberFlow), DEPOSIT button with wallet icon, ChatNavToggle.',
+    description: 'Global header bar used on casino, poker, sports, account. Left: sidebar toggle, divider, animated nav pills (Sports, Casino, Poker, VIP Rewards) with shared layoutId spring pill, "Other" dropdown. Right: VIP crown (gold), divider, avatar with red notification dot + balance (NumberFlow), DEPOSIT button with wallet icon, ChatNavToggle.',
     category: 'components',
     tags: ['navigation', 'header', 'nav-pills', 'animated', 'framer-motion', 'spring', 'layoutId', 'balance', 'vip', 'chat', 'deposit', 'crown', 'wallet', 'dropdown'],
     filePath: 'app/sports/soccer/premier-league/page.tsx (inline in SportsPage)',
@@ -2663,7 +2660,7 @@ import { IconCrown, IconWallet, IconChevronDown } from '@tabler/icons-react'
           </div>
 
           {/* Nav pills — animated with shared layoutId */}
-          {['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards'].map(item => (
+          {['Sports', 'Casino', 'Poker', 'VIP Rewards'].map(item => (
             <SidebarMenuItem key={item}>
               <SidebarMenuButton
                 onClick={() => navigate(item)}
