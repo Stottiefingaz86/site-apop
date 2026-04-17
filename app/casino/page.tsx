@@ -4096,7 +4096,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               {[
                 { label: 'Home', page: 'home' },
                 { label: 'Sports', page: 'sports' },
-                { label: 'Casino', page: 'casino' },
+                { label: 'Games', page: 'casino' },
                 { label: 'Poker', page: 'poker' },
                 { label: 'VIP Rewards', page: 'vipRewards' },
               ].map((item) => {
@@ -7309,8 +7309,8 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
                 { label: 'Home', page: 'home' as const },
                 { label: 'Sports', page: 'sports' as const },
                 { label: 'Live Betting', page: 'liveBetting' as const },
-                { label: 'Casino', page: 'casino' as const },
-                { label: 'Live Casino', page: 'liveCasino' as const },
+                { label: 'Games', page: 'casino' as const },
+                { label: 'Live Games', page: 'liveCasino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
               ].map((item) => {
@@ -8954,7 +8954,7 @@ function NavTestPageContent() {
     { icon: IconVideo, label: 'Video Poker' },
     { icon: IconDots, label: 'Specialty Games' },
     { icon: IconCards, label: 'Table Games' },
-    { icon: IconBroadcast, label: 'Live Casino' },
+    { icon: IconBroadcast, label: 'Live Games' },
     { icon: IconTrophy, label: 'Tournaments' },
   ]
 
@@ -9011,8 +9011,8 @@ function NavTestPageContent() {
                   { label: 'Home', product: null, onClick: () => { trackNav('home', 'Home'); trackPageView('home', 'Home'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setQuickLinksOpen(false); } },
                   { label: 'Sports', product: 'sports' as const, onClick: () => { trackNav('sports', 'Sports'); trackPageView('sports', 'Sports'); router.push('/sports/football'); setQuickLinksOpen(false); } },
                   { label: 'Live Betting', product: 'liveBetting' as const, onClick: () => { trackNav('live-betting', 'Live Betting'); trackPageView('live-betting', 'Live Betting'); window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', product: 'casino' as const, onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', product: 'liveCasino' as const, onClick: () => { trackNav('casino', 'Live Casino'); trackPageView('live-casino', 'Live Casino'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
+                  { label: 'Games', product: 'casino' as const, onClick: () => { trackNav('casino', 'Games'); trackPageView('casino', 'Games'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
+                  { label: 'Live Games', product: 'liveCasino' as const, onClick: () => { trackNav('casino', 'Live Games'); trackPageView('live-casino', 'Live Games'); setShowSports(false); setShowVipRewards(false); setShowPoker(false); setActiveSubNav('Live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', product: 'poker' as const, onClick: () => { trackNav('poker', 'Poker'); setShowPoker(true); setShowSports(false); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', product: 'vipRewards' as const, onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setShowSports(false); setShowPoker(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', product: null, onClick: () => { setQuickLinksOpen(false); } },
@@ -9027,7 +9027,7 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
-                      (item.label === 'Casino' && !showSports && !showVipRewards && !showPoker) ||
+                      (item.label === 'Games' && !showSports && !showVipRewards && !showPoker) ||
                       (item.label === 'Sports' && showSports) ||
                       (item.label === 'Poker' && showPoker) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
@@ -9214,7 +9214,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Casino</span>
+                      <span className="relative z-10">Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   )}
@@ -9253,7 +9253,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Live Casino</span>
+                      <span className="relative z-10">Live Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   )}
@@ -10057,8 +10057,8 @@ function NavTestPageContent() {
                     { label: 'Home', page: 'home' as const },
                     ...(visibleProducts.sports ? [{ label: 'Sports', page: 'sports' as const }] : []),
                     ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', page: 'liveBetting' as const }] : []),
-                    ...(visibleProducts.casino ? [{ label: 'Casino', page: 'casino' as const }] : []),
-                    ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', page: 'liveCasino' as const }] : []),
+                    ...(visibleProducts.casino ? [{ label: 'Games', page: 'casino' as const }] : []),
+                    ...(visibleProducts.liveCasino ? [{ label: 'Live Games', page: 'liveCasino' as const }] : []),
                     ...(visibleProducts.poker ? [{ label: 'Poker', page: 'poker' as const }] : []),
                     ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', page: 'vipRewards' as const }] : []),
                   ].map((item) => {
@@ -10410,7 +10410,7 @@ function NavTestPageContent() {
                              (item.label === 'Specialty Games' && selectedCategory === 'Specialty') ||
                              (item.label === 'Table Games' && selectedCategory === 'Table Games') ||
                              (item.label === 'Popular Games' && selectedCategory === 'Popular') ||
-                             (item.label === 'Live Casino' && activeSubNav === 'Live' && !selectedCategory) ||
+                             (item.label === 'Live Games' && activeSubNav === 'Live' && !selectedCategory) ||
                              (item.label === 'Tournaments' && selectedCategory === 'Tournaments')
                         return (
                           <React.Fragment key={index}>
@@ -10477,7 +10477,7 @@ function NavTestPageContent() {
                                         setSelectedCategory('Table Games')
                                         setShowAllGames(true)
                                         setShowSports(false)
-                                      } else if (item.label === 'Live Casino') {
+                                      } else if (item.label === 'Live Games') {
                                         setActiveSubNav('Live')
                                         setShowAllGames(false)
                                         setSelectedCategory('')

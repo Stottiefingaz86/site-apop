@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils"
 
 const topNavItems = [
   { label: "Forum", href: "/community", icon: IconMessageCircle2 },
-  { label: "Casino", href: "/casino", icon: IconDice },
+  { label: "Games", href: "/casino", icon: IconDice },
   { label: "Sportsbook", href: "/sports/soccer/premier-league", icon: IconBallFootball },
   { label: "Blog", href: "/journey-map", icon: IconNews },
 ]

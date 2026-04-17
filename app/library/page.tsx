@@ -452,8 +452,8 @@ function QuickLinksPreview() {
     { label: 'Home', isPrimary: true },
     { label: 'Sports' },
     { label: 'Live Betting' },
-    { label: 'Casino' },
-    { label: 'Live Casino' },
+    { label: 'Games' },
+    { label: 'Live Games' },
     { label: 'Poker' },
     { label: 'VIP Rewards' },
     { label: 'Other' },
@@ -577,11 +577,11 @@ function SportsSubNavPreview() {
 
 // ── MainNavPreview (interactive header nav — exact match to casino/poker/sports) ─────────
 function MainNavPreview() {
-  const [active, setActive] = useState('Casino')
+  const [active, setActive] = useState('Games')
   const [otherOpen, setOtherOpen] = useState(false)
-  const navItems = ['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const navItems = ['Sports', 'Live Betting', 'Games', 'Live Games', 'Poker', 'VIP Rewards']
   // Items that get the animated pill (layoutId shared)
-  const pillItems = ['Sports', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const pillItems = ['Sports', 'Games', 'Live Games', 'Poker', 'VIP Rewards']
   return (
     <div className="w-full rounded-lg overflow-hidden border border-white/10 relative">
       <div
@@ -759,7 +759,7 @@ function SidebarNavPreview() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeItem, setActiveItem] = useState('My Favorites')
   const [mobileOtherOpen, setMobileOtherOpen] = useState(false)
-  const [activeQuickLink, setActiveQuickLink] = useState('Casino')
+  const [activeQuickLink, setActiveQuickLink] = useState('Games')
 
   // Casino sidebar items
   const casinoTop = [
@@ -773,14 +773,14 @@ function SidebarNavPreview() {
     { icon: IconLayoutGrid, label: 'Blackjack' },
     { icon: IconDeviceGamepad2, label: 'Video Poker' },
     { icon: IconFlame, label: 'Table Games' },
-    { icon: IconBolt, label: 'Live Casino' },
+    { icon: IconBolt, label: 'Live Games' },
   ]
   const bottomItems = [
     { icon: IconCrown, label: 'Loyalty Hub' },
     { icon: IconBuilding, label: 'Banking' },
     { icon: IconLifebuoy, label: 'Need Help' },
   ]
-  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards']
+  const quickLinks = ['Home', 'Sports', 'Live Betting', 'Games', 'Live Games', 'Poker', 'VIP Rewards']
   const otherLinks = ['Esports', 'Racebook', 'Contests', 'Virtuals']
 
   // Sidebar width
@@ -2577,7 +2577,7 @@ useEffect(() => {
       {[
         { label: 'Home', product: null },
         { label: 'Sports', product: 'sports' },
-        { label: 'Casino', product: 'casino' },
+        { label: 'Games', product: 'casino' },
         { label: 'Poker', product: 'poker' },
         { label: 'VIP Rewards', product: 'vipRewards' },
       ].filter(i => !i.product || visibleProducts[i.product]).map((item) => (
@@ -2663,7 +2663,7 @@ import { IconCrown, IconWallet, IconChevronDown } from '@tabler/icons-react'
           </div>
 
           {/* Nav pills — animated with shared layoutId */}
-          {['Sports', 'Live Betting', 'Casino', 'Live Casino', 'Poker', 'VIP Rewards'].map(item => (
+          {['Sports', 'Live Betting', 'Games', 'Live Games', 'Poker', 'VIP Rewards'].map(item => (
             <SidebarMenuItem key={item}>
               <SidebarMenuButton
                 onClick={() => navigate(item)}

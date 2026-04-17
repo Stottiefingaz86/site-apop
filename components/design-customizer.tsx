@@ -12,8 +12,8 @@ import { useRouter } from 'next/navigation'
 export const ALL_PRODUCTS = [
   { key: 'sports', label: 'Sports' },
   { key: 'liveBetting', label: 'Live Betting' },
-  { key: 'casino', label: 'Casino' },
-  { key: 'liveCasino', label: 'Live Casino' },
+  { key: 'casino', label: 'Games' },
+  { key: 'liveCasino', label: 'Live Games' },
   { key: 'poker', label: 'Poker' },
   { key: 'vipRewards', label: 'VIP Rewards' },
 ] as const
