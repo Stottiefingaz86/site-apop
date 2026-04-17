@@ -63,7 +63,7 @@ const CHANNELS: { key: ChannelKey; label: string }[] = [
 ]
 
 const CAMPAIGNS: { key: CampaignKey; label: string }[] = [
-  { key: "casino", label: "Casino" },
+  { key: "casino", label: "Games" },
   { key: "sports", label: "Sports" },
   { key: "poker", label: "Poker" },
   { key: "vip", label: "VIP" },

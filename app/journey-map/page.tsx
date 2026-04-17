@@ -52,13 +52,13 @@ import { useTrackingStore, type FlowSnapshot, type FlowEdge, type PageStat, type
 const PAGE_META: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   // ── Core pages ──
   home:             { color: '#6366f1', icon: IconHome,             label: 'Home' },
-  casino:           { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Casino' },
+  casino:           { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Games' },
   sports:           { color: '#22c55e', icon: IconBallFootball,     label: 'Sports' },
   account:          { color: '#06b6d4', icon: IconUser,             label: 'Account' },
   poker:            { color: '#f97316', icon: IconCards,             label: 'Poker' },
   'vip-rewards':    { color: '#fbbf24', icon: IconCrown,            label: 'VIP Rewards' },
   'live-betting':   { color: '#ef4444', icon: IconFlame,            label: 'Live Betting' },
-  'live-casino':    { color: '#ef4444', icon: IconFlame,            label: 'Live Casino' },
+  'live-casino':    { color: '#ef4444', icon: IconFlame,            label: 'Live Games' },
   deposit:          { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
   'deposit-drawer': { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
   'vip-hub':        { color: '#fbbf24', icon: IconCrown,            label: 'VIP Hub' },
@@ -73,7 +73,7 @@ const PAGE_META: Record<string, { color: string; icon: React.ElementType; label:
   'casino/megaways':    { color: '#a855f7', icon: IconBolt,              label: 'Megaways' },
   'casino/originals':   { color: '#a855f7', icon: IconStar,              label: 'Originals' },
   'casino/blackjack':   { color: '#a855f7', icon: IconPlayCard,          label: 'Blackjack' },
-  'casino/live':        { color: '#ef4444', icon: IconFlame,             label: 'Live Casino' },
+  'casino/live':        { color: '#ef4444', icon: IconFlame,             label: 'Live Games' },
   'casino/jackpots':    { color: '#fbbf24', icon: IconCrown,             label: 'Jackpots' },
   'casino/new':         { color: '#22c55e', icon: IconBolt,              label: 'New Games' },
   'casino/early':       { color: '#a855f7', icon: IconEye,               label: 'Early Access' },
@@ -1564,7 +1564,7 @@ interface SiteNode {
 
 const SITE_MAP: SiteNode[] = [
   { id: 'home', label: 'Home', color: '#6366f1', icon: IconHome, children: ['casino', 'sports', 'poker', 'vip-rewards', 'live-betting', 'account', 'deposit'], actions: ['View hero banners', 'Quick links nav', 'Featured content'] },
-  { id: 'casino', label: 'Casino', color: '#a855f7', icon: IconDeviceGamepad2, children: ['home', 'sports', 'poker', 'vip-rewards', 'account', 'deposit', 'game-launcher'], actions: ['Browse games', 'Filter by category', 'Filter by vendor', 'Favourite a game', 'Open game launcher'] },
+  { id: 'casino', label: 'Games', color: '#a855f7', icon: IconDeviceGamepad2, children: ['home', 'sports', 'poker', 'vip-rewards', 'account', 'deposit', 'game-launcher'], actions: ['Browse games', 'Filter by category', 'Filter by vendor', 'Favourite a game', 'Open game launcher'] },
   { id: 'game-launcher', label: 'Game Launcher', color: '#c084fc', icon: IconPlayerPlay, children: ['casino'], actions: ['Play game', 'Fullscreen', 'Favourite', 'Back to casino'] },
   { id: 'sports', label: 'Sports', color: '#22c55e', icon: IconBallFootball, children: ['home', 'casino', 'poker', 'vip-rewards', 'account', 'deposit', 'my-bets'], actions: ['Browse events', 'Select odds', 'Place bet', 'View live scores', 'Change sport/league'] },
   { id: 'my-bets', label: 'My Bets', color: '#4ade80', icon: IconTicket, children: ['sports', 'account'], actions: ['View pending bets', 'Cash out', 'Share to chat'] },
@@ -2195,7 +2195,7 @@ const DESIGNED_JOURNEYS: DesignedJourney[] = [
     icon: IconDeviceGamepad2,
     steps: [
       { page: 'home', action: 'Land on Home', detail: 'User arrives at the home page' },
-      { page: 'home', action: 'Click Casino', detail: 'Taps "Casino" in the main navigation' },
+      { page: 'home', action: 'Click Games', detail: 'Taps "Games" in the main navigation' },
       { page: 'casino', action: 'Browse Games', detail: 'Scrolls through game tiles, uses filters' },
       { page: 'casino', action: 'Select a Game', detail: 'Clicks on a game tile to open the launcher' },
       { page: 'casino', action: 'Play Game', detail: 'Game loads in the full-screen launcher' },

@@ -5931,8 +5931,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 { label: 'Home', page: 'home' },
                 { label: 'Sports', page: 'sports' },
                 { label: 'Live Betting', page: 'liveBetting' },
-                { label: 'Casino', page: 'casino' },
-                { label: 'Live Casino', page: 'liveCasino' },
+                { label: 'Games', page: 'casino' },
+                { label: 'Live Games', page: 'liveCasino' },
                 { label: 'Poker', page: 'poker' },
                 { label: 'VIP Rewards', page: 'vipRewards' },
               ].map((item) => {
@@ -10050,7 +10050,7 @@ function NavTestPageContent() {
     { icon: IconVideo, label: 'Video Poker' },
     { icon: IconDots, label: 'Specialty Games' },
     { icon: IconCards, label: 'Table Games' },
-    { icon: IconBroadcast, label: 'Live Casino' },
+    { icon: IconBroadcast, label: 'Live Games' },
     { icon: IconTrophy, label: 'Tournaments' },
     { icon: IconCrown, label: 'Loyalty Hub' },
     { icon: IconBuilding, label: 'Banking' },
@@ -10103,8 +10103,8 @@ function NavTestPageContent() {
                   { label: 'Home', onClick: () => { router.push('/'); setQuickLinksOpen(false); } },
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Live Betting', onClick: () => { window.location.href = '/live-betting'; setQuickLinksOpen(false); } },
-                  { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
-                  { label: 'Live Casino', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
+                  { label: 'Games', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
+                  { label: 'Live Games', onClick: () => { router.push('/casino?tab=live'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
@@ -10119,7 +10119,7 @@ function NavTestPageContent() {
                     }}
                     className={cn(
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
-                      (item.label === 'Casino' && !showSports && !showVipRewards) ||
+                      (item.label === 'Games' && !showSports && !showVipRewards) ||
                       (item.label === 'Sports' && showSports) ||
                       (item.label === 'VIP Rewards' && showVipRewards)
                         ? "text-white"
@@ -10298,7 +10298,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Casino</span>
+                      <span className="relative z-10">Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -10327,7 +10327,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">Live Casino</span>
+                      <span className="relative z-10">Live Games</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -11276,7 +11276,7 @@ function NavTestPageContent() {
                                       setShowQuickLinksMenu(true)
                                     }}
                                   >
-                                    <span>Casino</span>
+                                    <span>Games</span>
                                     <IconChevronRight className="h-5 w-5" />
                                   </button>
                                 </div>
@@ -11365,7 +11365,7 @@ function NavTestPageContent() {
                                           window.scrollTo(0, 0)
                                       }}
                                     >
-                                      Casino
+                                      Games
                                     </button>
                                     <button
                                       className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
@@ -11384,7 +11384,7 @@ function NavTestPageContent() {
                                           window.scrollTo(0, 0)
                                       }}
                                     >
-                                      Live Casino
+                                      Live Games
                                     </button>
                                     <button
                                       className="w-full flex items-center justify-start px-3 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors text-sm"
@@ -11500,7 +11500,7 @@ function NavTestPageContent() {
                              (item.label === 'Table Games' && selectedCategory === 'Table Games') ||
                              (item.label === 'My Favorites' && selectedCategory === 'Favorites') ||
                              (item.label === 'Popular Games' && selectedCategory === 'Popular') ||
-                             (item.label === 'Live Casino' && activeSubNav === 'Live' && !selectedCategory)
+                             (item.label === 'Live Games' && activeSubNav === 'Live' && !selectedCategory)
                         return (
                           <React.Fragment key={index}>
                             {showSeparatorAbove && (
@@ -11571,7 +11571,7 @@ function NavTestPageContent() {
                                         setSelectedCategory('Table Games')
                                         setShowAllGames(true)
                                         setShowSports(false)
-                                      } else if (item.label === 'Live Casino') {
+                                      } else if (item.label === 'Live Games') {
                                         setActiveSubNav('Live')
                                         setShowAllGames(false)
                                         setSelectedCategory('')
