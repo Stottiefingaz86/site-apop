@@ -5,6 +5,7 @@ import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 import { RewardCrates } from '@/components/vip/reward-crates'
+import { SidebarPromos } from '@/components/sidebar-promos'
 import { DottedGlowBackground } from '@/components/ui/dotted-glow-background'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } from 'react'
@@ -1773,7 +1774,7 @@ const statusFilterFn: FilterFn<BonusItem> = (row, columnId, filterValue: string[
 // Cash Races Page Component
 function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipActiveTab, setVipActiveSidebarItem, previousPageState, setPreviousPageState, setActiveSubNav }: { brandPrimary: string; setVipDrawerOpen?: (open: boolean) => void; setShowVipRewards?: (show: boolean) => void; setVipActiveTab?: (tab: string) => void; setVipActiveSidebarItem?: (item: string) => void; previousPageState?: { showSports: boolean; showVipRewards: boolean; activeSubNav?: string } | null; setPreviousPageState?: (state: { showSports: boolean; showVipRewards: boolean; activeSubNav?: string } | null) => void; setActiveSubNav?: (nav: string) => void }) {
   const isMobile = useIsMobile()
-  const [activeRaceTab, setActiveRaceTab] = useState<'Daily Cash Race' | 'Sprint'>('Daily Cash Race')
+  const [activeRaceTab, setActiveRaceTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily')
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -1803,40 +1804,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
   
   return (
     <SidebarInset className="bg-[#1a1a1a] text-white">
-      {/* Banner Carousel - Full Width with Arrows */}
-      <div className="pt-6 md:pt-8 mb-6 md:mb-8">
-          <Carousel className="w-full relative overflow-visible" opts={{ dragFree: true, containScroll: 'trimSnaps', duration: 15 }}>
-          {!isMobile && (
-            <>
-              <CarouselPrevious className="!left-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
-              <CarouselNext className="!right-2 !-translate-x-0 h-8 w-8 rounded-full bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/20 hover:bg-[#1a1a1a] hover:border-white/30 text-white z-20" />
-            </>
-          )}
-          <CarouselContent className="ml-4 md:ml-6 -mr-2 md:-mr-4">
-            {[
-              { src: '/banners/casino/casino_banner1.svg', alt: 'Casino Banner 1' },
-              { src: '/banners/casino/casino_banner2.svg', alt: 'Casino Banner 2' },
-              { src: '/banners/casino/casino_banner 3.svg', alt: 'Casino Banner 3' },
-              { src: '/banners/casino/casino_banner4.svg', alt: 'Casino Banner 4' },
-              { src: '/banners/casino/casino_Banner5.svg', alt: 'Casino Banner 5' },
-            ].map((banner, index) => (
-              <CarouselItem key={index} className={`${index === 0 ? 'pl-0' : 'pl-2 md:pl-4'} basis-auto flex-shrink-0`}>
-                <Card className="border-0 relative overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity rounded-small" style={{ width: '340px', height: '164px' }}>
-                <Image
-                    src={banner.src}
-                    alt={banner.alt}
-                    width={340}
-                    height={164}
-                    className="object-cover w-full h-full"
-                  unoptimized
-                  />
-                </Card>
-              </CarouselItem>
-            ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-      <div className="px-4 md:px-6 pb-8 max-w-7xl mx-auto w-full">
+      <div className="px-4 md:px-6 pt-6 md:pt-8 pb-8 max-w-7xl mx-auto w-full">
         {/* Cash Races Title with Back Button */}
         <div className="flex items-center gap-4 mb-6">
           {previousPageState && (
@@ -1877,9 +1845,9 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
         
         {/* Sub Nav Tabs */}
         <div className="mb-6">
-          <AnimateTabs value={activeRaceTab} onValueChange={(value) => setActiveRaceTab(value as 'Daily Cash Race' | 'Sprint')} className="w-full">
+          <AnimateTabs value={activeRaceTab} onValueChange={(value) => setActiveRaceTab(value as 'Daily' | 'Weekly' | 'Monthly')} className="w-full">
             <AnimateTabsList className="bg-white/5 dark:bg-white/5 bg-gray-100/80 dark:bg-white/5 p-0.5 h-auto gap-1 rounded-3xl border-0 relative transition-colors duration-300">
-              {['Daily Cash Race', 'Sprint'].map((tab) => (
+              {['Daily', 'Weekly', 'Monthly'].map((tab) => (
                 <TabsTab
                   key={tab}
                   value={tab} 
@@ -1906,11 +1874,11 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
         </div>
         
         {/* Content based on active tab */}
-        {activeRaceTab === 'Sprint' ? (
+        {activeRaceTab !== 'Daily' ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-white mb-2">Coming Soon</h2>
-              <p className="text-white/70 text-sm">Sprint races will be available soon!</p>
+              <p className="text-white/70 text-sm">{activeRaceTab} races will be available soon!</p>
             </div>
           </div>
         ) : (
@@ -1936,7 +1904,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
                     />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">$15,000 Race</h1>
+                    <h1 className="text-2xl font-bold text-white mb-1">$25,000 Race</h1>
                     <p className="text-white/70 text-sm">Daily Races Every 24 Hours</p>
                   </div>
                 </div>
@@ -1944,7 +1912,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
                 {/* Description */}
                 <div className="text-white/70 text-sm mb-4 space-y-3">
                   <p>
-                    Feel the excitement at BetOnline, where $15,000 in cash is up for grabs every 24 hours!
+                    Feel the excitement at BetOnline, where $25,000 in cash is up for grabs every 24 hours!
                   </p>
                   <p>
                     Indulge in all your favorites across the Sportsbook, Casino, Casino in Poker, Racebook or Esports and with each bet, climb our Daily Race Leaderboard. Everyone qualifies, so kick off your journey and monitor your progress today. Once you start wagering, you're automatically enrolled in the race!
@@ -2044,7 +2012,7 @@ function CashRacesPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setV
               <li>Each Daily Cash Race will start and end at 12:00 am ET every 24 hours, 7 days a week</li>
               <li>Only bets in the Sportsbook, Casino, Casino in Poker, Racebook or Esports will qualify</li>
               <li>Any bets placed in Poker or Craps will not qualify</li>
-              <li>The $15,000 prize pool will be shared amongst the top 250 racers</li>
+              <li>The $25,000 prize pool will be shared amongst the top 250 racers</li>
               <li>Winning players will receive their cash prize after 12:00 am ET daily</li>
               <li>If there is a tie then the prize will be shared between the tied players</li>
               <li>All prizes are issued as cash with no rollover or further restrictions</li>
@@ -4128,45 +4096,6 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
 
         <SidebarContent className="overflow-y-auto flex flex-col">
           <TooltipProvider>
-            {/* Settings */}
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuButton
-                          className={cn(
-                            "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
-                            "text-white/70 hover:text-white hover:bg-white/5",
-                            sportsbookSettingsOpen && "bg-white/5 text-white"
-                          )}
-                          onClick={() => {
-                            if (isMobile) {
-                              setOpenMobile(false)
-                              setTimeout(() => setSportsbookSettingsOpen(true), 300)
-                            } else {
-                              setSportsbookSettingsOpen(true)
-                            }
-                          }}
-                        >
-                          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
-                            <IconSettings strokeWidth={1.5} className="w-4 h-4" />
-                          </div>
-                          <span>Settings</span>
-                        </SidebarMenuButton>
-                      </TooltipTrigger>
-                      {sidebarState === 'collapsed' && (
-                        <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
-                          <p>Settings</p>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
 
             <SidebarGroup>
               <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">FEATURES</SidebarGroupLabel>
@@ -4421,6 +4350,45 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
+
+          {/* Settings */}
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        className={cn(
+                          "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                          "text-white/70 hover:text-white hover:bg-white/5",
+                          sportsbookSettingsOpen && "bg-white/5 text-white"
+                        )}
+                        onClick={() => {
+                          if (isMobile) {
+                            setOpenMobile(false)
+                            setTimeout(() => setSportsbookSettingsOpen(true), 300)
+                          } else {
+                            setSportsbookSettingsOpen(true)
+                          }
+                        }}
+                      >
+                        <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
+                          <IconSettings strokeWidth={1.5} className="w-4 h-4" />
+                        </div>
+                        <span>Settings</span>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {sidebarState === 'collapsed' && (
+                      <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                        <p>Settings</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
           </TooltipProvider>
           {isMobile && <div className="flex-shrink-0 h-24" />}
         </SidebarContent>
@@ -7190,7 +7158,6 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
 
   // Bottom section (like casino sidebar)
   const pokerBottomItems = [
-    { icon: IconCrown, label: 'Loyalty Hub' },
     { icon: IconBuilding, label: 'Banking' },
     { icon: IconLifebuoy, label: 'Need Help' },
   ]
@@ -7397,8 +7364,12 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
           </AnimatePresence>
         )}
 
-        <SidebarContent className="overflow-y-auto flex flex-col">
+        <SidebarContent className="overflow-y-auto overflow-x-hidden flex flex-col">
           <TooltipProvider>
+            <SidebarPromos
+              collapsed={sidebarState === 'collapsed' && !isMobile}
+            />
+            <Separator className="bg-white/10 mx-2" />
             {/* Poker Menu section — square icon style like sports FEATURES */}
             <SidebarGroup className="mt-3">
               {isMobile && <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">POKER MENU</SidebarGroupLabel>}
@@ -8901,6 +8872,11 @@ function NavTestPageContent() {
     const vipParam = searchParams.get('vip')
     if (vipParam === 'true') {
       setShowVipRewards(true)
+      // Optional sidebar section to deep-link to (e.g. "Cash Races").
+      const sectionParam = searchParams.get('section')
+      if (sectionParam) {
+        setVipActiveSidebarItem(sectionParam)
+      }
     }
     
     // Check for poker query parameter to deep link to Poker
@@ -10175,10 +10151,15 @@ function NavTestPageContent() {
               </AnimatePresence>
             )}
 
-            <SidebarContent className="overflow-y-auto flex flex-col">
+            <SidebarContent className="overflow-y-auto overflow-x-hidden flex flex-col">
               <TooltipProvider>
                 {showVipRewards ? (
                   <>
+                    <SidebarPromos
+                      collapsed={sidebarState === 'collapsed' && !isMobile}
+                      onOpenHub={openVipDrawer}
+                    />
+                    <Separator className="bg-white/10 mx-2" />
                     {/* VIP Rewards sidebar items */}
                     <SidebarGroup>
                       <SidebarGroupContent>
@@ -10189,6 +10170,8 @@ function NavTestPageContent() {
                             { id: 'Promos', icon: IconSparkles, label: 'Promos' },
                             { id: 'Cash Races', icon: IconClock, label: 'Cash Races' },
                             { id: 'Contests', icon: IconTrophy, label: 'Contests' },
+                            { id: 'Challenges', icon: IconFlame, label: 'Challenges' },
+                            { id: 'Raffles', icon: IconTicket, label: 'Raffles' },
                             { id: 'Refer A Friend', icon: IconUserPlus, label: 'Refer A Friend' },
                             { type: 'separator' as const },
                             { id: 'Reward Crates', icon: IconConfetti, label: 'Reward Crates', linkTo: 'rewardcrates' },
@@ -10210,6 +10193,51 @@ function NavTestPageContent() {
                             const Icon = item.icon
                             const itemId = item.id
                             const isActive = vipActiveSidebarItem === itemId
+                            if (itemId === 'Get Telegram') {
+                              const isCollapsed = sidebarState === 'collapsed' && !isMobile
+                              return (
+                                <SidebarMenuItem key={itemId}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <a
+                                        href="https://t.me/betonline"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={cn(
+                                          "group flex items-center rounded-xl bg-gradient-to-r from-[#229ED9]/10 to-[#229ED9]/5 border border-[#229ED9]/20 hover:border-[#229ED9]/40 transition-all",
+                                          isCollapsed ? "justify-center w-9 h-9 mx-auto p-0" : "gap-3 px-2.5 py-2"
+                                        )}
+                                      >
+                                        <div className={cn(
+                                          "rounded-lg bg-[#229ED9]/20 flex items-center justify-center flex-shrink-0 group-hover:bg-[#229ED9]/30 transition-colors",
+                                          isCollapsed ? "w-7 h-7" : "w-9 h-9"
+                                        )}>
+                                          <IconBrandTelegram className={cn(isCollapsed ? "w-4 h-4" : "w-5 h-5", "text-[#229ED9]")} />
+                                        </div>
+                                        {!isCollapsed && (
+                                          <>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-semibold text-white leading-tight">Join our Telegram</p>
+                                              <p className="text-[11px] text-white/40 leading-snug truncate">Codes, promos & rewards</p>
+                                            </div>
+                                            <div className="flex-shrink-0">
+                                              <div className="px-2 py-1 rounded-md bg-[#229ED9] text-white text-[11px] font-semibold group-hover:bg-[#1a8bc2] transition-colors">
+                                                Join
+                                              </div>
+                                            </div>
+                                          </>
+                                        )}
+                                      </a>
+                                    </TooltipTrigger>
+                                    {isCollapsed && (
+                                      <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                                        <p>Join our Telegram</p>
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </SidebarMenuItem>
+                              )
+                            }
                             return (
                               <SidebarMenuItem key={itemId}>
                                 <Tooltip>
@@ -10315,6 +10343,14 @@ function NavTestPageContent() {
                   </>
                 ) : (
                   <>
+                {/* Promotions stack — TEST: dropped at the top of the casino
+                    sidebar to evaluate the live-promo pattern. Removable by
+                    deleting this block + the SidebarPromos import. */}
+                <SidebarPromos
+                  collapsed={sidebarState === 'collapsed' && !isMobile}
+                  onOpenHub={openVipDrawer}
+                />
+                <Separator className="bg-white/10 mx-2" />
                 {/* Featured top items — square icon style like poker */}
                 <SidebarGroup className="mt-3">
                   {isMobile && <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">CASINO MENU</SidebarGroupLabel>}
@@ -10537,11 +10573,15 @@ function NavTestPageContent() {
 
                 <Separator className="bg-white/10 mx-2" />
 
-                {/* Bottom section — Loyalty Hub, Banking, Need Help */}
+                {/* Bottom section — Banking + Need Help. Loyalty Hub now
+                    lives inside the Promotions card at the top of this
+                    sidebar, so it's filtered out here. */}
                 <SidebarGroup>
                   <SidebarGroupContent>
                     <SidebarMenu>
-                      {sidebarBottomItems.map((item, index) => {
+                      {sidebarBottomItems
+                        .filter((item) => item.label !== 'Loyalty Hub')
+                        .map((item, index) => {
                         const Icon = item.icon
                         return (
                           <SidebarMenuItem key={index}>
@@ -10552,9 +10592,7 @@ function NavTestPageContent() {
                                     e.preventDefault()
                                     e.stopPropagation()
                                     if (isMobile) setOpenMobile(false)
-                                    if (item.label === 'Loyalty Hub') {
-                                      openVipDrawer()
-                                    } else if (item.label === 'Banking') {
+                                    if (item.label === 'Banking') {
                                       openDepositDrawer()
                                     } else if (item.label === 'Need Help') {
                                       console.log('Need Help clicked')

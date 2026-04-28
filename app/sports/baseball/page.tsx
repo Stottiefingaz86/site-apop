@@ -5,6 +5,7 @@ import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 import { RewardCrates } from '@/components/vip/reward-crates'
+import { SidebarPromos } from '@/components/sidebar-promos'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
 import React from 'react'
@@ -5405,47 +5406,12 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
           </AnimatePresence>
         )}
 
-        <SidebarContent className="overflow-y-auto flex flex-col">
+        <SidebarContent className="overflow-y-auto overflow-x-hidden flex flex-col">
           <TooltipProvider>
-            {/* Settings */}
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuButton
-                          className={cn(
-                            "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
-                            "text-white/70 hover:text-white hover:bg-white/5",
-                            sportsbookSettingsOpen && "bg-white/5 text-white"
-                          )}
-                          onClick={() => {
-                            if (isMobile) {
-                              setOpenMobile(false)
-                              setTimeout(() => setSportsbookSettingsOpen(true), 300)
-                            } else {
-                              setSportsbookSettingsOpen(true)
-                            }
-                          }}
-                        >
-                          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
-                            <IconSettings strokeWidth={1.5} className="w-4 h-4" />
-                          </div>
-                          <span>Settings</span>
-                        </SidebarMenuButton>
-                      </TooltipTrigger>
-                      {sidebarState === 'collapsed' && (
-                        <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
-                          <p>Settings</p>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
+                <SidebarPromos
+                  collapsed={sidebarState === 'collapsed' && !isMobile}
+                />
+                <Separator className="bg-white/10 mx-2" />
 
             <SidebarGroup>
               <SidebarGroupLabel className="px-2 py-1 text-xs text-white/50">FEATURES</SidebarGroupLabel>
@@ -5763,6 +5729,45 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               </SidebarGroupContent>
             </SidebarGroup>
 
+
+          {/* Settings */}
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        className={cn(
+                          "w-full justify-start rounded-small h-auto py-2.5 px-3 text-sm font-medium cursor-pointer",
+                          "text-white/70 hover:text-white hover:bg-white/5",
+                          sportsbookSettingsOpen && "bg-white/5 text-white"
+                        )}
+                        onClick={() => {
+                          if (isMobile) {
+                            setOpenMobile(false)
+                            setTimeout(() => setSportsbookSettingsOpen(true), 300)
+                          } else {
+                            setSportsbookSettingsOpen(true)
+                          }
+                        }}
+                      >
+                        <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", sportsbookSettingsOpen ? "bg-white/20" : "bg-white/10")}>
+                          <IconSettings strokeWidth={1.5} className="w-4 h-4" />
+                        </div>
+                        <span>Settings</span>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {sidebarState === 'collapsed' && (
+                      <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                        <p>Settings</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
           </TooltipProvider>
         </SidebarContent>
       </Sidebar>
@@ -9947,7 +9952,6 @@ function NavTestPageContent() {
     { icon: IconCards, label: 'Table Games' },
     { icon: IconBroadcast, label: 'Live Casino' },
     { icon: IconTrophy, label: 'Tournaments' },
-    { icon: IconCrown, label: 'Loyalty Hub' },
     { icon: IconBuilding, label: 'Banking' },
     { icon: IconLifebuoy, label: 'Need Help' },
   ]
@@ -11139,8 +11143,13 @@ function NavTestPageContent() {
             variant="sidebar"
             className="!bg-[#2d2d2d] dark:!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] dark:[&>div]:!bg-[#2d2d2d]"
           >
-            <SidebarContent className="overflow-y-auto flex flex-col">
+            <SidebarContent className="overflow-y-auto overflow-x-hidden flex flex-col">
               <TooltipProvider>
+                <SidebarPromos
+                  collapsed={sidebarState === 'collapsed' && !isMobile}
+                  onOpenHub={openVipDrawer}
+                />
+                <Separator className="bg-white/10 mx-2" />
                 <SidebarGroup>
                   <SidebarGroupContent>
                     <SidebarMenu>
@@ -11520,8 +11529,13 @@ function NavTestPageContent() {
             variant="sidebar"
             className="!bg-[#2d2d2d] dark:!bg-[#2d2d2d] border-r border-white/10 text-white [&>div]:!bg-[#2d2d2d] dark:[&>div]:!bg-[#2d2d2d]"
           >
-            <SidebarContent className="overflow-y-auto flex flex-col">
+            <SidebarContent className="overflow-y-auto overflow-x-hidden flex flex-col">
               <TooltipProvider>
+                <SidebarPromos
+                  collapsed={sidebarState === 'collapsed' && !isMobile}
+                  onOpenHub={openVipDrawer}
+                />
+                <Separator className="bg-white/10 mx-2" />
                 <SidebarGroup>
                   <SidebarGroupContent>
                     <SidebarMenu>
@@ -11531,6 +11545,8 @@ function NavTestPageContent() {
                         { id: 'Promos', icon: IconSparkles, label: 'Promos' },
                         { id: 'Cash Races', icon: IconClock, label: 'Cash Races' },
                         { id: 'Contests', icon: IconTrophy, label: 'Contests' },
+                        { id: 'Challenges', icon: IconFlame, label: 'Challenges' },
+                        { id: 'Raffles', icon: IconTicket, label: 'Raffles' },
                         { id: 'Refer A Friend', icon: IconUserPlus, label: 'Refer A Friend' },
                         { type: 'separator' as const },
                         { id: 'Reward Crates', icon: IconConfetti, label: 'Reward Crates', linkTo: 'rewardcrates' },
@@ -11552,6 +11568,52 @@ function NavTestPageContent() {
                         const Icon = item.icon
                         const itemId = item.id
                         const isActive = vipActiveSidebarItem === itemId
+
+                        if (itemId === 'Get Telegram') {
+                          const isCollapsed = sidebarState === 'collapsed' && !isMobile
+                          return (
+                            <SidebarMenuItem key={itemId}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <a
+                                    href="https://t.me/betonline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={cn(
+                                      "group flex items-center rounded-xl bg-gradient-to-r from-[#229ED9]/10 to-[#229ED9]/5 border border-[#229ED9]/20 hover:border-[#229ED9]/40 transition-all",
+                                      isCollapsed ? "justify-center w-9 h-9 mx-auto p-0" : "gap-3 px-2.5 py-2"
+                                    )}
+                                  >
+                                    <div className={cn(
+                                      "rounded-lg bg-[#229ED9]/20 flex items-center justify-center flex-shrink-0 group-hover:bg-[#229ED9]/30 transition-colors",
+                                      isCollapsed ? "w-7 h-7" : "w-9 h-9"
+                                    )}>
+                                      <IconBrandTelegram className={cn(isCollapsed ? "w-4 h-4" : "w-5 h-5", "text-[#229ED9]")} />
+                                    </div>
+                                    {!isCollapsed && (
+                                      <>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-semibold text-white leading-tight">Join our Telegram</p>
+                                          <p className="text-[11px] text-white/40 leading-snug truncate">Codes, promos & rewards</p>
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                          <div className="px-2 py-1 rounded-md bg-[#229ED9] text-white text-[11px] font-semibold group-hover:bg-[#1a8bc2] transition-colors">
+                                            Join
+                                          </div>
+                                        </div>
+                                      </>
+                                    )}
+                                  </a>
+                                </TooltipTrigger>
+                                {isCollapsed && (
+                                  <TooltipContent side="right" className="bg-[#2d2d2d] border-white/10 text-white">
+                                    <p>Join our Telegram</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </SidebarMenuItem>
+                          )
+                        }
                         return (
                           <SidebarMenuItem key={itemId}>
                             <Tooltip>
@@ -11615,7 +11677,6 @@ function NavTestPageContent() {
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {[
-                        { icon: IconCrown, label: 'Loyalty Hub' },
                         { icon: IconBuilding, label: 'Banking' },
                         { icon: IconLifebuoy, label: 'Need Help' },
                       ].map((item, index) => {

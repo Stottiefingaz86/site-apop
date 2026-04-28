@@ -143,6 +143,7 @@ import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 import { RewardCrates } from '@/components/vip/reward-crates'
+import { SidebarPromos } from '@/components/sidebar-promos'
 import {
   Accordion,
   AccordionContent,
@@ -3663,7 +3664,6 @@ function AccountPageContent() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {[
-                      { icon: IconCrown, label: 'Loyalty Hub' },
                       { icon: IconBuilding, label: 'Banking' },
                       { icon: IconLifebuoy, label: 'Need Help' },
                     ].map((item, index) => {

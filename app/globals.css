@@ -1480,3 +1480,82 @@ button[data-active="true"][class*="SidebarMenuButton"],
 [data-vaul-no-drag] [data-sidebar="content"] {
   overflow: visible !important;
 }
+
+/* ───────────────────────────────────────────────────────── */
+/* ─── Global Sleek On-Brand Scrollbars ────────────────── */
+/* ───────────────────────────────────────────────────────── */
+
+/* Firefox — thin track, dark thumb */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) — pill-shaped thumb, no buttons */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ds-primary, #ee3536);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: var(--ds-primary, #ee3536);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Hide scrollbar buttons */
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Light-mode pages (page bg is light) — switch the resting thumb to a
+   dark translucent so it has contrast against light backgrounds */
+:root:not(.dark) *::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.18);
+}
+:root:not(.dark) {
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+
+/* Auto-hide scrollbar on body when not actively scrolling on supported
+   browsers — keeps the page edge clean. */
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Don't apply the thin-scrollbar rule to elements that explicitly opted
+   into hidden scrollbars (carousels, tab strips, etc.). */
+.scrollbar-hide,
+.scrollbar-hide * {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar,
+.scrollbar-hide *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
