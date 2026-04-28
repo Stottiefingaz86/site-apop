@@ -11,6 +11,7 @@ import {
   IconChevronDown,
   IconSparkles,
   IconCrown,
+  type Icon as TablerIcon,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 
@@ -30,7 +31,7 @@ interface PromoItem {
   id: string
   prize: string
   label: string
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
+  icon: TablerIcon
   tone: PromoTone
   /** Static badge (e.g. "4d", "18 active"). Ignored when `endsAt` is set. */
   badge?: string
