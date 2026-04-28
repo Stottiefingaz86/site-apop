@@ -142,6 +142,7 @@ import { StreakCounter } from '@/components/vip/streak-counter'
 import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
+import { RewardCrates } from '@/components/vip/reward-crates'
 import {
   Accordion,
   AccordionContent,
@@ -2248,7 +2249,7 @@ function VipDrawerContent({
     if (!vipDrawerOpen) return
     const container = vipTabsContainerRef.current
     if (!container) return
-    const tabs = ['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
     const activeIndex = tabs.indexOf(vipActiveTab)
     if (activeIndex === -1) return
     const tabButtons = container.querySelectorAll('button')
@@ -2332,7 +2333,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab) => (
+            {['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -2374,6 +2375,7 @@ function VipDrawerContent({
             <div>
               <StreakCounter />
             </div>
+
 
             {/* Telegram CTA */}
             <a
@@ -2623,6 +2625,13 @@ function VipDrawerContent({
             </div>
           </div>
         )}
+
+        {vipActiveTab === 'Reward Crates' && (
+          <div className="space-y-3">
+            <RewardCrates variant="compact" />
+          </div>
+        )}
+
 
         {vipActiveTab === 'Cash Boost' && (
           <div className="space-y-3">

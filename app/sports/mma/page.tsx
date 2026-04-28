@@ -4,6 +4,7 @@ import { StreakCounter } from '@/components/vip/streak-counter'
 import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
+import { RewardCrates } from '@/components/vip/reward-crates'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
 import React from 'react'
@@ -121,7 +122,7 @@ import {
   IconExternalLink,
   IconMaximize,
   IconShare
-, IconMessageCircle2, IconTrash, IconBrandTelegram, IconRefresh, IconParachute, IconTargetArrow} from '@tabler/icons-react'
+, IconMessageCircle2, IconTrash, IconBrandTelegram, IconRefresh, IconParachute, IconTargetArrow, IconConfetti} from '@tabler/icons-react'
 import { colorTokenMap } from '@/lib/agent/designSystem'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -7825,7 +7826,7 @@ function VipDrawerContent({
     const container = vipTabsContainerRef.current
     if (!container) return
 
-    const tabs = ['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
     const activeIndex = tabs.indexOf(vipActiveTab)
     
     if (activeIndex === -1) return
@@ -7929,7 +7930,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
+            {['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -7976,6 +7977,8 @@ function VipDrawerContent({
             <div>
               <StreakCounter />
             </div>
+
+
             {/* Telegram CTA */}
             <a
               href="https://t.me/betonline"
@@ -8362,6 +8365,13 @@ function VipDrawerContent({
             </div>
           </div>
         )}
+        
+        {vipActiveTab === 'Reward Crates' && (
+          <div className="space-y-3">
+            <RewardCrates variant="compact" />
+          </div>
+        )}
+
         
         {vipActiveTab === 'Cash Boost' && (
           <div className="space-y-3">
@@ -10626,7 +10636,8 @@ function NavTestPageContent() {
                         { id: 'Contests', icon: IconTrophy, label: 'Contests' },
                         { id: 'Refer A Friend', icon: IconUserPlus, label: 'Refer A Friend' },
                         { type: 'separator' as const },
-                        { id: 'Cash Boost', icon: IconBolt, label: 'Cash Boost', linkTo: 'cashboost' },
+                        { id: 'Reward Crates', icon: IconConfetti, label: 'Reward Crates', linkTo: 'rewardcrates' },
+                            { id: 'Cash Boost', icon: IconBolt, label: 'Cash Boost', linkTo: 'cashboost' },
                         { id: 'Reloads', icon: IconRefresh, label: 'Reloads', linkTo: 'reloads' },
                         { id: 'Cash Drop', icon: IconParachute, label: 'Cash Drop', linkTo: 'draw' },
                         { id: 'Bet & Get', icon: IconTargetArrow, label: 'Bet & Get', linkTo: 'draw' },
@@ -10654,7 +10665,10 @@ function NavTestPageContent() {
                                     e.preventDefault()
                                     e.stopPropagation()
                                     if (item.linkTo) {
-                                      if (item.linkTo === 'cashboost') {
+                                      if (item.linkTo === 'rewardcrates') {
+                                            setVipDrawerOpen(true)
+                                            setVipActiveTab('Reward Crates')
+                                          } else if (item.linkTo === 'cashboost') {
                                         setVipDrawerOpen(true)
                                         setVipActiveTab('Cash Boost')
                                       } else if (item.linkTo === 'reloads') {
