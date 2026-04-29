@@ -6,6 +6,7 @@ import GlobalBetslip from '@/components/betslip/global-betslip'
 import { DesignCustomizer } from '@/components/design-customizer'
 import { PreventOverscroll } from '@/components/prevent-overscroll'
 import EsportsLinkFix from '@/components/navigation/esports-link-fix'
+import { DailySpinTrigger } from '@/components/promotions/daily-spin-trigger'
 import './globals.css'
 
 const figtree = Figtree({
@@ -46,6 +47,7 @@ export default function RootLayout({
           </GlobalChatWrapper>
           <GlobalBetslip />
           <DesignCustomizer />
+          <DailySpinTrigger />
         </ThemeProvider>
       </body>
     </html>
