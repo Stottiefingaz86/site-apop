@@ -6,7 +6,7 @@ import GlobalBetslip from '@/components/betslip/global-betslip'
 import { DesignCustomizer } from '@/components/design-customizer'
 import { PreventOverscroll } from '@/components/prevent-overscroll'
 import EsportsLinkFix from '@/components/navigation/esports-link-fix'
-import { DailySpinTrigger } from '@/components/promotions/daily-spin-trigger'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const figtree = Figtree({
@@ -38,6 +38,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={figtree.variable} suppressHydrationWarning>
+      <head>
+        {/* Figma MCP capture script — only loads on dev to support the
+            "Export to Figma" flow. The script self-activates only when the
+            URL contains a `#figmacapture=...` hash, so it's a no-op during
+            normal dev work. Stripped from production builds. */}
+        {process.env.NODE_ENV === 'development' && (
+          <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async />
+        )}
+      </head>
       <body style={{ fontFamily: 'var(--font-figtree), sans-serif' }}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="theme">
           <EsportsLinkFix />
@@ -47,7 +56,7 @@ export default function RootLayout({
           </GlobalChatWrapper>
           <GlobalBetslip />
           <DesignCustomizer />
-          <DailySpinTrigger />
+          <Toaster position="top-left" />
         </ThemeProvider>
       </body>
     </html>

@@ -61,7 +61,7 @@ const PAGE_META: Record<string, { color: string; icon: React.ElementType; label:
   'live-casino':    { color: '#ef4444', icon: IconFlame,            label: 'Live Casino' },
   deposit:          { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
   'deposit-drawer': { color: '#ee3536', icon: IconWallet,           label: 'Deposit' },
-  'vip-hub':        { color: '#fbbf24', icon: IconCrown,            label: 'VIP Hub' },
+  'vip-hub':        { color: '#fbbf24', icon: IconCrown,            label: 'Overview' },
   'account-drawer': { color: '#06b6d4', icon: IconUser,             label: 'My Account' },
   'game-launch':    { color: '#a855f7', icon: IconDeviceGamepad2,   label: 'Game' },
   library:          { color: '#8b5cf6', icon: IconEye,              label: 'Library' },

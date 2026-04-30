@@ -181,6 +181,95 @@ const RARITY_STYLES: Record<CrateRarity, RarityStyle> = {
 }
 
 // ---------------------------------------------------------------------------
+// "Earned crate" event payload
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload for the `notification:earn-crate` window event. The Level Up reel
+ * dispatches this when a spin lands on Case L / Case XL so the new crate
+ * shows up immediately in the Loot Crates tab.
+ */
+export interface EarnCrateDetail {
+  kind: 'case-l' | 'case-xl' | 'case-s' | 'case-m'
+  source?: CrateSource
+  tier?: string
+  subLevel?: number
+  /** Override the default rarity / rewards for this earn. */
+  rarity?: CrateRarity
+  rewards?: CrateReward[]
+  title?: string
+  subtitle?: string
+}
+
+const EARNED_RARITY_BY_KIND: Record<EarnCrateDetail['kind'], CrateRarity> = {
+  'case-s': 'common',
+  'case-m': 'rare',
+  'case-l': 'epic',
+  'case-xl': 'legendary',
+}
+
+const EARNED_TITLE_BY_KIND: Record<EarnCrateDetail['kind'], string> = {
+  'case-s': 'Case S',
+  'case-m': 'Case M',
+  'case-l': 'Case L',
+  'case-xl': 'Case XL',
+}
+
+// Reward pools per case size — inline here so we don't depend on additional
+// data tables. Tweak when product nails down the exact economy.
+const EARNED_REWARDS_BY_KIND: Record<EarnCrateDetail['kind'], CrateReward[]> = {
+  'case-s': [
+    { label: '$5 Cash', cashValue: 5, chance: 60, icon: IconCurrencyDollar },
+    { label: '10 Free Spins', chance: 30, icon: IconSparkles },
+    { label: '$25 Cash', cashValue: 25, chance: 10, icon: IconCoin },
+  ],
+  'case-m': [
+    { label: '$10 Cash', cashValue: 10, chance: 50, icon: IconCurrencyDollar },
+    { label: '25 Free Spins', chance: 30, icon: IconSparkles },
+    { label: '$50 Cash', cashValue: 50, chance: 15, icon: IconCoin },
+    { label: 'Risk-Free $25 Bet', chance: 5, icon: IconShield },
+  ],
+  'case-l': [
+    { label: '$15 Cash', cashValue: 15, chance: 45, icon: IconCurrencyDollar },
+    { label: '50 Free Spins', chance: 30, icon: IconSparkles },
+    { label: 'Risk-Free $50 Bet', chance: 15, icon: IconShield },
+    { label: '$100 Cash', cashValue: 100, chance: 8, icon: IconCoin },
+    { label: '$500 Cash', cashValue: 500, chance: 2, icon: IconCoin },
+  ],
+  'case-xl': [
+    { label: '$50 Cash', cashValue: 50, chance: 40, icon: IconCurrencyDollar },
+    { label: '100 Free Spins', chance: 30, icon: IconSparkles },
+    { label: 'Risk-Free $100 Bet', chance: 15, icon: IconShield },
+    { label: '$400 Cash', cashValue: 400, chance: 10, icon: IconCoin },
+    { label: '$2,500 Cash', cashValue: 2500, chance: 4, icon: IconCoin },
+    { label: '$10,000 Cash', cashValue: 10000, chance: 1, icon: IconCoin },
+  ],
+}
+
+function buildEarnedCrate(detail: EarnCrateDetail): RewardCrate {
+  const rarity = detail.rarity ?? EARNED_RARITY_BY_KIND[detail.kind]
+  const rewards = detail.rewards ?? EARNED_REWARDS_BY_KIND[detail.kind]
+  const baseTitle = detail.title ?? EARNED_TITLE_BY_KIND[detail.kind]
+  const subtitle =
+    detail.subtitle ??
+    (detail.tier && detail.subLevel != null
+      ? `From ${detail.tier} ${detail.subLevel} Level Up`
+      : detail.source === 'level-up'
+        ? 'From your Level Up spin'
+        : undefined)
+  return {
+    id: `${detail.kind}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    title: baseTitle,
+    subtitle,
+    rarity,
+    source: detail.source ?? 'level-up',
+    state: 'ready',
+    earnedAt: 'just now',
+    rewards,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Default crates
 // ---------------------------------------------------------------------------
 
@@ -304,6 +393,22 @@ export function RewardCrates({
   useEffect(() => {
     if (cratesProp) setCrates(cratesProp)
   }, [cratesProp])
+
+  // Listen for crates earned from the Level Up reel (or any other surface
+  // that wants to drop a crate into the user's collection). The event is
+  // dispatched with `{ kind: 'case-l' | 'case-xl', source, tier, subLevel }`
+  // — see `components/vip/level-up-spinner.tsx`.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = (evt: Event) => {
+      const detail = (evt as CustomEvent<EarnCrateDetail>).detail
+      const newCrate = buildEarnedCrate(detail)
+      setCrates((prev) => [newCrate, ...prev])
+    }
+    window.addEventListener('notification:earn-crate', handler as EventListener)
+    return () =>
+      window.removeEventListener('notification:earn-crate', handler as EventListener)
+  }, [])
 
   const readyCount = crates.filter((c) => (c.state ?? 'ready') === 'ready').length
 
@@ -443,6 +548,24 @@ function CrateCard({ crate, onOpen, isLink }: CrateCardProps) {
   const isLocked = crate.state === 'locked'
   const canOpen = !isLocked
 
+  // Cursor-following spotlight (matches VIP benefit tile aesthetic).
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    el.style.setProperty('--spot-x', `${e.clientX - rect.left}px`)
+    el.style.setProperty('--spot-y', `${e.clientY - rect.top}px`)
+    el.style.setProperty('--spot-opacity', '1')
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.setProperty('--spot-opacity', '0')
+  }, [])
+
   // Sort rewards by chance descending so the most likely show first.
   const sortedRewards = useMemo(
     () => [...crate.rewards].sort((a, b) => (b.chance ?? 0) - (a.chance ?? 0)),
@@ -451,6 +574,9 @@ function CrateCard({ crate, onOpen, isLink }: CrateCardProps) {
 
   return (
     <motion.div
+      ref={ref}
+      onMouseMove={canOpen ? handleMouseMove : undefined}
+      onMouseLeave={canOpen ? handleMouseLeave : undefined}
       layout
       initial={{ opacity: 0, y: 6, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -460,48 +586,61 @@ function CrateCard({ crate, onOpen, isLink }: CrateCardProps) {
         filter: 'blur(4px)',
         transition: { duration: 0.35, ease: 'easeOut' },
       }}
-      whileHover={canOpen ? { y: -1 } : undefined}
       transition={{ duration: 0.2 }}
-      className={`group relative rounded-xl bg-white/[0.04] overflow-hidden ${
-        isLocked ? 'opacity-60' : ''
+      className={`group relative overflow-hidden rounded-xl bg-white/[0.04] border transition-colors duration-200 ${
+        isLocked
+          ? 'border-white/[0.06] opacity-60'
+          : 'border-white/[0.06] hover:border-white/15'
       }`}
-      style={{
-        border: `1px solid rgba(${styles.glowRgb}, ${isLocked ? 0.1 : 0.18})`,
-        boxShadow: isLocked
-          ? 'inset 0 1px 0 rgba(255,255,255,0.04)'
-          : `inset 0 1px 0 rgba(${styles.glowRgb}, 0.15)`,
-      }}
+      style={
+        {
+          '--spot-x': '50%',
+          '--spot-y': '50%',
+          '--spot-opacity': '0',
+        } as React.CSSProperties
+      }
     >
-      {/* Top accent line */}
+      {/* Cursor-following spotlight, tinted with the crate's rarity colour */}
       {!isLocked && (
         <div
           aria-hidden
-          className="absolute top-0 inset-x-0 h-[2px] pointer-events-none"
+          className="pointer-events-none absolute inset-0 transition-opacity duration-200"
           style={{
-            background: `linear-gradient(90deg, transparent, ${styles.primary}, transparent)`,
-            opacity: 0.85,
+            background: `radial-gradient(220px circle at var(--spot-x) var(--spot-y), rgba(${styles.glowRgb}, 0.18), transparent 60%)`,
+            opacity: 'var(--spot-opacity)',
+          }}
+        />
+      )}
+
+      {/* Subtle top rarity accent — much lighter than before, just a hint */}
+      {!isLocked && (
+        <div
+          aria-hidden
+          className="absolute top-0 inset-x-0 h-[2px] pointer-events-none opacity-60"
+          style={{
+            background: `linear-gradient(90deg, transparent, rgba(${styles.glowRgb}, 0.65), transparent)`,
           }}
         />
       )}
 
       {/* Header row */}
-      <div className="relative p-2.5 flex items-center gap-3">
+      <div className="relative p-3 flex items-center gap-3">
         <div className="flex-shrink-0">
           <MiniCrate rarity={crate.rarity} idle={canOpen} dim={!canOpen} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-white truncate leading-tight">
+          <div className="text-[14px] font-semibold text-white truncate leading-tight tracking-tight">
             {crate.title}
           </div>
           {crate.subtitle && (
-            <div className="text-xs text-white/55 truncate leading-snug mt-0.5">
+            <div className="text-[12.5px] text-white/55 truncate leading-snug mt-0.5">
               {crate.subtitle}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-[10px] mt-1">
+          <div className="flex items-center gap-1.5 text-[10px] mt-1.5">
             <span
-              className="font-bold uppercase tracking-wider"
+              className="font-bold uppercase tracking-[0.12em]"
               style={{ color: styles.primary }}
             >
               {styles.label}
@@ -515,52 +654,43 @@ function CrateCard({ crate, onOpen, isLink }: CrateCardProps) {
           </div>
         </div>
 
-        <button
-          type="button"
-          disabled={!canOpen && !isLink}
-          onClick={() => onOpen(crate)}
-          aria-label={isLocked ? 'Locked' : 'Open crate'}
-          className={`flex-shrink-0 inline-flex items-center gap-1 h-7 px-3 rounded-full text-[11px] font-semibold transition-all disabled:cursor-not-allowed
-            ${
-              isLocked
-                ? 'bg-white/5 text-white/40'
-                : isLink
-                ? 'bg-white/[0.08] text-white hover:bg-white/[0.12]'
-                : 'bg-[#fef3c7] hover:bg-[#fde68a] text-black active:scale-[0.97]'
-            }`}
-        >
-          {isLocked ? (
-            <>
-              <IconLock className="w-3 h-3" />
-              Locked
-            </>
-          ) : (
-            <>
-              Open
-              <IconChevronRight className="w-3 h-3" />
-            </>
-          )}
-        </button>
+        {isLocked ? (
+          <div className="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md text-[11px] font-medium bg-white/[0.03] border border-white/[0.06] text-white/45">
+            <IconLock className="w-3 h-3" />
+            Locked
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onOpen(crate)}
+            aria-label={isLink ? 'View crate' : 'Open crate'}
+            style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+            className="flex-shrink-0 inline-flex items-center gap-1 h-9 px-3.5 rounded-md text-[11px] font-bold uppercase tracking-wider text-white hover:brightness-110 transition-[filter] duration-150 active:scale-[0.97]"
+          >
+            {isLink ? 'View' : 'Open'}
+            <IconChevronRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
-      {/* "What you can win" rewards list — compact rows */}
-      <div className="relative px-2.5 pb-2.5 space-y-0.5">
+      {/* Rewards list — separated by a hairline divider for hierarchy */}
+      <div className="relative px-3 pb-3 pt-2.5 mt-0 border-t border-white/[0.04] space-y-0.5">
         {sortedRewards.map((reward, idx) => {
           const Icon = reward.icon ?? IconCoin
           return (
             <div
               key={idx}
-              className="flex items-center gap-2 px-1.5 py-1 rounded-md"
+              className="flex items-center gap-2.5 px-1 py-1 rounded-md"
             >
               <Icon
                 className="w-4 h-4 flex-shrink-0"
                 style={{ color: styles.primary }}
               />
-              <span className="flex-1 text-[11px] font-medium text-white/90 truncate">
+              <span className="flex-1 text-[12px] font-medium text-white/85 truncate">
                 {reward.label}
               </span>
               {typeof reward.chance === 'number' && (
-                <span className="text-[10px] tabular-nums font-semibold text-white/45 flex-shrink-0">
+                <span className="text-[10.5px] tabular-nums font-semibold text-white/40 flex-shrink-0">
                   {reward.chance}%
                 </span>
               )}

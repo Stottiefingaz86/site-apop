@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconPalette, IconX, IconCheck, IconPencil, IconArrowLeft, IconUpload, IconBook2, IconMap2 } from '@tabler/icons-react'
+import { IconPalette, IconX, IconCheck, IconPencil, IconArrowLeft, IconUpload, IconBook2, IconMap2, IconBrandFigma } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useRouter } from 'next/navigation'
@@ -742,8 +742,41 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
   const [activeBrandId, setActiveBrandId] = useState(currentBrandId)
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null)
   const [productOverrides, setProductOverrides] = useState<Record<string, ProductToggles>>({})
+  const [figmaCopied, setFigmaCopied] = useState(false)
   const hasRestoredRef = useRef(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Copy a ready-to-paste Cursor agent prompt that exports the page the user
+  // is currently viewing into the configured Figma file. The Figma MCP tools
+  // run in the agent's context, not the browser, so the button hands off
+  // intent rather than making the API call itself.
+  const FIGMA_FILE_KEY = 'boqNQ8t96bxwiuggNNj62b'
+  const FIGMA_NODE_ID = '0:1'
+  const handleExportToFigma = useCallback(async () => {
+    if (typeof window === 'undefined') return
+    const path = pathname || '/'
+    const targetUrl = `${window.location.origin}${path}`
+    const prompt = `Export ${targetUrl} into Figma file ${FIGMA_FILE_KEY} (node ${FIGMA_NODE_ID}). Use design-system components from the file's library where they match shadcn components in the codebase, and fall back to layered shapes/text only when no DS component matches.`
+    try {
+      await navigator.clipboard.writeText(prompt)
+      setFigmaCopied(true)
+      window.setTimeout(() => setFigmaCopied(false), 2200)
+    } catch {
+      // Clipboard API blocked — fall back to a temporary textarea so the
+      // prompt still ends up on the user's clipboard on older browsers.
+      const ta = document.createElement('textarea')
+      ta.value = prompt
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.focus()
+      ta.select()
+      try { document.execCommand('copy') } catch {}
+      document.body.removeChild(ta)
+      setFigmaCopied(true)
+      window.setTimeout(() => setFigmaCopied(false), 2200)
+    }
+  }, [pathname])
 
   // Load saved product overrides and active brand from localStorage on mount
   useEffect(() => {
@@ -1327,6 +1360,32 @@ export function DesignCustomizer({ onBrandChange, currentBrandId = 'betonline' }
                       <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }}>
                         NEW
                       </span>
+                    </button>
+
+                    {/* Export current page to Figma — copies a ready-to-paste
+                        prompt for the Cursor agent (the Figma MCP runs in the
+                        agent context, not the browser). */}
+                    <button
+                      onClick={handleExportToFigma}
+                      aria-label="Export current page to Figma"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all duration-150 hover:bg-white/5 border border-dashed border-white/10 hover:border-white/20"
+                    >
+                      {figmaCopied ? (
+                        <IconCheck className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#8ac500' }} />
+                      ) : (
+                        <IconBrandFigma className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.5)' }} />
+                      )}
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ color: figmaCopied ? '#8ac500' : 'rgba(255,255,255,0.6)' }}
+                      >
+                        {figmaCopied ? 'Prompt copied — paste in Cursor' : 'Export to Figma'}
+                      </span>
+                      {!figmaCopied && (
+                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          NEW
+                        </span>
+                      )}
                     </button>
                   </div>
 

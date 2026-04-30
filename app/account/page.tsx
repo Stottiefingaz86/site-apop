@@ -139,6 +139,10 @@ import { useRainBalance } from '@/hooks/use-rain-balance'
 import { colorTokenMap } from '@/lib/agent/designSystem'
 import type { ProductToggles } from '@/components/design-customizer'
 import { StreakCounter } from '@/components/vip/streak-counter'
+import { VipBenefitTiles } from '@/components/vip/vip-benefit-tiles'
+import { LevelUpSpinner } from '@/components/vip/level-up-spinner'
+import { RedeemPromoCode } from '@/components/vip/redeem-promo-code'
+import { MyBenefitsAccordion } from '@/components/vip/my-benefits-accordion'
 import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
@@ -915,7 +919,6 @@ function DashboardSection({
 
         {/* Days Streak */}
         <div className="w-full md:flex-1">
-          <StreakCounter />
         </div>
       </div>
 
@@ -2250,7 +2253,7 @@ function VipDrawerContent({
     if (!vipDrawerOpen) return
     const container = vipTabsContainerRef.current
     if (!container) return
-    const tabs = ['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop']
+    const tabs = ['Overview', 'Level Up', 'Loot Crates', 'Benefits']
     const activeIndex = tabs.indexOf(vipActiveTab)
     if (activeIndex === -1) return
     const tabButtons = container.querySelectorAll('button')
@@ -2334,7 +2337,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['VIP Hub', 'Reward Crates', 'Cash Boost', 'Profit Boost', 'Bet & Get', 'Reloads', 'Cash Drop'].map((tab) => (
+            {['Overview', 'Level Up', 'Loot Crates', 'Benefits'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -2363,7 +2366,7 @@ function VipDrawerContent({
       </div>
 
       <div className={cn("px-4 pt-4 overflow-y-auto flex-1 min-h-0", isMobile ? "pb-6" : "pb-2")} style={{ WebkitOverflowScrolling: 'touch', overflowY: 'auto', flex: '1 1 auto', minHeight: 0, paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 24px)' : undefined }}>
-        {vipActiveTab === 'VIP Hub' && (
+        {vipActiveTab === 'Overview' && (
           <div className="space-y-6">
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-4">
@@ -2373,10 +2376,12 @@ function VipDrawerContent({
               </CardContent>
             </Card>
 
-            <div>
-              <StreakCounter />
-            </div>
+            <VipBenefitTiles
+              onClaim={(tile) => console.log('VIP claim', tile.id)}
+              onTileClick={(tile) => console.log('VIP tile click', tile.id)}
+            />
 
+            <RedeemPromoCode />
 
             {/* Telegram CTA */}
             <a
@@ -2401,352 +2406,27 @@ function VipDrawerContent({
               </div>
             </a>
 
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">My Benefits</h3>
-              <Accordion type="single" defaultValue="Gold" collapsible className="w-full">
-                <AccordionItem value="Bronze" className={cn("border-white/10", "opacity-50")}>
-                  <AccordionTrigger value="Bronze" className="text-white/50 hover:text-white/70">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-amber-600" />
-                      <span className="line-through">Bronze</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Bronze">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white/50">$0</div>
-                      <div className="text-sm text-white/50">Wager Amount</div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-white/50">
-                          <div className="h-4 w-4 rounded-full bg-white/10 flex items-center justify-center">
-                            <IconCheck className="h-3 w-3" />
-                          </div>
-                          <span>Daily Cash Race</span>
-                        </div>
-                      </div>
-                      <div className="pt-2">
-                        <div className="text-xs text-white/50 font-medium">Complete</div>
-                        <Button variant="ghost" className="mt-2 text-white/70 hover:text-white hover:bg-white/5">
-                          VIP Rewards
-                        </Button>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Silver" className={cn("border-white/10", "opacity-50")}>
-                  <AccordionTrigger value="Silver" className="text-white/50 hover:text-white/70">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-gray-400" />
-                      <span className="line-through">Silver</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Silver">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white/50">$10K</div>
-                      <div className="text-sm text-white/50">Wager Amount</div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-white/50">
-                          <div className="h-4 w-4 rounded-full bg-white/10 flex items-center justify-center">
-                            <IconCheck className="h-3 w-3" />
-                          </div>
-                          <span>Daily Cash Race</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-white/50">
-                          <div className="h-4 w-4 rounded-full bg-white/10 flex items-center justify-center">
-                            <IconCheck className="h-3 w-3" />
-                          </div>
-                          <span>Birthday Rewards</span>
-                        </div>
-                      </div>
-                      <div className="pt-2">
-                        <div className="text-xs text-white/50 font-medium">Complete</div>
-                        <Button variant="ghost" className="mt-2 text-white/70 hover:text-white hover:bg-white/5">
-                          VIP Rewards
-                        </Button>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Gold" className="border-white/10 relative">
-                  <motion.div
-                    className="absolute inset-0 bg-white/5 pointer-events-none"
-                    animate={{ opacity: [0, 0.3, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  <AccordionTrigger value="Gold" className="text-white hover:text-white relative z-10">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-yellow-400" />
-                      <span>Gold</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Gold">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$50K</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['Daily Cash Race', 'Birthday Rewards', 'Weekly Cash Boost', 'Monthly Cash Boost', 'Level Up Bonuses'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Platinum" className="border-white/10">
-                  <AccordionTrigger value="Platinum" className="text-white hover:text-white">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-cyan-400" />
-                      <span>Platinum I - III</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Platinum">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$100K - 500K</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['Daily Cash Race', 'Birthday Rewards', 'Weekly Cash Boost', 'Monthly Cash Boost', 'Level Up Bonuses'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Diamond" className="border-white/10">
-                  <AccordionTrigger value="Diamond" className="text-white hover:text-white">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-emerald-400" />
-                      <span>Diamond I - III</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Diamond">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$1M - 5M</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['All Platinum I - III Benefits', 'Monthly Cash Boost', 'Level Up Bonuses', 'Prioritized Withdrawals', 'Dedicated VIP Team'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Elite" className="border-white/10">
-                  <AccordionTrigger value="Elite" className="text-white hover:text-white">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-purple-400" />
-                      <span>Elite I - III</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Elite">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$100M - 500M</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['All Diamond I - III Benefits', 'Free Crypto Withdrawals', 'Reduced Deposit Fees', 'Exclusive Refer-A-Friend', 'Dedicated VIP Team'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Black" className="border-white/10">
-                  <AccordionTrigger value="Black" className="text-white hover:text-white">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-gray-800" />
-                      <span>Black I - III</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Black">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$100M+</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['All Elite I - III Benefits', 'Reduced Deposit Fees', 'Exclusive Refer-A-Friend', 'Tailored Gifts & Rewards', 'Dedicated VIP Team'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="Obsidian" className="border-white/10">
-                  <AccordionTrigger value="Obsidian" className="text-white hover:text-white">
-                    <div className="flex items-center gap-3">
-                      <IconCrown className="w-5 h-5 text-purple-900" />
-                      <span>Obsidian I - III</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent value="Obsidian">
-                    <div className="space-y-3 pt-2">
-                      <div className="text-lg font-semibold text-white">$1B+</div>
-                      <div className="text-sm text-white/70">Wager Amount</div>
-                      <div className="space-y-2">
-                        {['All Black I - III Benefits', 'Reduced Deposit Fees', 'Exclusive Refer-A-Friend', 'Tailored Gifts & Rewards', 'Dedicated VIP Team'].map(b => (
-                          <div key={b} className="flex items-center gap-2 text-sm text-white">
-                            <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                              <IconCheck className="h-3 w-3" />
-                            </div>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
           </div>
         )}
 
-        {vipActiveTab === 'Reward Crates' && (
+        {vipActiveTab === 'Loot Crates' && (
           <div className="space-y-3">
             <RewardCrates variant="compact" />
           </div>
         )}
 
-
-        {vipActiveTab === 'Cash Boost' && (
+        {vipActiveTab === 'Level Up' && (
           <div className="space-y-3">
-            {boostClaimMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-center gap-3"
-              >
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <IconCheck className="w-5 h-5 text-green-400" strokeWidth={2} />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-white">
-                    ${boostClaimMessage.amount.toFixed(2)} have been claimed and added to your balance
-                  </div>
-                </div>
-              </motion.div>
-            )}
-            {claimedBoosts.has('weekly') && claimedBoosts.has('monthly') ? (
-              <Card className="bg-white/3 border-white/5">
-                <CardContent className="p-8">
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="w-20 h-20 rounded-2xl bg-white/3 border border-white/5 flex items-center justify-center mb-6">
-                      <IconCrown className="w-10 h-10 text-white/40" strokeWidth={1.5} />
-                    </div>
-                    <div className="text-center space-y-2">
-                      <p className="text-white/70 text-sm leading-relaxed">
-                        Keep on playing and check back for any cash<br />
-                        boost rewards.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {!claimedBoosts.has('weekly') && (
-                  <div className="group flex items-center gap-4 rounded-xl bg-gradient-to-r from-[#fbbf24]/10 to-[#fbbf24]/5 border border-[#fbbf24]/20 p-4 transition-all">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-[#fbbf24]/20 flex items-center justify-center">
-                        <IconCoins className="w-6 h-6 text-[#fbbf24]" strokeWidth={1.5} />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-lg font-bold text-white">$15.00</div>
-                      <div className="text-xs text-white/40">Weekly Cash Boost</div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="text-white hover:bg-[#ee3536]/90 bg-[#ee3536] text-xs px-4 py-1.5 h-8 rounded-lg font-semibold border-0"
-                      onClick={() => {
-                        setBoostProcessing('weekly')
-                        setTimeout(() => {
-                          setClaimedBoosts(prev => new Set([...prev, 'weekly']))
-                          setBoostProcessing(null)
-                          setBoostClaimMessage({ amount: 15 })
-                          onBoostClaimed(15)
-                          setTimeout(() => { setBoostClaimMessage(null) }, 3000)
-                        }, 1500)
-                      }}
-                      disabled={boostProcessing !== null}
-                    >
-                      {boostProcessing === 'weekly' ? (
-                        <div className="flex items-center gap-2">
-                          <IconLoader2 className="w-3 h-3 animate-spin" />
-                          <span>Processing...</span>
-                        </div>
-                      ) : 'CLAIM'}
-                    </Button>
-                  </div>
-                )}
-                {!claimedBoosts.has('monthly') && (
-                  <div className="group flex items-center gap-4 rounded-xl bg-gradient-to-r from-[#fbbf24]/10 to-[#fbbf24]/5 border border-[#fbbf24]/20 p-4 transition-all">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-[#fbbf24]/20 flex items-center justify-center">
-                        <IconCoins className="w-6 h-6 text-[#fbbf24]" strokeWidth={1.5} />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-lg font-bold text-white">$20.00</div>
-                      <div className="text-xs text-white/40">Monthly Cash Boost</div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="text-white hover:bg-[#ee3536]/90 bg-[#ee3536] text-xs px-4 py-1.5 h-8 rounded-lg font-semibold border-0"
-                      onClick={() => {
-                        setBoostProcessing('monthly')
-                        setTimeout(() => {
-                          setClaimedBoosts(prev => new Set([...prev, 'monthly']))
-                          setBoostProcessing(null)
-                          setBoostClaimMessage({ amount: 20 })
-                          onBoostClaimed(20)
-                          setTimeout(() => { setBoostClaimMessage(null) }, 3000)
-                        }, 1500)
-                      }}
-                      disabled={boostProcessing !== null}
-                    >
-                      {boostProcessing === 'monthly' ? (
-                        <div className="flex items-center gap-2">
-                          <IconLoader2 className="w-3 h-3 animate-spin" />
-                          <span>Processing...</span>
-                        </div>
-                      ) : 'CLAIM'}
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
+            <LevelUpSpinner />
           </div>
         )}
+        
+        {vipActiveTab === 'Benefits' && (
+          <div className="space-y-3">
+            <MyBenefitsAccordion />
+          </div>
+        )}
+
 
         {vipActiveTab === 'Bet & Get' && <BetAndGet />}
         {vipActiveTab === 'Reloads' && <ReloadClaim />}
@@ -2780,7 +2460,7 @@ function AccountPageContent() {
   const webInboxUnreadCount = 2
   const [depositDrawerOpen, setDepositDrawerOpen] = useState(false)
   const [vipDrawerOpen, setVipDrawerOpen] = useState(false)
-  const [vipActiveTab, setVipActiveTab] = useState('VIP Hub')
+  const [vipActiveTab, setVipActiveTab] = useState('Overview')
   const [profitBoostOptedIn, setProfitBoostOptedIn] = useState(false)
   const profitBoostRequiredBetMarket = 'Premier League'
   const profitBoostRequiredBetStake = 50
@@ -2836,7 +2516,7 @@ function AccountPageContent() {
     useChatStore.getState().setIsOpen(false)
   }, [trackClick])
   const openVipDrawer = useCallback(() => {
-    trackClick('vip-hub', 'VIP Hub')
+    trackClick('vip-hub', 'Overview')
     setAccountDrawerOpen(false)
     setDepositDrawerOpen(false)
     setVipDrawerOpen(true)
@@ -3029,7 +2709,7 @@ function AccountPageContent() {
               ...(visibleProducts.casino ? [{ label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino') } }] : []),
               ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', onClick: () => { trackNav('casino', 'Live Casino'); router.push('/casino') } }] : []),
               ...(visibleProducts.poker ? [{ label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true') } }] : []),
-              ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') } }] : []),
+              ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); openVipDrawer() } }] : []),
             ].map((item) => (
               <button
                 key={item.label}
@@ -3144,20 +2824,6 @@ function AccountPageContent() {
                 </SidebarMenuItem>
                 )}
 
-                {visibleProducts.liveBetting && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className={cn(
-                      "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center",
-                      "hover:bg-white/5 hover:text-white transition-colors",
-                      "text-white/70 active:bg-white/10 cursor-pointer"
-                    )}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('live-betting', 'Live Betting'); window.location.href = '/live-betting' }}
-                  >
-                    Live Betting
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                )}
 
                 {visibleProducts.casino && (
                 <SidebarMenuItem>
@@ -3175,21 +2841,6 @@ function AccountPageContent() {
                 </SidebarMenuItem>
                 )}
 
-                {visibleProducts.liveCasino && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className={cn(
-                      "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
-                      "hover:bg-white/5 hover:text-white transition-colors",
-                      "text-white/70 cursor-pointer"
-                    )}
-                    style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('casino', 'Live Casino'); router.push('/casino') }}
-                  >
-                    <span className="relative z-10">Live Casino</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                )}
 
                 {visibleProducts.poker && (
                 <SidebarMenuItem>
@@ -3216,7 +2867,7 @@ function AccountPageContent() {
                       "text-white/70 cursor-pointer"
                     )}
                     style={{ pointerEvents: 'auto' } as React.CSSProperties}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('vip-rewards', 'VIP Rewards'); router.push('/casino?vip=true') }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackNav('vip-rewards', 'VIP Rewards'); openVipDrawer() }}
                   >
                     <span className="relative z-10">VIP Rewards</span>
                   </SidebarMenuButton>
@@ -3485,9 +3136,7 @@ function AccountPageContent() {
                 {[
                   { label: 'Home', page: 'home' as const },
                   ...(visibleProducts.sports ? [{ label: 'Sports', page: 'sports' as const }] : []),
-                  ...(visibleProducts.liveBetting ? [{ label: 'Live Betting', page: 'liveBetting' as const }] : []),
                   ...(visibleProducts.casino ? [{ label: 'Casino', page: 'casino' as const }] : []),
-                  ...(visibleProducts.liveCasino ? [{ label: 'Live Casino', page: 'liveCasino' as const }] : []),
                   ...(visibleProducts.poker ? [{ label: 'Poker', page: 'poker' as const }] : []),
                   ...(visibleProducts.vipRewards ? [{ label: 'VIP Rewards', page: 'vipRewards' as const }] : []),
                 ].map((item) => (
@@ -3507,7 +3156,7 @@ function AccountPageContent() {
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')
                       } else if (item.page === 'vipRewards') {
-                        router.push('/casino?vip=true')
+                        openVipDrawer()
                       }
                     }}
                     className={cn(
