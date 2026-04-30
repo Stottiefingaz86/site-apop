@@ -6755,8 +6755,6 @@ function PokerLandingPage({ brandPrimary, quickLinksOpen, onNavigate }: { brandP
                       setOpenMobile(false)
                       if (item.page === 'sports') {
                         router.push('/sports/football')
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (onNavigate) {
                         onNavigate(item.page as any)
                       }
@@ -9446,8 +9444,6 @@ function NavTestPageContent() {
                           setOpenMobile(false)
                           if (item.page === 'sports') {
                             router.push('/sports/football')
-                          } else if (item.page === 'liveBetting') {
-                            window.location.href = '/live-betting'
                           } else if (item.page === 'home') {
                             setShowSports(false)
                             setShowVipRewards(false)
@@ -9459,8 +9455,6 @@ function NavTestPageContent() {
                             setShowPoker(false)
                             setActiveSubNav('For You')
                             window.scrollTo(0, 0)
-                          } else if (item.page === 'liveCasino') {
-                            setShowSports(false)
                             setShowVipRewards(false)
                             setShowPoker(false)
                             setActiveSubNav('Live')

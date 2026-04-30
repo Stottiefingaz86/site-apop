@@ -3147,11 +3147,9 @@ function AccountPageContent() {
                       setOpenMobile(false)
                       if (item.page === 'sports') {
                         router.push('/sports/football')
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (item.page === 'home') {
                         router.push('/')
-                      } else if (item.page === 'casino' || item.page === 'liveCasino') {
+                      } else if (item.page === 'casino') {
                         router.push('/casino')
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')

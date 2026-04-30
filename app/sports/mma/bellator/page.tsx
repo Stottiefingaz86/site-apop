@@ -5280,16 +5280,12 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         router.push('/')
                       } else if (item.page === 'sports') {
                         // Already on sports
-                      } else if (item.page === 'liveBetting') {
-                        window.location.href = '/live-betting'
                       } else if (item.page === 'casino') {
                         router.push('/casino')
-                      } else if (item.page === 'liveCasino') {
-                        router.push('/casino?live=true')
                       } else if (item.page === 'poker') {
                         router.push('/casino?poker=true')
                       } else if (item.page === 'vipRewards') {
-                        openVipDrawer()
+                        router.push('/?vip=open')
                       }
                     }}
                     className={cn(

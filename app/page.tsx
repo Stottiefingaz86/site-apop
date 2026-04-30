@@ -939,6 +939,21 @@ function HomePageContent() {
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
   }, [trackClick])
+
+  // Sub-component nav handlers across the app navigate to `/?vip=open` when
+  // they want to launch the VIP Hub but can't reach the local `openVipDrawer`
+  // helper from their scope. Listen for that param on mount, open the drawer,
+  // then strip the param from the URL so a refresh doesn't keep re-opening it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('vip') === 'open') {
+      openVipDrawer()
+      params.delete('vip')
+      const next = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`
+      window.history.replaceState(null, '', next)
+    }
+  }, [openVipDrawer])
   const openDepositDrawer = useCallback(() => {
     trackClick('deposit', 'Deposit')
     setAccountDrawerOpen(false)
