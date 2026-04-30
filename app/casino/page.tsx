@@ -8335,7 +8335,7 @@ function NavTestPageContent() {
     // Check for VIP query parameter to deep link to VIP Rewards
     const vipParam = searchParams.get('vip')
     if (vipParam === 'true') {
-      setShowVipRewards(true)
+      openVipDrawer()
       // Optional sidebar section to deep-link to (e.g. "Cash Races").
       const sectionParam = searchParams.get('section')
       if (sectionParam) {
@@ -10416,9 +10416,7 @@ function NavTestPageContent() {
                               activeSubNav: activeSubNav
                             })
                             setInitialVipSidebarItem('Cash Races')
-                            setShowVipRewards(true)
-                            // Scroll to top when navigating to new page
-                            window.scrollTo(0, 0)
+                            openVipDrawer()
                           }}
                         >
                           <CardContent className="p-4 relative z-10">

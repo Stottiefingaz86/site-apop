@@ -9570,7 +9570,7 @@ function NavTestPageContent() {
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
+                  { label: 'VIP Rewards', onClick: () => { openVipDrawer(); setShowSports(false); setQuickLinksOpen(false); window.scrollTo(0, 0); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -11383,9 +11383,7 @@ function NavTestPageContent() {
                               activeSubNav: activeSubNav
                             })
                             setInitialVipSidebarItem('Cash Races')
-                            setShowVipRewards(true)
-                            setShowSports(false)
-                            // Scroll to top when navigating to new page
+                            openVipDrawer()
                             window.scrollTo(0, 0)
                           }}
                         >

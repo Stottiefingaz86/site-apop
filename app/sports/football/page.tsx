@@ -10239,7 +10239,7 @@ function NavTestPageContent() {
                   { label: 'Esports', onClick: () => { trackNav('esports', 'Esports'); trackPageView('esports', 'Esports'); setShowSports(true); setShowVipRewards(false); router.push('/esports'); setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); trackPageView('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); trackPageView('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); trackPageView('vip-rewards', 'VIP Rewards'); setShowVipRewards(true); setQuickLinksOpen(false); } },
+                  { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); trackPageView('vip-rewards', 'VIP Rewards'); openVipDrawer(); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -10458,9 +10458,7 @@ function NavTestPageContent() {
                         e.stopPropagation()
                         trackNav('vip-rewards', 'VIP Rewards')
                         trackPageView('vip-rewards', 'VIP Rewards')
-                        setShowVipRewards(true)
-                        setShowSports(false)
-                        window.scrollTo(0, 0)
+                        openVipDrawer()
                       }}
                       data-active={showVipRewards}
                       style={{ pointerEvents: 'auto' } as React.CSSProperties}
@@ -12291,9 +12289,7 @@ function NavTestPageContent() {
                               activeSubNav: activeSubNav
                             })
                             setInitialVipSidebarItem('Cash Races')
-                            setShowVipRewards(true)
-                            // Scroll to top when navigating to new page
-                            window.scrollTo(0, 0)
+                            openVipDrawer()
                           }}
                         >
                           <CardContent className="p-4 relative z-10">

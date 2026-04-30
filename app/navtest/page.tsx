@@ -6786,7 +6786,7 @@ function NavTestPageContent() {
                   { label: 'Sports', onClick: () => { setShowSports(true); setShowVipRewards(false); setQuickLinksOpen(false); } },
                   { label: 'Casino', onClick: () => { setShowSports(false); setShowVipRewards(false); setActiveSubNav('For You'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { window.location.href = '/casino?poker=true'; setQuickLinksOpen(false); } },
-                  { label: 'VIP Rewards', onClick: () => { setShowVipRewards(true); setShowSports(false); setQuickLinksOpen(false); } },
+                  { label: 'VIP Rewards', onClick: () => { openVipDrawer(); setShowSports(false); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -8527,9 +8527,7 @@ function NavTestPageContent() {
                               activeSubNav: activeSubNav
                             })
                             setInitialVipSidebarItem('Cash Races')
-                            setShowVipRewards(true)
-                            // Scroll to top when navigating to new page
-                            window.scrollTo(0, 0)
+                            openVipDrawer()
                           }}
                         >
                           <CardContent className="p-4 relative z-10">

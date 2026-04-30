@@ -13389,9 +13389,7 @@ function NavTestPageContent() {
                               activeSubNav: activeSubNav
                             })
                             setInitialVipSidebarItem('Cash Races')
-                            setShowVipRewards(true)
-                            // Scroll to top when navigating to new page
-                            window.scrollTo(0, 0)
+                            openVipDrawer()
                           }}
                         >
                           <CardContent className="p-4 relative z-10">
