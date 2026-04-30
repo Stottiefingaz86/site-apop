@@ -9021,6 +9021,16 @@ function NavTestPageContent() {
     setVipDrawerOpen(true)
     useChatStore.getState().setIsOpen(false)
   }, [])
+
+  // Listen for the global VIP Hub open event so sub-component nav handlers
+  // can launch the drawer without needing to thread `openVipDrawer` down
+  // through props.
+  useEffect(() => {
+    const handler = () => openVipDrawer()
+    if (typeof window === 'undefined') return
+    window.addEventListener('vip:open-drawer', handler)
+    return () => window.removeEventListener('vip:open-drawer', handler)
+  }, [openVipDrawer])
   const openDepositDrawer = useCallback(() => {
     setAccountDrawerOpen(false)
     setVipDrawerOpen(false)

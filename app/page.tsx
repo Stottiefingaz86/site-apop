@@ -940,6 +940,16 @@ function HomePageContent() {
     useChatStore.getState().setIsOpen(false)
   }, [trackClick])
 
+  // Listen for the global VIP Hub open event so sub-component nav handlers
+  // can launch the drawer without needing to thread `openVipDrawer` down
+  // through props.
+  useEffect(() => {
+    const handler = () => openVipDrawer()
+    if (typeof window === 'undefined') return
+    window.addEventListener('vip:open-drawer', handler)
+    return () => window.removeEventListener('vip:open-drawer', handler)
+  }, [openVipDrawer])
+
   // Sub-component nav handlers across the app navigate to `/?vip=open` when
   // they want to launch the VIP Hub but can't reach the local `openVipDrawer`
   // helper from their scope. Listen for that param on mount, open the drawer,
