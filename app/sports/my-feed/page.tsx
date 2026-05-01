@@ -7168,7 +7168,7 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
               ].map((item) => {
                 const isCurrentPage =
                   item.page === 'sports' ||
-                  (item.page === 'promotions' && showVipRewards)
+                  false
                 return (
                   <button
                     key={item.label}

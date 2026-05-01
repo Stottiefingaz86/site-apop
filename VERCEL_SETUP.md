@@ -39,6 +39,14 @@ After redeploying, check the Vercel function logs:
    - ✅ `"Using OpenAI API for chat response"` = AI is working
    - ❌ `"OpenAI API key not found"` = API key not set correctly
 
+## Deployments stuck on Queued / Pending
+
+1. **Failed builds block the queue** — On Hobby/Free, Vercel runs one production build at a time. If the latest deploy fails TypeScript or `next build`, fix the error and push again; older “Queued” entries will only move once a build succeeds or you cancel stuck jobs in **Deployments**.
+
+2. **Auto-cancel outdated builds** — This repo sets `"github": { "autoJobCancelation": true }` in [`vercel.json`](./vercel.json) so a new push cancels in-flight builds for the same branch and prioritizes the latest commit. If your project had this disabled in the dashboard, the file-level setting should align GitHub behavior with that default.
+
+3. **Stale local `.next`** — If `npm run build` fails with missing `./####.js` under `.next`, delete `.next` and rebuild locally before pushing.
+
 ## Troubleshooting
 
 ### Still not working?

@@ -246,7 +246,7 @@ PROMO_ROW = (
 IS_CURRENT_OLD = "const isCurrentPage = item.page === 'sports'"
 IS_CURRENT_NEW = """const isCurrentPage =
                   item.page === 'sports' ||
-                  (item.page === 'promotions' && showVipRewards)"""
+                  false"""
 
 
 def patch_file(path: Path) -> bool:
