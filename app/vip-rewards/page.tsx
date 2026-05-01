@@ -7,8 +7,8 @@ export default function VipRewardsRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to casino with VIP view parameter
-    router.replace('/casino?vip=true')
+    // Legacy URL → full-page Promotions on casino (not the hub drawer).
+    router.replace('/casino?vipRewardsPage=true')
   }, [router])
 
   return (

@@ -95,11 +95,10 @@ function buildPromoData(): PromoItem[] {
     )
   )
 
-  // Deep-link to the VIP Rewards page with the right sidebar item active.
-  // The casino page reads `section` from the query string and forwards it
-  // to `vipActiveSidebarItem`.
-  const cashRacesHref = '/casino?vip=true&section=Cash%20Races'
-  const contestsHref = '/casino?vip=true&section=Contests'
+  // Full-page Promotions on casino (`vipRewardsPage=true`); `section` must match
+  // `vipActiveSidebarItem` ids (see casino sidebar). Does not open the VIP hub drawer.
+  const promoPage = (section: string) =>
+    `/casino?vipRewardsPage=true&section=${encodeURIComponent(section)}`
 
   return [
     {
@@ -109,7 +108,7 @@ function buildPromoData(): PromoItem[] {
       icon: IconTrophy,
       tone: 'amber',
       endsAt: nextMidnightUtc,
-      href: cashRacesHref,
+      href: promoPage('Cash Races'),
     },
     {
       id: 'weekly-raffle',
@@ -118,7 +117,7 @@ function buildPromoData(): PromoItem[] {
       icon: IconTicket,
       tone: 'emerald',
       badge: '5d',
-      href: contestsHref,
+      href: promoPage('Raffles'),
     },
     {
       id: 'challenges',
@@ -127,7 +126,7 @@ function buildPromoData(): PromoItem[] {
       icon: IconTargetArrow,
       tone: 'sky',
       badge: '18 active',
-      href: contestsHref,
+      href: promoPage('Challenges'),
     },
   ]
 }
@@ -160,12 +159,6 @@ interface SidebarPromosProps {
   /** Override the default promo list. */
   items?: PromoItem[]
   onItemClick?: (item: PromoItem) => void
-  /**
-   * Callback for the "VIP Hub" footer link. When omitted, clicking the link
-   * navigates to `/vip-rewards`. Pass a callback when the surrounding page
-   * already exposes a way to open the in-page VIP drawer.
-   */
-  onOpenHub?: () => void
 }
 
 const COLLAPSE_STORAGE_KEY = 'sidebar-promos-open'
@@ -174,7 +167,6 @@ export function SidebarPromos({
   collapsed = false,
   items,
   onItemClick,
-  onOpenHub,
 }: SidebarPromosProps) {
   const router = useRouter()
   const [data] = useState(() => items ?? buildPromoData())
@@ -265,14 +257,13 @@ export function SidebarPromos({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (onOpenHub) onOpenHub()
-                    else router.push('/vip-rewards')
-                  }}
+                  onClick={() =>
+                    router.push('/promotions')
+                  }
                   className="mt-1 mx-1 flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[11px] font-medium text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
                   <IconCrown strokeWidth={1.8} className="w-3.5 h-3.5" />
-                  <span className="flex-1 text-left">VIP Hub</span>
+                  <span className="flex-1 text-left">All Promotions</span>
                   <IconChevronRight className="w-3 h-3 opacity-60" />
                 </button>
               </div>

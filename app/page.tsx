@@ -573,7 +573,7 @@ function VipDrawerContent({
     const container = vipTabsContainerRef.current
     if (!container) return
 
-    const tabs = ['Overview', 'Level Up', 'Loot Crates', 'Benefits']
+    const tabs = ['Overview', 'Level Up', 'Loot Crates', 'Bet & Get', 'Benefits']
     const activeIndex = tabs.indexOf(vipActiveTab)
     
     if (activeIndex === -1) return
@@ -671,7 +671,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['Overview', 'Level Up', 'Loot Crates', 'Benefits'].map((tab, index) => (
+            {['Overview', 'Level Up', 'Loot Crates', 'Bet & Get', 'Benefits'].map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -730,6 +730,12 @@ function VipDrawerContent({
           </div>
         )}
 
+        {vipActiveTab === 'Bet & Get' && (
+          <div className="space-y-3">
+            <BetAndGet />
+          </div>
+        )}
+
         {vipActiveTab === 'Level Up' && (
           <div className="space-y-3">
             <LevelUpSpinner />
@@ -755,7 +761,6 @@ function VipDrawerContent({
 function HomePageContent() {
   const isMobile = useIsMobile()
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
   const { trackNav, trackClick, trackAction, trackSidebar } = useTracking('home')
   
   // Global betslip store for adding bets from homepage Top Sports
@@ -1340,7 +1345,6 @@ function HomePageContent() {
   }, [isMobile, lastScrollY])
 
   useEffect(() => {
-    setMounted(true)
     setCurrentTime(new Date().toLocaleString('en-US', { 
       month: '2-digit', 
       day: '2-digit', 
@@ -1491,14 +1495,6 @@ function HomePageContent() {
     return globalBets.some(bet => bet.eventId === eventId && bet.marketTitle === 'Moneyline' && bet.selection === selection)
   }, [globalBets])
 
-  if (!mounted) {
-  return (
-      <div className="w-full bg-[#1a1a1a] text-white font-figtree overflow-x-hidden min-h-screen flex items-center justify-center">
-        <div className="text-white/70">Loading...</div>
-    </div>
-    )
-  }
-
   // Brand configuration
   const brandPrimary = colorTokenMap['betRed/500']?.hex || '#ee3536'
   const brandPrimaryHover = colorTokenMap['betRed/700']?.hex || '#dc2a2f'
@@ -1554,6 +1550,9 @@ function HomePageContent() {
         width: '100%', 
         maxWidth: '100vw', 
         boxSizing: 'border-box',
+        flex: '1 1 0%',
+        minWidth: 0,
+        alignSelf: 'stretch',
         '--brand-primary': brandPrimary,
         '--brand-primary-hover': brandPrimaryHover,
       } as React.CSSProperties}
@@ -1587,6 +1586,7 @@ function HomePageContent() {
               { label: 'Casino', onClick: () => { trackNav('casino', 'Casino'); router.push('/casino'); setQuickLinksOpen(false); } },
               { label: 'Poker', onClick: () => { trackNav('poker', 'Poker'); router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
               { label: 'VIP Rewards', onClick: () => { trackNav('vip-rewards', 'VIP Rewards'); openVipDrawer(); setQuickLinksOpen(false); } },
+              { label: 'Promotions', onClick: () => { trackNav('promotions', 'Promotions'); router.push('/promotions'); setQuickLinksOpen(false); } },
               { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
             ].map((item) => (
               <button
@@ -1686,6 +1686,14 @@ function HomePageContent() {
                     onClick={() => { trackNav('vip-rewards', 'VIP Rewards'); openVipDrawer() }}
                   >
                     VIP Rewards
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center hover:bg-white/5 hover:text-white transition-colors text-white/70 cursor-pointer"
+                    onClick={() => { trackNav('promotions', 'Promotions'); router.push('/promotions') }}
+                  >
+                    Promotions
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

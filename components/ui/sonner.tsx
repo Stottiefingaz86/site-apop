@@ -37,12 +37,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "!border !border-white/10",
             "!rounded-xl !shadow-[0_18px_40px_-12px_rgba(0,0,0,0.6),0_4px_12px_rgba(0,0,0,0.35)]",
             // size & layout
-            "!w-[360px] !p-4 !pl-[18px] !gap-3",
+            "!w-[360px] !p-4 !pl-4 !gap-3",
             // text
             "!text-white !font-medium",
-            // subtle left accent bar driven by --toast-accent (set per-type below)
-            "before:content-[''] before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:rounded-full",
-            "before:bg-[var(--toast-accent,rgba(255,255,255,0.25))]",
+            // left accent: inset shadow (stays solid during slide/transform; ::before can tear)
+            "!shadow-[inset_3px_0_0_0_var(--toast-accent,rgba(255,255,255,0.25)),0_18px_40px_-12px_rgba(0,0,0,0.6),0_4px_12px_rgba(0,0,0,0.35)]",
             // smooth entrance
             "data-[mounted=true]:!animate-in data-[mounted=true]:fade-in-0 data-[mounted=true]:slide-in-from-left-2",
           ].join(" "),
@@ -72,8 +71,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
           ].join(" "),
           actionButton: [
             "!h-8 !px-3 !rounded-md !text-[12px] !font-semibold",
-            "!bg-[var(--ds-primary,#ee3536)] !text-white",
-            "hover:!brightness-110 transition-[filter] duration-150",
+            "!bg-transparent !text-white !shadow-none",
+            "!border !border-white/20",
+            "hover:!bg-white/[0.06] hover:!text-white hover:!border-white/30",
+            "transition-colors duration-150",
           ].join(" "),
           cancelButton: [
             "!h-8 !px-3 !rounded-md !text-[12px] !font-medium",

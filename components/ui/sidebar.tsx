@@ -222,6 +222,8 @@ const SidebarProvider = React.forwardRef<
               {
                 "--sidebar-width": SIDEBAR_WIDTH,
                 "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                width: "100%",
+                minHeight: "100vh",
                 ...style,
               } as React.CSSProperties
             }
@@ -637,11 +639,12 @@ SidebarGroupContent.displayName = "SidebarGroupContent"
 const SidebarMenu = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
->(({ className, ...props }, ref) => (
+>(({ className, style, ...props }, ref) => (
   <ul
     ref={ref}
     data-sidebar="menu"
     className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+    style={{ listStyle: "none", margin: 0, padding: 0, ...style }}
     {...props}
   />
 ))

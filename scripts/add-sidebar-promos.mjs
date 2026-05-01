@@ -137,7 +137,7 @@ for (const rel of FILES) {
   const SIDEBAR_OPEN_RE =
     /(<SidebarContent\s+className="overflow-y-auto)(\s+flex\s+flex-col">\s*\n\s*<TooltipProvider>)/g
 
-  const promosBlock = `\n                <SidebarPromos\n                  collapsed={sidebarState === 'collapsed' && !isMobile}\n                  onOpenHub={openVipDrawer}\n                />\n                <Separator className="bg-white/10 mx-2" />`
+  const promosBlock = `\n                <SidebarPromos\n                  collapsed={sidebarState === 'collapsed' && !isMobile}\n                />\n                <Separator className="bg-white/10 mx-2" />`
 
   let didInsert = false
   src = src.replace(SIDEBAR_OPEN_RE, (m, open, rest) => {

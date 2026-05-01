@@ -1651,10 +1651,9 @@ function PromosPage({ brandPrimary, setVipDrawerOpen, setShowVipRewards, setVipA
                 <CardContent className="p-4">
                   <CardTitle className="text-lg font-semibold text-white mb-2">{promo.title}</CardTitle>
                   <p className="text-sm text-white/70 mb-4 line-clamp-3">{promo.description}</p>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full bg-red-500 hover:bg-red-600 text-white"
-                    style={{ backgroundColor: 'var(--ds-primary, #ee3536)' }}
+                  <Button
+                    variant="ghost"
+                    className="w-full rounded-md border border-white/20 bg-transparent text-white shadow-none hover:bg-white/[0.06] hover:text-white hover:border-white/30"
                   >
                     MORE INFO
                   </Button>
@@ -5279,8 +5278,11 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                 { label: 'Casino', page: 'casino' as const },
                 { label: 'Poker', page: 'poker' as const },
                 { label: 'VIP Rewards', page: 'vipRewards' as const },
+                { label: 'Promotions', page: 'promotions' as const },
               ].map((item) => {
-                const isCurrentPage = item.page === 'sports'
+                const isCurrentPage =
+                  item.page === 'sports' ||
+                  (item.page === 'promotions' && showVipRewards)
                 return (
                   <button
                     key={item.label}
@@ -5298,6 +5300,8 @@ function SportsPage({ activeTab, onTabChange, onBack, brandPrimary, brandPrimary
                         if (typeof window !== 'undefined') {
                           window.dispatchEvent(new CustomEvent('vip:open-drawer'))
                         }
+                      } else if (item.page === 'promotions') {
+                        router.push('/promotions')
                       }
                     }}
                     className={cn(
@@ -8795,7 +8799,7 @@ function VipDrawerContent({
     const container = vipTabsContainerRef.current
     if (!container) return
 
-    const tabs = ['Overview', 'Level Up', 'Loot Crates', 'Benefits']
+    const tabs = ['Overview', 'Level Up', 'Loot Crates', 'Bet & Get', 'Benefits']
     const activeIndex = tabs.indexOf(vipActiveTab)
     
     if (activeIndex === -1) return
@@ -8899,7 +8903,7 @@ function VipDrawerContent({
               pointerEvents: 'auto'
             }}
           >
-            {['Overview', 'Level Up', 'Loot Crates', 'Benefits'].map((tab, index) => (
+            {['Overview', 'Level Up', 'Loot Crates', 'Bet & Get', 'Benefits'].map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setVipActiveTab(tab)}
@@ -8979,6 +8983,12 @@ function VipDrawerContent({
         {vipActiveTab === 'Loot Crates' && (
           <div className="space-y-3">
             <RewardCrates variant="compact" />
+          </div>
+        )}
+
+        {vipActiveTab === 'Bet & Get' && (
+          <div className="space-y-3">
+            <BetAndGet />
           </div>
         )}
 
@@ -9536,6 +9546,7 @@ function NavTestPageContent() {
                   { label: 'Casino', onClick: () => { router.push('/casino'); setQuickLinksOpen(false); } },
                   { label: 'Poker', onClick: () => { router.push('/casino?poker=true'); setQuickLinksOpen(false); } },
                   { label: 'VIP Rewards', onClick: () => { openVipDrawer(); setQuickLinksOpen(false); } },
+                  { label: 'Promotions', onClick: () => { router.push('/promotions'); setQuickLinksOpen(false); } },
                   { label: 'Other', onClick: () => { setQuickLinksOpen(false); } },
                 ].map((item) => (
                   <button
@@ -9550,7 +9561,7 @@ function NavTestPageContent() {
                       "flex-shrink-0 px-3 py-1.5 rounded-small text-xs font-medium transition-colors relative",
                       (item.label === 'Casino' && !showSports && !showVipRewards) ||
                       (item.label === 'Sports' && showSports) ||
-                      (item.label === 'VIP Rewards' && showVipRewards)
+                      (item.label === 'Promotions' && showVipRewards)
                         ? "text-white"
                         : "text-white/70 hover:text-white"
                     )}
@@ -9739,12 +9750,32 @@ function NavTestPageContent() {
                         "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
                         "hover:bg-white/5 hover:text-white transition-colors",
                         "text-white/70 cursor-pointer",
-                        showVipRewards && "!text-white"
                       )}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                         openVipDrawer()
+                      }}
+                      style={{ pointerEvents: 'auto' } as React.CSSProperties}
+                    >
+                      <span className="relative z-10">VIP Rewards</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      className={cn(
+                        "h-10 min-w-[100px] px-4 py-2 rounded-small text-sm font-medium justify-center relative overflow-visible data-[active=true]:bg-transparent [&>span]:!flex-initial",
+                        "hover:bg-white/5 hover:text-white transition-colors",
+                        "text-white/70 cursor-pointer",
+                        showVipRewards && "!text-white"
+                      )}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setVipDrawerOpen(false)
+                        router.push('/promotions')
                       }}
                       data-active={showVipRewards}
                       style={{ pointerEvents: 'auto' } as React.CSSProperties}
@@ -9758,7 +9789,7 @@ function NavTestPageContent() {
                           transition={{ type: "spring", stiffness: 400, damping: 40 }}
                         />
                       )}
-                      <span className="relative z-10">VIP Rewards</span>
+                      <span className="relative z-10">Promotions</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -10631,7 +10662,6 @@ function NavTestPageContent() {
               <TooltipProvider>
                 <SidebarPromos
                   collapsed={sidebarState === 'collapsed' && !isMobile}
-                  onOpenHub={openVipDrawer}
                 />
                 <Separator className="bg-white/10 mx-2" />
                 <SidebarGroup>
@@ -10985,7 +11015,6 @@ function NavTestPageContent() {
               <TooltipProvider>
                 <SidebarPromos
                   collapsed={sidebarState === 'collapsed' && !isMobile}
-                  onOpenHub={openVipDrawer}
                 />
                 <Separator className="bg-white/10 mx-2" />
                 <SidebarGroup>
