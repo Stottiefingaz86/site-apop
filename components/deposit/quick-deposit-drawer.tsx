@@ -1,0 +1,1859 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  IconAlertCircle,
+  IconBuildingBank,
+  IconCheck,
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronUp,
+  IconCoin,
+  IconCopy,
+  IconCreditCard,
+  IconCurrencyBitcoin,
+  IconCurrencyDollar,
+  IconInfoCircle,
+  IconLoader2,
+  IconLock,
+  IconShield,
+  IconX,
+} from "@tabler/icons-react";
+
+import { UsageBasedPricing } from "@/components/billingsdk/usage-based-pricing";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHandle,
+  DrawerHeader,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+
+export type QuickDepositStep =
+  | "started"
+  | "processing"
+  | "almost"
+  | "complete";
+
+export type QuickDepositStepLoading = {
+  started: boolean;
+  processing: boolean;
+  almost: boolean;
+  complete: boolean;
+};
+
+export type WalletHubTab = "deposit" | "withdrawal" | "history" | "settings";
+
+type MethodDef = {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
+  fee: number;
+  feeLabel: string;
+  badge?: { text: string; variant: "blue" | "green" };
+  logo: "cards" | "bitcoin" | "coin" | "echeck" | "wire" | "moneygram" | "qb" | "eco";
+};
+
+const PRIMARY_METHODS: MethodDef[] = [
+  {
+    id: "card",
+    label: "Credit / Debit Card",
+    min: 25,
+    max: 2500,
+    fee: 0.0975,
+    feeLabel: "9.75%",
+    badge: { text: "POPULAR", variant: "blue" },
+    logo: "cards",
+  },
+  {
+    id: "bitcoin",
+    label: "Bitcoin (BTC)",
+    min: 20,
+    max: 500_000,
+    fee: 0,
+    feeLabel: "0%",
+    badge: { text: "10% BOOST", variant: "green" },
+    logo: "bitcoin",
+  },
+];
+
+const OTHER_METHODS: MethodDef[] = [
+  {
+    id: "altcoins",
+    label: "Altcoins",
+    min: 20,
+    max: 500_000,
+    fee: 0,
+    feeLabel: "0%",
+    logo: "coin",
+  },
+  {
+    id: "echeck",
+    label: "eCheck (ACH)",
+    min: 20,
+    max: 500_000,
+    fee: 0.045,
+    feeLabel: "4.5%",
+    logo: "echeck",
+  },
+  {
+    id: "wire",
+    label: "Wire Transfer",
+    min: 500,
+    max: 10_000,
+    fee: 0,
+    feeLabel: "0%",
+    logo: "wire",
+  },
+  {
+    id: "moneygram",
+    label: "MoneyGram",
+    min: 50,
+    max: 400,
+    fee: 0,
+    feeLabel: "0%",
+    logo: "moneygram",
+  },
+  {
+    id: "qbdirect",
+    label: "QBdirect",
+    min: 20,
+    max: 100_000,
+    fee: 0,
+    feeLabel: "0%",
+    logo: "qb",
+  },
+  {
+    id: "ecopayz",
+    label: "ecoPayz",
+    min: 10,
+    max: 100_000,
+    fee: 0,
+    feeLabel: "0%",
+    logo: "eco",
+  },
+];
+
+const CARD_QUICK_AMOUNTS = [25, 50, 100, 500] as const;
+
+/** Demo on-chain / BEP20 deposit address for UI preview */
+const BITCOIN_DEMO_DEPOSIT_ADDRESS =
+  "0xec7842178520bb71523bcce4cadc7e1b478cec40abc7842178520bb7152ebce4ca";
+
+const BITCOIN_USD_RATE = 67_496.351865;
+
+function parseDecimalInput(s: string): number | null {
+  const t = s.replace(/,/g, "").trim();
+  if (t === "" || t === "." || t === "-") return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+function formatFiatForConverter(n: number): string {
+  if (!Number.isFinite(n)) return "";
+  return n.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  });
+}
+
+function formatBtcForConverter(n: number): string {
+  if (!Number.isFinite(n)) return "";
+  const s = n.toFixed(8);
+  return s.replace(/\.?0+$/, "") || "0";
+}
+
+function cardDigitsOnly(s: string) {
+  return s.replace(/\D/g, "");
+}
+
+function formatCardNumberInput(raw: string) {
+  const d = cardDigitsOnly(raw).slice(0, 19);
+  return d.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+}
+
+function formatExpiryInput(raw: string) {
+  const d = cardDigitsOnly(raw).slice(0, 4);
+  if (d.length <= 2) return d;
+  return `${d.slice(0, 2)}/${d.slice(2)}`;
+}
+
+function isExpiryValid(expiry: string) {
+  if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
+  const mm = parseInt(expiry.slice(0, 2), 10);
+  return mm >= 1 && mm <= 12;
+}
+
+const ALL_METHODS = [...PRIMARY_METHODS, ...OTHER_METHODS];
+
+function normalizeMethodId(raw: string): string {
+  if (raw === "card1" || raw === "card2" || raw === "card3") return "card";
+  if (ALL_METHODS.some((m) => m.id === raw)) return raw;
+  return "card";
+}
+
+function getMethod(id: string): MethodDef {
+  const n = normalizeMethodId(id);
+  return ALL_METHODS.find((m) => m.id === n) ?? PRIMARY_METHODS[0];
+}
+
+export type QuickDepositDrawerProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  isMobile: boolean;
+  currencySymbol: string;
+  depositAmount: number;
+  setDepositAmount: (value: number) => void;
+  selectedPaymentMethod: string;
+  setSelectedPaymentMethod: (value: string) => void;
+  useManualAmount: boolean;
+  setUseManualAmount: (value: boolean) => void;
+  showDepositConfirmation: boolean;
+  setShowDepositConfirmation: (value: boolean) => void;
+  depositStep: QuickDepositStep;
+  setDepositStep: (value: QuickDepositStep) => void;
+  stepLoading: QuickDepositStepLoading;
+  setStepLoading: (value: QuickDepositStepLoading) => void;
+  transactionId: string;
+  setTransactionId: (value: string) => void;
+  isDepositLoading: boolean;
+  setIsDepositLoading: (value: boolean) => void;
+  /** Fires when the flow enters the confirmation screen (e.g. analytics). */
+  onTrackDeposit?: (info: { amount: number; method: string }) => void;
+  /** Called when the user taps Play Now after the stepper completes. */
+  onPlayNow: () => void;
+  title?: string;
+  /** Summary card — defaults match demo hub. Pass to mirror wallet balance. */
+  walletAvailableBalance?: number;
+  walletFreeBet?: number;
+};
+
+function formatPaymentMethodLabel(method: string) {
+  return getMethod(method).label;
+}
+
+function formatMoney(n: number, symbol: string) {
+  return `${symbol}${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function MethodLogo({
+  kind,
+  className,
+}: {
+  kind: MethodDef["logo"];
+  className?: string;
+}) {
+  const c = cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg", className);
+  switch (kind) {
+    case "cards":
+      return (
+        <div className={cn(c, "bg-white/10")}>
+          <IconCreditCard className="h-6 w-6 text-white/90" stroke={1.5} />
+        </div>
+      );
+    case "bitcoin":
+      return (
+        <div className={cn(c, "bg-[#f7931a]/20")}>
+          <IconCurrencyBitcoin className="h-7 w-7 text-[#f7931a]" stroke={1.5} />
+        </div>
+      );
+    case "coin":
+      return (
+        <div className={cn(c, "bg-violet-500/20")}>
+          <IconCoin className="h-6 w-6 text-violet-300" stroke={1.5} />
+        </div>
+      );
+    case "echeck":
+      return (
+        <div className={cn(c, "bg-sky-500/15 font-bold text-[10px] leading-tight text-sky-200")}>
+          echeck
+        </div>
+      );
+    case "wire":
+      return (
+        <div className={cn(c, "bg-white/10")}>
+          <IconBuildingBank className="h-6 w-6 text-white/80" stroke={1.5} />
+        </div>
+      );
+    case "moneygram":
+      return (
+        <div className={cn(c, "bg-red-600/25 text-xs font-bold text-red-200")}>MG</div>
+      );
+    case "qb":
+      return (
+        <div className={cn(c, "bg-emerald-500/15 text-[10px] font-semibold text-emerald-200")}>
+          QB
+        </div>
+      );
+    case "eco":
+      return (
+        <div className={cn(c, "bg-blue-500/15 text-[9px] font-semibold leading-tight text-blue-200")}>
+          eco
+        </div>
+      );
+    default:
+      return <div className={c} />;
+  }
+}
+
+function PaymentMethodCard({
+  method,
+  selected,
+  onSelect,
+  currencySymbol,
+  isMobile,
+}: {
+  method: MethodDef;
+  selected: boolean;
+  onSelect: () => void;
+  currencySymbol: string;
+  isMobile: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors",
+        selected
+          ? "border-sky-500/70 bg-sky-500/10"
+          : "border-white/10 bg-[#252525]/80 hover:border-white/20 hover:bg-[#2a2a2a]",
+        isMobile && "p-2.5",
+      )}
+    >
+      <MethodLogo kind={method.logo} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-white">{method.label}</span>
+          {method.badge ? (
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                method.badge.variant === "blue"
+                  ? "border-sky-400/60 text-sky-300"
+                  : "border-emerald-400/60 text-emerald-300",
+              )}
+            >
+              {method.badge.text}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-1 text-[11px] text-white/50">
+          Min: {currencySymbol}
+          {method.min.toLocaleString()} · Max: {currencySymbol}
+          {method.max.toLocaleString()} · Fee: {method.feeLabel}
+        </p>
+      </div>
+      {selected ? (
+        <IconCheck className="mt-1 h-5 w-5 shrink-0 text-sky-400" stroke={2} />
+      ) : (
+        <span className="mt-1 h-5 w-5 shrink-0" />
+      )}
+    </button>
+  );
+}
+
+const HUB_TABS: { id: WalletHubTab; label: string }[] = [
+  { id: "deposit", label: "Deposit" },
+  { id: "withdrawal", label: "Withdrawal" },
+  { id: "history", label: "History" },
+  { id: "settings", label: "Settings" },
+];
+
+export function QuickDepositDrawer({
+  open,
+  onOpenChange,
+  isMobile,
+  currencySymbol,
+  depositAmount,
+  setDepositAmount,
+  selectedPaymentMethod,
+  setSelectedPaymentMethod,
+  useManualAmount,
+  setUseManualAmount,
+  showDepositConfirmation,
+  setShowDepositConfirmation,
+  depositStep,
+  setDepositStep,
+  stepLoading,
+  setStepLoading,
+  transactionId,
+  setTransactionId,
+  isDepositLoading,
+  setIsDepositLoading,
+  onTrackDeposit,
+  onPlayNow,
+  title = "Wallet",
+  walletAvailableBalance = 7000,
+  walletFreeBet = 500,
+}: QuickDepositDrawerProps) {
+  const [hubTab, setHubTab] = useState<WalletHubTab>("deposit");
+  const [otherMethodsOpen, setOtherMethodsOpen] = useState(false);
+  const [depositFlowScreen, setDepositFlowScreen] = useState<
+    "hub" | "card-checkout" | "bitcoin-checkout"
+  >("hub");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [saveCard, setSaveCard] = useState(true);
+  const [bitcoinQrExpanded, setBitcoinQrExpanded] = useState(true);
+  const [btcCopied, setBtcCopied] = useState(false);
+  const [btcConvFiatStr, setBtcConvFiatStr] = useState("");
+  const [btcConvCryptoStr, setBtcConvCryptoStr] = useState("");
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const prevBitcoinFlowRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setHubTab("deposit");
+      if (isMobile) setOtherMethodsOpen(false);
+      setDepositFlowScreen("hub");
+      setCardNumber("");
+      setCardExpiry("");
+      setCardCvc("");
+      setSaveCard(true);
+      setBitcoinQrExpanded(true);
+      setBtcCopied(false);
+      setBtcConvFiatStr("");
+      setBtcConvCryptoStr("");
+      prevBitcoinFlowRef.current = null;
+    }
+  }, [open, isMobile]);
+
+  useEffect(() => {
+    if (open && hubTab === "deposit") {
+      scrollAreaRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [open, hubTab]);
+
+  useEffect(() => {
+    if (!isMobile) setOtherMethodsOpen(true);
+  }, [isMobile]);
+
+  const activeMethod = useMemo(
+    () => getMethod(selectedPaymentMethod),
+    [selectedPaymentMethod],
+  );
+
+  const normalizedId = normalizeMethodId(selectedPaymentMethod);
+
+  const showCardCheckout =
+    depositFlowScreen === "card-checkout" &&
+    hubTab === "deposit" &&
+    !showDepositConfirmation;
+
+  const showBitcoinCheckout =
+    depositFlowScreen === "bitcoin-checkout" &&
+    hubTab === "deposit" &&
+    !showDepositConfirmation;
+
+  const isFlowCheckout = showCardCheckout || showBitcoinCheckout;
+
+  const checkoutTitle =
+    showDepositConfirmation
+      ? null
+      : depositFlowScreen === "card-checkout"
+        ? "Credit / Debit Card Deposit"
+        : depositFlowScreen === "bitcoin-checkout"
+          ? "Bitcoin (BTC) Deposit"
+          : null;
+
+  const bitcoinMethod = useMemo(() => getMethod("bitcoin"), []);
+  const cardMethod = PRIMARY_METHODS[0];
+
+  useEffect(() => {
+    if (!open) {
+      prevBitcoinFlowRef.current = null;
+      return;
+    }
+    if (depositFlowScreen === "bitcoin-checkout") {
+      if (prevBitcoinFlowRef.current !== "bitcoin-checkout") {
+        const u = Math.min(
+          bitcoinMethod.max,
+          Math.max(bitcoinMethod.min, depositAmount),
+        );
+        setBtcConvFiatStr(formatFiatForConverter(u));
+        setBtcConvCryptoStr(formatBtcForConverter(u / BITCOIN_USD_RATE));
+      }
+      prevBitcoinFlowRef.current = "bitcoin-checkout";
+    } else {
+      prevBitcoinFlowRef.current = depositFlowScreen;
+    }
+  }, [
+    open,
+    depositFlowScreen,
+    depositAmount,
+    bitcoinMethod.min,
+    bitcoinMethod.max,
+  ]);
+  const cardNumberDigits = useMemo(
+    () => cardDigitsOnly(cardNumber),
+    [cardNumber],
+  );
+  const isCardFormValid = useMemo(() => {
+    if (cardNumberDigits.length < 15 || cardNumberDigits.length > 19)
+      return false;
+    if (!isExpiryValid(cardExpiry)) return false;
+    const cvc = cardCvc.replace(/\D/g, "");
+    if (cvc.length < 3 || cvc.length > 4) return false;
+    return true;
+  }, [cardNumberDigits, cardExpiry, cardCvc]);
+
+  const cardFeeAmount = depositAmount * cardMethod.fee;
+  const cardTotalAmount = depositAmount + cardFeeAmount;
+
+  useEffect(() => {
+    if (isFlowCheckout) {
+      scrollAreaRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [isFlowCheckout]);
+
+  useEffect(() => {
+    if (
+      isMobile &&
+      OTHER_METHODS.some((m) => m.id === normalizedId)
+    ) {
+      setOtherMethodsOpen(true);
+    }
+  }, [normalizedId, isMobile]);
+
+  useEffect(() => {
+    const m = getMethod(selectedPaymentMethod);
+    const next = Math.min(m.max, Math.max(m.min, depositAmount));
+    if (next !== depositAmount) setDepositAmount(next);
+  }, [selectedPaymentMethod, depositAmount, setDepositAmount]);
+
+  const feeAmount = depositAmount * activeMethod.fee;
+  const totalAmount = depositAmount + feeAmount;
+
+  const handleConfirmDeposit = useCallback(
+    (opts?: { amount?: number }) => {
+      const amount =
+        opts?.amount !== undefined ? opts.amount : depositAmount;
+      if (opts?.amount !== undefined && opts.amount !== depositAmount) {
+        setDepositAmount(opts.amount);
+      }
+      setIsDepositLoading(true);
+      const txId = Math.floor(Math.random() * 10000000).toString();
+      setTransactionId(txId);
+      window.setTimeout(() => {
+        setIsDepositLoading(false);
+        setShowDepositConfirmation(true);
+        setDepositFlowScreen("hub");
+        onTrackDeposit?.({
+          amount,
+          method: normalizedId,
+        });
+        setStepLoading({
+          started: true,
+          processing: false,
+          almost: false,
+          complete: false,
+        });
+        window.setTimeout(() => {
+          setDepositStep("started");
+          setStepLoading({
+            started: false,
+            processing: true,
+            almost: false,
+            complete: false,
+          });
+          window.setTimeout(() => {
+            setDepositStep("processing");
+            setStepLoading({
+              started: false,
+              processing: false,
+              almost: true,
+              complete: false,
+            });
+            window.setTimeout(() => {
+              setDepositStep("almost");
+              setStepLoading({
+                started: false,
+                processing: false,
+                almost: false,
+                complete: true,
+              });
+              window.setTimeout(() => {
+                setDepositStep("complete");
+                setStepLoading({
+                  started: false,
+                  processing: false,
+                  almost: false,
+                  complete: false,
+                });
+              }, 800);
+            }, 1500);
+          }, 800);
+        }, 500);
+      }, 1000);
+    },
+    [
+      depositAmount,
+      normalizedId,
+      onTrackDeposit,
+      setDepositStep,
+      setDepositAmount,
+      setIsDepositLoading,
+      setShowDepositConfirmation,
+      setStepLoading,
+      setTransactionId,
+    ],
+  );
+
+  const sliderMax = Math.min(activeMethod.max, 10_000);
+  const sliderMin = activeMethod.min;
+
+  return (
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      direction={isMobile ? "bottom" : "right"}
+      shouldScaleBackground={false}
+    >
+      <DrawerContent
+        showOverlay={isMobile}
+        className={cn(
+          "relative flex flex-col bg-[#1a1a1a] text-white",
+          "w-full overflow-hidden border-l border-white/10 sm:max-w-md",
+          isMobile && "rounded-t-[10px]",
+        )}
+        style={
+          isMobile
+            ? {
+                height: "90vh",
+                maxHeight: "90vh",
+                top: "auto",
+                bottom: 0,
+              }
+            : {
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }
+        }
+      >
+        {isMobile && <DrawerHandle variant="dark" />}
+        {isMobile && checkoutTitle ? (
+          <div className="flex flex-shrink-0 items-center border-b border-white/10 px-3 py-3">
+            <div className="flex w-9 shrink-0 justify-start">
+              <button
+                type="button"
+                onClick={() => setDepositFlowScreen("hub")}
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
+                aria-label="Back"
+              >
+                <IconChevronLeft className="h-4 w-4" stroke={2} />
+              </button>
+            </div>
+            <h2 className="min-w-0 flex-1 truncate text-center text-sm font-semibold leading-tight text-white">
+              {checkoutTitle}
+            </h2>
+            <div className="flex w-9 shrink-0 justify-end">
+              <DrawerClose asChild>
+                <button
+                  type="button"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
+                  aria-label="Close"
+                >
+                  <IconX className="h-4 w-4" stroke={2} />
+                </button>
+              </DrawerClose>
+            </div>
+          </div>
+        ) : null}
+        {isMobile && !checkoutTitle && (
+          <div className="flex items-center justify-between px-4 pb-2 pt-1">
+            <h2 className="text-base font-semibold text-white">{title}</h2>
+            <DrawerClose asChild>
+              <button
+                type="button"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/15"
+                aria-label="Close"
+              >
+                <IconX className="h-4 w-4 text-white" stroke={2} />
+              </button>
+            </DrawerClose>
+          </div>
+        )}
+
+        {!isMobile && checkoutTitle ? (
+          <div className="flex flex-shrink-0 items-center border-b border-white/10 px-4 py-3">
+            <div className="flex w-9 shrink-0 justify-start">
+              <button
+                type="button"
+                onClick={() => setDepositFlowScreen("hub")}
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
+                aria-label="Back"
+              >
+                <IconChevronLeft className="h-4 w-4" stroke={2} />
+              </button>
+            </div>
+            <h2 className="min-w-0 flex-1 truncate text-center text-base font-semibold leading-tight text-white">
+              {checkoutTitle}
+            </h2>
+            <div className="flex w-9 shrink-0 justify-end">
+              <DrawerClose asChild>
+                <button
+                  type="button"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
+                  aria-label="Close"
+                >
+                  <IconX className="h-4 w-4" stroke={2} />
+                </button>
+              </DrawerClose>
+            </div>
+          </div>
+        ) : null}
+        {!isMobile && !checkoutTitle && (
+          <DrawerHeader className="relative flex-shrink-0 px-4 pb-2 pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold text-white">{title}</h2>
+              <DrawerClose asChild>
+                <button
+                  type="button"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/15"
+                  aria-label="Close"
+                >
+                  <IconX className="h-4 w-4 text-white" stroke={2} />
+                </button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+        )}
+
+        {/* Sub-navigation pill bar */}
+        {!isFlowCheckout && !showDepositConfirmation ? (
+        <div
+          className={cn(
+            "flex-shrink-0 px-4",
+            isMobile ? "pb-3 pt-1" : "pb-3 pt-0",
+          )}
+        >
+          <div className="flex rounded-full bg-white/10 p-1">
+            {HUB_TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setHubTab(t.id)}
+                className={cn(
+                  "min-w-0 flex-1 rounded-full px-2 py-2 text-center text-[11px] font-semibold transition-colors sm:text-xs",
+                  hubTab === t.id
+                    ? "bg-[var(--ds-primary,#ee3536)] text-white shadow-sm"
+                    : "text-white/65 hover:text-white",
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        ) : null}
+
+        <div
+          ref={scrollAreaRef}
+          className={cn(
+            "min-h-0 w-full flex-1 overflow-y-auto",
+            isMobile ? "px-4 pb-6" : "px-4 pb-4",
+          )}
+          style={{
+            WebkitOverflowScrolling: "touch",
+            overflowY: "auto",
+            flex: "1 1 auto",
+            minHeight: 0,
+            paddingBottom: isMobile
+              ? "env(safe-area-inset-bottom, 20px)"
+              : undefined,
+          }}
+        >
+          {showCardCheckout ? (
+            <div className="space-y-4 pb-2">
+              <Card className="border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className="space-y-4 p-4">
+                  <h3 className="font-semibold text-white">
+                    Enter your card details
+                  </h3>
+                  <div>
+                    <p className="mb-2 text-xs text-white/50">We accept</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        ["Mastercard", "Visa", "Amex", "Discover"] as const
+                      ).map((brand) => (
+                        <span
+                          key={brand}
+                          className="rounded border border-white/15 bg-white/5 px-2 py-1 text-[10px] font-medium text-white/70"
+                        >
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="qd-card-number" className="text-xs text-white/60">
+                      Card Number
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="qd-card-number"
+                        autoComplete="cc-number"
+                        value={cardNumber}
+                        onChange={(e) =>
+                          setCardNumber(formatCardNumberInput(e.target.value))
+                        }
+                        placeholder="0000 0000 0000 0000"
+                        className="border-white/15 bg-[#252525] pr-10 text-white placeholder:text-white/30"
+                      />
+                      <IconCreditCard className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label htmlFor="qd-expiry" className="text-xs text-white/60">
+                        Expiry Date
+                      </label>
+                      <Input
+                        id="qd-expiry"
+                        autoComplete="cc-exp"
+                        value={cardExpiry}
+                        onChange={(e) =>
+                          setCardExpiry(formatExpiryInput(e.target.value))
+                        }
+                        placeholder="MM/YY"
+                        className="border-white/15 bg-[#252525] text-white placeholder:text-white/30"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="qd-cvc"
+                        className="flex items-center gap-1 text-xs text-white/60"
+                      >
+                        CVC / CVV
+                        <IconInfoCircle className="h-3.5 w-3.5 text-white/35" />
+                      </label>
+                      <Input
+                        id="qd-cvc"
+                        autoComplete="cc-csc"
+                        value={cardCvc}
+                        onChange={(e) =>
+                          setCardCvc(cardDigitsOnly(e.target.value).slice(0, 4))
+                        }
+                        placeholder="000"
+                        className="border-white/15 bg-[#252525] text-white placeholder:text-white/30"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 pt-1">
+                    <Checkbox
+                      id="qd-save-card"
+                      checked={saveCard}
+                      onCheckedChange={(v) => setSaveCard(v === true)}
+                      className="mt-0.5 border-white/30 data-[state=checked]:border-emerald-600 data-[state=checked]:bg-emerald-600"
+                    />
+                    <div>
+                      <label
+                        htmlFor="qd-save-card"
+                        className="text-sm font-medium text-white"
+                      >
+                        Save Card
+                      </label>
+                      <p className="text-xs text-white/45">
+                        Saving your card details now allows you to deposit funds
+                        faster next time!
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className="space-y-4 p-4">
+                  <h3 className="font-semibold text-white">Deposit amount</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {CARD_QUICK_AMOUNTS.map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() =>
+                          setDepositAmount(Math.min(amt, cardMethod.max))
+                        }
+                        className={cn(
+                          "min-w-[4.25rem] flex-1 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-colors",
+                          Math.abs(depositAmount - amt) < 0.01
+                            ? "border-emerald-500/70 bg-emerald-500/15 text-white"
+                            : "border-white/15 bg-[#252525] text-white hover:border-white/25",
+                        )}
+                      >
+                        {currencySymbol}
+                        {amt}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="qd-amount" className="text-xs text-white/60">
+                      Amount
+                    </label>
+                    <Input
+                      id="qd-amount"
+                      type="number"
+                      min={cardMethod.min}
+                      max={cardMethod.max}
+                      step={0.01}
+                      value={depositAmount}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setDepositAmount(cardMethod.min);
+                          return;
+                        }
+                        const v = parseFloat(raw);
+                        if (Number.isNaN(v)) return;
+                        setDepositAmount(
+                          Math.min(
+                            cardMethod.max,
+                            Math.max(cardMethod.min, v),
+                          ),
+                        );
+                      }}
+                      placeholder={`${currencySymbol}0.00`}
+                      className="border-white/15 bg-[#252525] text-white placeholder:text-white/30"
+                    />
+                    <p className="text-right text-[11px] text-white/40">
+                      Min. {currencySymbol}
+                      {cardMethod.min} / Max. {currencySymbol}
+                      {cardMethod.max.toLocaleString()}
+                    </p>
+                  </div>
+                  <p className="text-xs text-white/55">
+                    Fee: {cardMethod.feeLabel} / Total Amount:{" "}
+                    {formatMoney(cardTotalAmount, currencySymbol)} USD
+                  </p>
+                  <div className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.04] p-3">
+                    <IconCurrencyBitcoin className="mt-0.5 h-5 w-5 shrink-0 text-[#f7931a]" />
+                    <p className="text-xs text-white/65">
+                      Avoid this fee!{" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedPaymentMethod("bitcoin");
+                          setDepositFlowScreen("hub");
+                        }}
+                        className="font-semibold text-sky-400 underline-offset-2 hover:underline"
+                      >
+                        Switch to Bitcoin (BTC)
+                      </button>
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => handleConfirmDeposit()}
+                    disabled={
+                      !isCardFormValid ||
+                      depositAmount < cardMethod.min ||
+                      depositAmount > cardMethod.max ||
+                      isDepositLoading
+                    }
+                    className="h-12 w-full font-semibold text-white shadow-none disabled:cursor-not-allowed disabled:opacity-100 enabled:bg-[#059669] enabled:hover:bg-[#10b981] disabled:bg-white/10 disabled:text-white/35 disabled:hover:bg-white/10"
+                  >
+                    {isDepositLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <IconLoader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </span>
+                    ) : (
+                      "DEPOSIT"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
+
+          {showBitcoinCheckout ? (
+            <div className="space-y-4 pb-2">
+              <p className="text-sm leading-snug text-white/65">
+                Copy the address or scan the QR, send from your wallet, then tap{" "}
+                <span className="font-medium text-white/85">Deposit sent</span>.
+              </p>
+
+              <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
+                {/* Estimate */}
+                <div className="px-4 py-3.5">
+                  <div className="flex items-center gap-2">
+                    <div className="relative min-w-0 flex-1">
+                      <div
+                        className="pointer-events-none absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.08] ring-1 ring-white/10"
+                        aria-hidden
+                      >
+                        <IconCurrencyDollar
+                          className="h-3.5 w-3.5 text-white/80"
+                          stroke={2}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        aria-label="Deposit amount in USD"
+                        value={btcConvFiatStr}
+                        onChange={(e) => {
+                          const s = e.target.value;
+                          setBtcConvFiatStr(s);
+                          const n = parseDecimalInput(s);
+                          if (n === null) return;
+                          setBtcConvCryptoStr(
+                            formatBtcForConverter(n / BITCOIN_USD_RATE),
+                          );
+                        }}
+                        placeholder="0.00"
+                        className="h-10 w-full rounded-lg border border-white/10 bg-transparent pl-10 pr-2.5 text-sm font-medium text-white/95 [font-variant-numeric:tabular-nums] placeholder:text-white/35 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/15"
+                      />
+                    </div>
+                    <span
+                      className="shrink-0 px-0.5 text-sm font-medium text-white/35"
+                      aria-hidden
+                    >
+                      =
+                    </span>
+                    <div className="relative min-w-0 flex-1">
+                      <div
+                        className="pointer-events-none absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-[#f7931a]/20 ring-1 ring-[#f7931a]/35"
+                        aria-hidden
+                      >
+                        <IconCurrencyBitcoin
+                          className="h-4 w-4 text-[#f7931a]"
+                          stroke={1.75}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        aria-label="Deposit amount in BTC"
+                        value={btcConvCryptoStr}
+                        onChange={(e) => {
+                          const s = e.target.value;
+                          setBtcConvCryptoStr(s);
+                          const n = parseDecimalInput(s);
+                          if (n === null) return;
+                          setBtcConvFiatStr(
+                            formatFiatForConverter(n * BITCOIN_USD_RATE),
+                          );
+                        }}
+                        placeholder="0"
+                        className="h-10 w-full rounded-lg border border-white/10 bg-transparent pl-10 pr-2.5 text-sm font-medium text-white/95 [font-variant-numeric:tabular-nums] placeholder:text-white/35 focus:border-[#f7931a]/35 focus:outline-none focus:ring-1 focus:ring-[#f7931a]/25"
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2.5 text-[11px] leading-snug text-white/48">
+                    <span className="text-white/40">Reference rate</span>
+                    <span className="mx-1.5 text-white/[0.22]" aria-hidden>
+                      ·
+                    </span>
+                    <span className="text-sky-200/55">1 BTC</span>
+                    <span className="text-white/35"> = </span>
+                    <span className="font-medium [font-variant-numeric:tabular-nums] text-white/72">
+                      {currencySymbol}
+                      {BITCOIN_USD_RATE.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 6,
+                      })}{" "}
+                      USD
+                    </span>
+                  </p>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Address + copy */}
+                <div className="px-4 py-3.5">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-white/42">
+                    Deposit address
+                  </p>
+                  <p className="mt-1.5 break-words break-all text-[13px] leading-relaxed tracking-tight text-white/78">
+                    {BITCOIN_DEMO_DEPOSIT_ADDRESS}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          BITCOIN_DEMO_DEPOSIT_ADDRESS,
+                        );
+                        setBtcCopied(true);
+                        window.setTimeout(() => setBtcCopied(false), 2200);
+                      } catch {
+                        /* clipboard unavailable */
+                      }
+                    }}
+                    className="mt-3 h-9 w-full border-white/15 bg-transparent text-xs font-semibold text-white hover:bg-white/[0.06]"
+                  >
+                    <IconCopy className="mr-2 h-3.5 w-3.5" stroke={1.5} />
+                    {btcCopied ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Limits — inline, no extra box */}
+                <div className="flex divide-x divide-white/10 px-2 py-3 text-center">
+                  <div className="min-w-0 flex-1 px-2">
+                    <p className="text-[9px] font-medium uppercase tracking-wide text-white/40">
+                      Min
+                    </p>
+                    <p className="mt-0.5 text-xs font-medium [font-variant-numeric:tabular-nums] text-white/88">
+                      {currencySymbol}
+                      {bitcoinMethod.min}
+                    </p>
+                  </div>
+                  <div className="min-w-0 flex-1 px-2">
+                    <p className="text-[9px] font-medium uppercase tracking-wide text-white/40">
+                      Max
+                    </p>
+                    <p className="mt-0.5 text-xs font-medium [font-variant-numeric:tabular-nums] text-white/88">
+                      {currencySymbol}
+                      {bitcoinMethod.max.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="min-w-0 flex-1 px-2">
+                    <p className="text-[9px] font-medium uppercase tracking-wide text-white/40">
+                      Fee
+                    </p>
+                    <p className="mt-0.5 text-xs font-medium text-white/88">
+                      {bitcoinMethod.feeLabel}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                <div className="px-4 py-3">
+                  <div className="flex gap-2.5 rounded-lg border border-amber-400/18 bg-gradient-to-b from-amber-500/[0.09] to-amber-950/[0.12] px-3 py-2.5">
+                    <IconAlertCircle
+                      className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/85"
+                      stroke={1.5}
+                    />
+                    <p className="text-[11px] leading-relaxed text-white/68">
+                      <span className="font-semibold text-amber-100/85">
+                        Important
+                      </span>
+                      <span className="text-white/35"> — </span>
+                      Send only{" "}
+                      <span className="font-medium text-white/88">
+                        Bitcoin (BTC)
+                      </span>{" "}
+                      to this address on{" "}
+                      <span className="font-medium text-white/88">
+                        Binance Smart Chain (BEP20)
+                      </span>
+                      . Other assets or networks may result in loss of funds.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setBitcoinQrExpanded((e) => !e)}
+                    className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-medium text-white">
+                      <IconCurrencyBitcoin className="h-4 w-4 text-[#f7931a]" />
+                      {bitcoinQrExpanded ? "Hide QR code" : "Show QR code"}
+                    </span>
+                    {bitcoinQrExpanded ? (
+                      <IconChevronUp className="h-4 w-4 text-white/45" />
+                    ) : (
+                      <IconChevronDown className="h-4 w-4 text-white/45" />
+                    )}
+                  </button>
+                  {bitcoinQrExpanded ? (
+                    <div className="flex flex-col items-center border-t border-white/10 px-4 pb-4 pt-3">
+                      <div className="relative rounded-lg bg-white p-2.5 shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(BITCOIN_DEMO_DEPOSIT_ADDRESS)}`}
+                          alt="Wallet QR code"
+                          width={220}
+                          height={220}
+                          className="h-[220px] w-[220px]"
+                        />
+                        <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#f7931a]">
+                          <IconCurrencyBitcoin className="h-6 w-6 text-white" />
+                        </div>
+                      </div>
+                      <a
+                        href="https://bitcoin.org/en/getting-started"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2.5 text-xs font-medium text-sky-400/90 hover:underline"
+                      >
+                        New to Bitcoin? Get started
+                      </a>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  const fiatParsed = parseDecimalInput(btcConvFiatStr);
+                  const btcParsed = parseDecimalInput(btcConvCryptoStr);
+                  let usd: number | null = fiatParsed;
+                  if (usd === null && btcParsed !== null)
+                    usd = btcParsed * BITCOIN_USD_RATE;
+                  if (usd === null || !Number.isFinite(usd) || usd < 0) {
+                    usd = bitcoinMethod.min;
+                  }
+                  const amt = Math.max(
+                    bitcoinMethod.min,
+                    Math.min(bitcoinMethod.max, usd),
+                  );
+                  handleConfirmDeposit({ amount: amt });
+                }}
+                disabled={isDepositLoading}
+                className="h-12 w-full bg-[#84cc16] font-bold uppercase tracking-wide text-white hover:bg-[#a3e635] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35"
+              >
+                {isDepositLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <IconLoader2 className="h-4 w-4 animate-spin" />
+                    Processing...
+                  </span>
+                ) : (
+                  "Deposit sent"
+                )}
+              </Button>
+            </div>
+          ) : null}
+
+          {hubTab !== "deposit" &&
+          !showDepositConfirmation &&
+          !isFlowCheckout ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm font-medium text-white/80">
+                {hubTab === "withdrawal" && "Withdrawal"}
+                {hubTab === "history" && "History"}
+                {hubTab === "settings" && "Settings"}
+              </p>
+              <p className="mt-2 max-w-[240px] text-xs text-white/45">
+                This section is coming soon. Use{" "}
+                <span className="text-white/70">Deposit</span> to add funds.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-6 border-white/20 bg-transparent text-white hover:bg-white/10"
+                onClick={() => setHubTab("deposit")}
+              >
+                Back to Deposit
+              </Button>
+            </div>
+          ) : null}
+
+          {hubTab === "deposit" &&
+          !showDepositConfirmation &&
+          !isFlowCheckout ? (
+            <>
+              {/* Balance summary */}
+              <Card className="mb-4 border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className={cn("p-4", isMobile && "p-3.5")}>
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-1.5 text-sm text-white/65">
+                      Available Balance
+                      <IconInfoCircle className="h-3.5 w-3.5 text-white/40" />
+                    </div>
+                    <span className="font-semibold tabular-nums text-white">
+                      {formatMoney(walletAvailableBalance, currencySymbol)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-3">
+                    <div className="flex items-center gap-1.5 text-sm text-white/65">
+                      Free Bet
+                      <IconInfoCircle className="h-3.5 w-3.5 text-white/40" />
+                    </div>
+                    <span className="font-semibold tabular-nums text-white">
+                      {formatMoney(walletFreeBet, currencySymbol)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="mb-4">
+                <h3 className="text-base font-bold text-white">
+                  Select your deposit method
+                </h3>
+              </div>
+
+              <div className="space-y-2.5">
+                {PRIMARY_METHODS.map((m) => (
+                  <PaymentMethodCard
+                    key={m.id}
+                    method={m}
+                    selected={normalizedId === m.id}
+                    onSelect={() => {
+                      setSelectedPaymentMethod(m.id);
+                      if (m.id === "card") {
+                        setDepositFlowScreen("card-checkout");
+                      } else if (m.id === "bitcoin") {
+                        setDepositFlowScreen("bitcoin-checkout");
+                      } else {
+                        setDepositFlowScreen("hub");
+                      }
+                    }}
+                    currencySymbol={currencySymbol}
+                    isMobile={isMobile}
+                  />
+                ))}
+              </div>
+
+              <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-white/45">
+                Other deposit methods
+              </p>
+              {isMobile && !otherMethodsOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setOtherMethodsOpen(true)}
+                  className="mb-2 flex w-full items-center justify-center gap-1 rounded-lg border border-white/15 bg-[#252525] py-2.5 text-xs font-medium text-white/80 transition-colors hover:bg-[#2a2a2a]"
+                >
+                  Show {OTHER_METHODS.length} more methods
+                  <IconChevronDown className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+              <div className="space-y-2.5">
+                {OTHER_METHODS.map((m) => (
+                  <PaymentMethodCard
+                    key={m.id}
+                    method={m}
+                    selected={normalizedId === m.id}
+                    onSelect={() => {
+                      setSelectedPaymentMethod(m.id);
+                      setDepositFlowScreen("hub");
+                    }}
+                    currencySymbol={currencySymbol}
+                    isMobile={isMobile}
+                  />
+                ))}
+              </div>
+              )}
+
+              {normalizedId === "card" ? (
+                <div className="mt-6">
+                  <Button
+                    type="button"
+                    onClick={() => setDepositFlowScreen("card-checkout")}
+                    className="h-12 w-full bg-[var(--ds-primary,#ee3536)] font-semibold text-white hover:opacity-95"
+                  >
+                    Continue with Credit / Debit Card
+                  </Button>
+                </div>
+              ) : normalizedId === "bitcoin" ? null : (
+                <>
+              <Separator className={cn("my-5 bg-white/10", isMobile && "my-4")} />
+
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-white">
+                  Amount &amp; review
+                </h3>
+                <p className="text-[11px] text-white/45">
+                  Method: {activeMethod.label}
+                </p>
+              </div>
+
+              <Card className="border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className={cn(isMobile ? "p-4" : "p-5")}>
+                  <div>
+                    {!useManualAmount ? (
+                      <>
+                        <UsageBasedPricing
+                          className="w-full"
+                          variant="dark"
+                          min={sliderMin}
+                          max={sliderMax}
+                          snapTo={
+                            sliderMin === 25 && sliderMax === 10000
+                              ? 25
+                              : Math.max(1, Math.floor(sliderMin))
+                          }
+                          currency={currencySymbol}
+                          basePrice={0}
+                          includedCredits={0}
+                          value={depositAmount}
+                          onChange={setDepositAmount}
+                          onChangeEnd={(v) => {
+                            setDepositAmount(v);
+                          }}
+                          title=""
+                          subtitle=""
+                        />
+                        <div className="mt-3 flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setUseManualAmount(true)}
+                            className="text-sm font-medium text-white/60 transition-colors hover:text-white"
+                          >
+                            + Add Manual Amount
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div
+                        className={cn("space-y-3", isMobile && "space-y-2")}
+                      >
+                        <div>
+                          <label
+                            className={cn(
+                              "mb-2 block font-semibold text-white",
+                              isMobile ? "text-xs" : "text-sm",
+                            )}
+                          >
+                            Deposit Amount
+                          </label>
+                          <Input
+                            type="number"
+                            min={activeMethod.min}
+                            max={activeMethod.max}
+                            step={0.01}
+                            value={depositAmount}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              if (
+                                value >= activeMethod.min &&
+                                value <= activeMethod.max
+                              ) {
+                                setDepositAmount(value);
+                              } else if (value > activeMethod.max) {
+                                setDepositAmount(activeMethod.max);
+                              } else if (
+                                value < activeMethod.min &&
+                                e.target.value !== ""
+                              ) {
+                                setDepositAmount(activeMethod.min);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value =
+                                parseFloat(e.target.value) || activeMethod.min;
+                              if (value < activeMethod.min) {
+                                setDepositAmount(activeMethod.min);
+                              } else if (value > activeMethod.max) {
+                                setDepositAmount(activeMethod.max);
+                              } else {
+                                setDepositAmount(value);
+                              }
+                            }}
+                            className={cn(
+                              "w-full rounded-lg border-2 border-white/15 bg-[#252525] font-medium text-white placeholder:text-white/35 focus:border-emerald-500/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/40",
+                              isMobile
+                                ? "px-3 py-2.5 text-sm"
+                                : "px-4 py-3 text-base",
+                            )}
+                            placeholder={`${activeMethod.min} – ${activeMethod.max}`}
+                          />
+                          <p
+                            className={cn(
+                              "mt-1.5 text-white/50",
+                              isMobile ? "text-[10px]" : "text-xs",
+                            )}
+                          >
+                            Min. {currencySymbol}
+                            {activeMethod.min.toLocaleString()} / Max.{" "}
+                            {currencySymbol}
+                            {activeMethod.max.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setUseManualAmount(false)}
+                            className="text-sm font-medium text-white/60 transition-colors hover:text-white"
+                          >
+                            Use Slider
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator
+                    className={cn("bg-white/10", isMobile ? "my-4" : "my-5")}
+                  />
+
+                  <div>
+                    <div
+                      className={cn(
+                        "rounded-lg bg-white/5",
+                        isMobile ? "space-y-2 p-3" : "space-y-2 p-4",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex justify-between",
+                          isMobile ? "text-xs" : "text-sm",
+                        )}
+                      >
+                        <span className="text-white/60">Deposit Amount:</span>
+                        <span className="font-medium text-white">
+                          {currencySymbol}
+                          {depositAmount.toFixed(2)}
+                        </span>
+                      </div>
+                      <div
+                        className={cn(
+                          "flex justify-between",
+                          isMobile ? "text-xs" : "text-sm",
+                        )}
+                      >
+                        <span className="text-white/60">
+                          Fee ({activeMethod.feeLabel}):
+                        </span>
+                        <span className="font-medium text-white">
+                          {currencySymbol}
+                          {feeAmount.toFixed(2)}
+                        </span>
+                      </div>
+                      <div
+                        className={cn(
+                          "flex justify-between border-t border-white/10 pt-1.5",
+                          isMobile ? "text-sm" : "text-base",
+                        )}
+                      >
+                        <span className="font-semibold text-white">
+                          Total Amount:
+                        </span>
+                        <span className="font-bold text-white">
+                          {currencySymbol}
+                          {totalAmount.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={() => handleConfirmDeposit()}
+                      disabled={
+                        depositAmount < activeMethod.min ||
+                        depositAmount > activeMethod.max ||
+                        isDepositLoading
+                      }
+                      className={cn(
+                        "w-full cursor-pointer rounded-md bg-[#059669] font-semibold text-white transition-colors hover:bg-[#10b981] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35",
+                        isMobile ? "mt-4 h-11 text-sm" : "mt-4 h-12",
+                      )}
+                      style={{ pointerEvents: "auto", zIndex: 10 }}
+                    >
+                      {isDepositLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <IconLoader2 className="h-4 w-4 animate-spin" />
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        `DEPOSIT ${currencySymbol}${
+                          depositAmount > 0
+                            ? depositAmount.toFixed(2)
+                            : "0.00"
+                        }`
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div
+                className={cn(
+                  "border-t border-white/10",
+                  isMobile ? "mt-4 pt-4" : "mt-5 pb-4 pt-5",
+                )}
+                style={
+                  isMobile
+                    ? { paddingBottom: "0px", marginBottom: 0 }
+                    : undefined
+                }
+              >
+                <div
+                  className={cn(
+                    "flex flex-col items-center",
+                    isMobile ? "gap-2" : "gap-2.5",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex items-center",
+                      isMobile ? "gap-2" : "gap-3",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex items-center text-white/55",
+                        isMobile ? "gap-1" : "gap-1.5",
+                      )}
+                    >
+                      <IconShield
+                        className={cn(
+                          "text-emerald-400",
+                          isMobile ? "h-3 w-3" : "h-3.5 w-3.5",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "font-medium",
+                          isMobile ? "text-[10px]" : "text-xs",
+                        )}
+                      >
+                        SSL Encrypted
+                      </span>
+                    </div>
+                    <div
+                      className={cn(
+                        "bg-white/20",
+                        isMobile ? "h-2.5 w-px" : "h-3.5 w-px",
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "flex items-center text-white/55",
+                        isMobile ? "gap-1" : "gap-1.5",
+                      )}
+                    >
+                      <IconLock
+                        className={cn(
+                          "text-sky-400",
+                          isMobile ? "h-3 w-3" : "h-3.5 w-3.5",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "font-medium",
+                          isMobile ? "text-[10px]" : "text-xs",
+                        )}
+                      >
+                        Secure Payment
+                      </span>
+                    </div>
+                  </div>
+                  <p
+                    className={cn(
+                      "max-w-sm text-center leading-tight text-white/45",
+                      isMobile ? "text-[10px]" : "text-xs",
+                    )}
+                  >
+                    Your payment information is secure and encrypted. We never
+                    store your full card details.
+                  </p>
+                </div>
+              </div>
+                </>
+              )}
+            </>
+          ) : null}
+
+          {showDepositConfirmation ? (
+            <div className="space-y-6">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold text-white">
+                  Your deposit is on the way...
+                </h2>
+                <p className="text-sm text-white/50">
+                  Transaction ID: {transactionId}
+                </p>
+              </div>
+
+              <Card className="border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/60">
+                        Deposit Amount
+                      </span>
+                      <span className="text-lg font-semibold text-white">
+                        {currencySymbol}
+                        {depositAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <Separator className="bg-white/10" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/60">
+                        Payment Method
+                      </span>
+                      <span className="text-sm font-medium text-white">
+                        {formatPaymentMethodLabel(selectedPaymentMethod)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-white/10 bg-[#2d2d2d] shadow-none">
+                <CardContent className="p-4">
+                  <div className="relative">
+                    <div className="flex items-start justify-between px-1">
+                      <div className="flex min-w-0 flex-1 flex-col items-center">
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                            depositStep === "started" ||
+                            depositStep === "processing" ||
+                            depositStep === "almost" ||
+                            depositStep === "complete"
+                              ? "bg-[#059669] shadow-sm"
+                              : "border-2 border-white/20 bg-white/10"
+                          }`}
+                        >
+                          {stepLoading.started ? (
+                            <IconLoader2 className="h-4 w-4 animate-spin text-white" />
+                          ) : depositStep === "started" ||
+                            depositStep === "processing" ||
+                            depositStep === "almost" ||
+                            depositStep === "complete" ? (
+                            <IconCheck className="h-5 w-5 text-white" />
+                          ) : null}
+                        </div>
+                        <span className="whitespace-nowrap text-xs font-medium text-white">
+                          Started
+                        </span>
+                      </div>
+
+                      <div
+                        className={`mx-2 mt-5 h-1 flex-1 rounded-full transition-all ${
+                          depositStep === "processing" ||
+                          depositStep === "almost" ||
+                          depositStep === "complete"
+                            ? "bg-[#059669]"
+                            : "bg-white/15"
+                        }`}
+                      />
+
+                      <div className="flex min-w-0 flex-1 flex-col items-center">
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                            depositStep === "processing"
+                              ? "border-2 border-white/25 bg-[#2d2d2d] shadow-sm"
+                              : depositStep === "almost" ||
+                                  depositStep === "complete"
+                                ? "bg-[#059669] shadow-sm"
+                                : "border-2 border-white/20 bg-white/10"
+                          }`}
+                        >
+                          {stepLoading.processing ? (
+                            <IconLoader2 className="h-4 w-4 animate-spin text-white" />
+                          ) : depositStep === "processing" ? (
+                            <IconLoader2 className="h-4 w-4 animate-spin text-white" />
+                          ) : depositStep === "almost" ||
+                            depositStep === "complete" ? (
+                            <IconCheck className="h-5 w-5 text-white" />
+                          ) : (
+                            <span className="text-xs font-bold text-white/35">
+                              B
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          className={`whitespace-nowrap text-xs font-medium ${
+                            depositStep === "processing" ||
+                            depositStep === "almost" ||
+                            depositStep === "complete"
+                              ? "text-white"
+                              : "text-white/45"
+                          }`}
+                        >
+                          Processing
+                        </span>
+                      </div>
+
+                      <div
+                        className={`mx-2 mt-5 h-1 flex-1 rounded-full transition-all ${
+                          depositStep === "almost" ||
+                          depositStep === "complete"
+                            ? "bg-[#059669]"
+                            : "bg-white/15"
+                        }`}
+                      />
+
+                      <div className="flex min-w-0 flex-1 flex-col items-center">
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                            depositStep === "almost" ||
+                            depositStep === "complete"
+                              ? "bg-[#059669] shadow-sm"
+                              : "border-2 border-white/20 bg-white/10"
+                          }`}
+                        >
+                          {stepLoading.almost ? (
+                            <IconLoader2 className="h-4 w-4 animate-spin text-white" />
+                          ) : depositStep === "almost" ||
+                            depositStep === "complete" ? (
+                            <IconCheck className="h-5 w-5 text-white" />
+                          ) : null}
+                        </div>
+                        <span
+                          className={`whitespace-nowrap text-xs font-medium ${
+                            depositStep === "almost" ||
+                            depositStep === "complete"
+                              ? "text-white"
+                              : "text-white/45"
+                          }`}
+                        >
+                          Almost Done
+                        </span>
+                      </div>
+
+                      <div
+                        className={`mx-2 mt-5 h-1 flex-1 rounded-full transition-all ${
+                          depositStep === "complete"
+                            ? "bg-[#059669]"
+                            : "bg-white/15"
+                        }`}
+                      />
+
+                      <div className="flex min-w-0 flex-1 flex-col items-center">
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                            depositStep === "complete"
+                              ? "bg-[#059669] shadow-sm"
+                              : "border-2 border-white/20 bg-white/10"
+                          }`}
+                        >
+                          {stepLoading.complete ? (
+                            <IconLoader2 className="h-4 w-4 animate-spin text-white" />
+                          ) : depositStep === "complete" ? (
+                            <IconCheck className="h-5 w-5 text-white" />
+                          ) : null}
+                        </div>
+                        <span
+                          className={`whitespace-nowrap text-xs font-medium ${
+                            depositStep === "complete"
+                              ? "text-white"
+                              : "text-white/45"
+                          }`}
+                        >
+                          Complete
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {depositStep === "complete" && (
+                <Button
+                  variant="ghost"
+                  onClick={onPlayNow}
+                  className="mt-4 h-11 w-full rounded-md border-2 border-white/20 font-semibold text-white transition-colors hover:border-white/35 hover:bg-white/10"
+                >
+                  Play Now
+                </Button>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

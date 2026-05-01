@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Chat toggle button for the main nav header.
- * Sits next to the DEPOSIT button. Shows online indicator when chat is closed.
+ * Sits next to the Wallet button. Shows online indicator when chat is closed.
  */
 export default function ChatNavToggle() {
   const { isOpen, toggleChat } = useChatStore()

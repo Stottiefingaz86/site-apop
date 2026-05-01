@@ -2224,7 +2224,7 @@ const DESIGNED_JOURNEYS: DesignedJourney[] = [
     icon: IconWallet,
     steps: [
       { page: 'home', action: 'Land on Home', detail: 'User arrives at the home page' },
-      { page: 'home', action: 'Click Deposit', detail: 'Taps the DEPOSIT button in the header' },
+      { page: 'home', action: 'Click Wallet', detail: 'Taps the Wallet button in the header' },
       { page: 'deposit', action: 'Select Amount', detail: 'Chooses a preset or enters custom amount' },
       { page: 'deposit', action: 'Choose Payment', detail: 'Selects payment method (card, crypto, etc.)' },
       { page: 'deposit', action: 'Confirm', detail: 'Reviews and confirms the deposit' },

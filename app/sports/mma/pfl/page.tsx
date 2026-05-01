@@ -9,6 +9,7 @@ import { ReloadClaim } from '@/components/vip/reload-claim'
 import { CashDropCode } from '@/components/vip/cash-drop-code'
 import { BetAndGet } from '@/components/vip/bet-and-get'
 import { RewardCrates } from '@/components/vip/reward-crates'
+import { VipTierProgressBar } from '@/components/vip/vip-tier-progress-bar'
 import { SidebarPromos } from '@/components/sidebar-promos'
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
@@ -231,7 +232,7 @@ import {
   type IconButtonProps,
 } from '@/components/animate-ui/components/buttons/icon'
 import { Heart } from 'lucide-react'
-import { UsageBasedPricing } from '@/components/billingsdk/usage-based-pricing'
+import { QuickDepositDrawer } from '@/components/deposit/quick-deposit-drawer'
 import {
   FamilyDrawerAnimatedContent,
   FamilyDrawerAnimatedWrapper,
@@ -568,85 +569,6 @@ function LazyGameTile({ index, columnIndex, rowIndex, onTileClick, isMobile = fa
         <div className="w-full h-full rounded-small bg-white/5 animate-pulse" />
       )}
     </motion.div>
-  )
-}
-
-// VIP Progress Bar Component
-function VIPProgressBar({ value = 45 }: { value?: number }) {
-  const [animatedValue, setAnimatedValue] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !isVisible) {
-            setIsVisible(true)
-            // Animate progress bar from 0 to target value
-            const duration = 1500 // 1.5 seconds
-            const startTime = Date.now()
-            const startValue = 0
-            const endValue = value
-
-            const animate = () => {
-              const elapsed = Date.now() - startTime
-              const progress = Math.min(elapsed / duration, 1)
-              // Ease out cubic for smooth animation
-              const eased = 1 - Math.pow(1 - progress, 3)
-              const currentValue = startValue + (endValue - startValue) * eased
-              setAnimatedValue(currentValue)
-
-              if (progress < 1) {
-                requestAnimationFrame(animate)
-              } else {
-                setAnimatedValue(endValue)
-              }
-            }
-
-            requestAnimationFrame(animate)
-            observer.disconnect()
-          }
-        })
-      },
-      { threshold: 0.1 }
-    )
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current)
-    }
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current)
-      }
-      observer.disconnect()
-    }
-  }, [value, isVisible])
-
-  return (
-    <div ref={containerRef} className="flex items-center gap-2">
-      <div className="relative flex-1 h-2.5 bg-white/10 dark:bg-white/10 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden transition-colors duration-300" style={{ maxWidth: '75%' }}>
-        <motion.div
-          className="h-full rounded-full"
-          style={{
-            background: 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-            boxShadow: '0 0 8px rgba(251, 191, 36, 0.5)'
-          }}
-          initial={{ width: '0%' }}
-          animate={{ width: `${animatedValue}%` }}
-          transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
-        />
-      </div>
-      <motion.div
-        className="text-xs text-gray-700 dark:text-white/70 whitespace-nowrap transition-colors duration-300"
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
-        <NumberFlow value={Math.round(animatedValue)} />%
-      </motion.div>
-    </div>
   )
 }
 
@@ -2533,8 +2455,7 @@ function VIPRewardsPage({ brandPrimary, setVipDrawerOpen, setVipActiveTab, setSh
               <Card className="bg-white/5 dark:bg-white/5 bg-gray-100 dark:bg-white/5 border-white/10 dark:border-white/10 border-gray-200 dark:border-white/10 flex-shrink-0 transition-colors duration-300 w-full md:w-[280px]" style={{ minHeight: '140px' }}>
                 <CardContent className="p-4">
                   <CardTitle className="text-sm text-white/70 dark:text-white/70 text-gray-800 dark:text-white/70 mb-4 transition-colors duration-300">Gold To Platinum I</CardTitle>
-                  <VIPProgressBar value={45} />
-                  <div className="text-xs text-gray-600 dark:text-white/50 mt-2 transition-colors duration-300">Updated 24/25/2024, 8:00 PM ET</div>
+                  <VipTierProgressBar value={45} nextTierLabel="Platinum I" wagerRemaining="$2,750" />
                 </CardContent>
               </Card>
               
@@ -7897,8 +7818,7 @@ function VipDrawerContent({
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-4">
                 <CardTitle className="text-sm text-white/70 mb-2">Gold To Platinum I</CardTitle>
-                <VIPProgressBar value={45} />
-                <div className="text-xs text-white/50 mt-2">Updated 24/25/2024, 8:00 PM ET</div>
+                <VipTierProgressBar value={45} nextTierLabel="Platinum I" wagerRemaining="$2,750" />
               </CardContent>
             </Card>
 
@@ -8903,7 +8823,7 @@ function NavTestPageContent() {
                 style={{ pointerEvents: 'auto', zIndex: 101, position: 'relative', cursor: 'pointer' }}
               >
                 <IconWallet className="w-3.5 h-3.5 text-white" />
-                <span className="text-white">DEPOSIT</span>
+                <span className="text-white">Wallet</span>
               </Button>
             )}
 
@@ -9165,447 +9085,64 @@ function NavTestPageContent() {
         )}
 
         {/* Deposit Drawer - Rendered outside header to avoid conflicts */}
-        <Drawer open={depositDrawerOpen} onOpenChange={handleDepositDrawerOpenChange} direction={isMobile ? "bottom" : "right"} shouldScaleBackground={false}>
-          <DrawerContent 
-                showOverlay={isMobile}
-                className={cn(
-                  "bg-white text-gray-900 flex flex-col relative",
-                  "w-full sm:max-w-md border-l border-gray-200 overflow-hidden",
-                  isMobile && "rounded-t-[10px]"
-                )}
-                style={isMobile ? {
-                  height: '80vh',
-                  maxHeight: '80vh',
-                  top: 'auto',
-                  bottom: 0,
-                } : { display: 'flex', flexDirection: 'column' as const, overflow: 'hidden' }}
-              >
-                {isMobile && <DrawerHandle variant="dark" />}
-            
-                {!isMobile && (
-              <DrawerHeader className="relative flex-shrink-0 px-4 pt-4 pb-2">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-semibold text-gray-900">Quick Deposit</h2>
-                  <DrawerClose asChild>
-                    <button className="h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors flex-shrink-0">
-                      <IconX className="h-4 w-4 text-gray-600" />
-                    </button>
-                  </DrawerClose>
-              </div>
-            </DrawerHeader>
-            )}
-            <div className={cn("w-full overflow-y-auto flex-1 min-h-0", isMobile ? "px-4 pt-4 pb-6" : "px-4 pt-4 pb-4")} style={{ WebkitOverflowScrolling: 'touch', overflowY: 'auto', flex: '1 1 auto', minHeight: 0, paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 20px)' : undefined }}>
-              {!showDepositConfirmation ? (
-              <>
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardContent className={cn(isMobile ? "p-4" : "p-5")}>
-                  {/* Saved Methods Dropdown */}
-                  <div className={cn(isMobile ? "mb-4" : "mb-5")}>
-                    <div className={cn("flex items-center justify-between", isMobile ? "mb-3" : "mb-3")}>
-                      <label className="block text-sm font-semibold text-gray-900">
-                        Saved Methods
-                      </label>
-                      <button
-                        onClick={() => {
-                          console.log("Add new deposit method clicked");
-                          // Handle adding new deposit method
-                        }}
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        + Add Method
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <div className="relative">
-                        <select
-                          value={selectedPaymentMethod}
-                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                          className="w-full px-4 py-3.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 appearance-none cursor-pointer hover:border-gray-300 transition-all shadow-sm pr-12"
-                        >
-                          <option value="bitcoin">Bitcoin</option>
-                          <option value="card1">Mastercard **** 0740</option>
-                          <option value="card2">Visa **** 5234</option>
-                          <option value="card3">American Express **** 1234</option>
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <IconChevronDown className="h-4 w-4 text-gray-600" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator className={cn("bg-gray-200", isMobile ? "my-4" : "my-5")} />
-
-                  {/* Deposit Amount */}
-                  <div>
-                    {!useManualAmount ? (
-                      <>
-                        <UsageBasedPricing
-                          className="w-full"
-                          min={25}
-                          max={10000}
-                          snapTo={25}
-                          currency={currentBrand.symbol}
-                          basePrice={0}
-                          includedCredits={0}
-                          value={depositAmount}
-                          onChange={setDepositAmount}
-                          onChangeEnd={(v) => {
-                            console.log("Deposit amount committed:", v);
-                            setDepositAmount(v);
-                          }}
-                          title=""
-                          subtitle=""
-                        />
-                        <div className="flex items-center justify-end mt-3">
-                          <button
-                            onClick={() => setUseManualAmount(true)}
-                            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                          >
-                            + Add Manual Amount
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className={cn("space-y-3", isMobile && "space-y-2")}>
-                        <div>
-                          <label className={cn("block font-semibold text-gray-900 mb-2", isMobile ? "text-xs" : "text-sm")}>
-                            Deposit Amount
-                          </label>
-                          <Input
-                            type="number"
-                            min={25}
-                            max={10000}
-                            step={0.01}
-                            value={depositAmount}
-                            onChange={(e) => {
-                              const value = parseFloat(e.target.value) || 0;
-                              if (value >= 25 && value <= 10000) {
-                                setDepositAmount(value);
-                              } else if (value > 10000) {
-                                setDepositAmount(10000);
-                              } else if (value < 25 && e.target.value !== '') {
-                                setDepositAmount(25);
-                              }
-                            }}
-                            onBlur={(e) => {
-                              const value = parseFloat(e.target.value) || 25;
-                              if (value < 25) {
-                                setDepositAmount(25);
-                              } else if (value > 10000) {
-                                setDepositAmount(10000);
-                              } else {
-                                setDepositAmount(value);
-                              }
-                            }}
-                            className={cn(
-                              "w-full bg-white border-2 border-gray-200 rounded-lg text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 hover:border-gray-300 transition-all",
-                              isMobile ? "px-3 py-2.5 text-sm" : "px-4 py-3 text-base"
-                            )}
-                            placeholder="Enter amount (25 - 10,000)"
-                          />
-                          <p className={cn("text-gray-500 mt-1.5", isMobile ? "text-[10px]" : "text-xs")}>
-                            Min. {currentBrand.symbol}25 / Max. {currentBrand.symbol}10,000
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-end">
-                          <button
-                            onClick={() => setUseManualAmount(false)}
-                            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                          >
-                            Use Slider
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <Separator className={cn("bg-gray-200", isMobile ? "my-6" : "my-8")} />
-
-                  {/* Deposit Summary */}
-                  <div>
-                    <div className={cn("bg-gray-50 rounded-lg", isMobile ? "space-y-2 p-3" : "space-y-2 p-4")}>
-                      <div className={cn("flex justify-between", isMobile ? "text-xs" : "text-sm")}>
-                        <span className="text-gray-600">Deposit Amount:</span>
-                        <span className="text-gray-900 font-medium">{currentBrand.symbol}{depositAmount.toFixed(2)}</span>
-                      </div>
-                      <div className={cn("flex justify-between", isMobile ? "text-xs" : "text-sm")}>
-                        <span className="text-gray-600">Fee (9.75%):</span>
-                        <span className="text-gray-900 font-medium">{currentBrand.symbol}{(depositAmount * 0.0975).toFixed(2)}</span>
-                      </div>
-                      <div className={cn("flex justify-between pt-1.5 border-t border-gray-200", isMobile ? "text-sm" : "text-base")}>
-                        <span className="text-gray-900 font-semibold">Total Amount:</span>
-                        <span className="text-gray-900 font-bold">{currentBrand.symbol}{(depositAmount + depositAmount * 0.0975).toFixed(2)}</span>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        console.log("Deposit: Proceed with amount:", depositAmount);
-                        // Show loading state
-                        setIsDepositLoading(true)
-                        
-                        // Generate transaction ID
-                        const txId = Math.floor(Math.random() * 10000000).toString()
-                        setTransactionId(txId)
-                        
-                        // After 1 second, show confirmation screen and start stepper
-                        setTimeout(() => {
-                          setIsDepositLoading(false)
-                          setShowDepositConfirmation(true)
-                          
-                          // Start with loading state for 'started'
-                          setStepLoading({started: true, processing: false, almost: false, complete: false})
-                          setTimeout(() => {
-                            setDepositStep('started')
-                            setStepLoading({started: false, processing: true, almost: false, complete: false})
-                            setTimeout(() => {
-                              setDepositStep('processing')
-                              setStepLoading({started: false, processing: false, almost: true, complete: false})
-                              setTimeout(() => {
-                                setDepositStep('almost')
-                                setStepLoading({started: false, processing: false, almost: false, complete: true})
-                                setTimeout(() => {
-                                  setDepositStep('complete')
-                                  setStepLoading({started: false, processing: false, almost: false, complete: false})
-                                }, 800)
-                              }, 1500)
-                            }, 800)
-                          }, 500)
-                        }, 1000)
-                      }}
-                      disabled={depositAmount < 25 || depositAmount > 10000 || isDepositLoading}
-                      className={cn("w-full bg-[#8BC34A] text-white hover:bg-[#7CB342] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md font-semibold transition-colors cursor-pointer", isMobile ? "h-11 mt-4 text-sm" : "h-12 mt-4")}
-                      style={{ pointerEvents: 'auto', zIndex: 10 }}
-                    >
-                      {isDepositLoading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <IconLoader2 className="w-4 h-4 animate-spin" />
-                          <span>Processing...</span>
-                        </div>
-                      ) : (
-                        `DEPOSIT ${currentBrand.symbol}${depositAmount > 0 ? depositAmount.toFixed(2) : "0.00"}`
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Trust Section */}
-              <div className={cn("border-t border-gray-200", isMobile ? "mt-4 pt-4" : "mt-5 pt-5 pb-4")} style={isMobile ? { paddingBottom: '0px', marginBottom: 0 } : undefined}>
-                <div className={cn("flex flex-col items-center", isMobile ? "gap-2" : "gap-2.5")}>
-                  {/* Security Badges */}
-                  <div className={cn("flex items-center", isMobile ? "gap-2" : "gap-3")}>
-                    <div className={cn("flex items-center text-gray-600", isMobile ? "gap-1" : "gap-1.5")}>
-                      <IconShield className={cn("text-green-600", isMobile ? "w-3 h-3" : "w-3.5 h-3.5")} />
-                      <span className={cn("font-medium", isMobile ? "text-[10px]" : "text-xs")}>SSL Encrypted</span>
-                    </div>
-                    <div className={cn("bg-gray-300", isMobile ? "w-px h-2.5" : "w-px h-3.5")} />
-                    <div className={cn("flex items-center text-gray-600", isMobile ? "gap-1" : "gap-1.5")}>
-                      <IconLock className={cn("text-blue-600", isMobile ? "w-3 h-3" : "w-3.5 h-3.5")} />
-                      <span className={cn("font-medium", isMobile ? "text-[10px]" : "text-xs")}>Secure Payment</span>
-                    </div>
-                  </div>
-
-                  {/* Trust Statement */}
-                  <p className={cn("text-gray-500 text-center max-w-sm leading-tight", isMobile ? "text-[10px]" : "text-xs")}>
-                    Your payment information is secure and encrypted. We never store your full card details.
-                  </p>
-                </div>
-              </div>
-              </>
-              ) : (
-                /* Deposit Confirmation Screen */
-                <div className="space-y-6">
-                  {/* Header Section */}
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-bold text-gray-900">Your deposit is on the way...</h2>
-                    <p className="text-gray-500 text-sm">Transaction ID: {transactionId}</p>
-                  </div>
-
-                  {/* Deposit Details Card */}
-                  <Card className="bg-gray-50 border border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Deposit Amount</span>
-                          <span className="text-lg font-semibold text-gray-900">{currentBrand.symbol}{depositAmount.toFixed(2)}</span>
-                        </div>
-                        <Separator className="bg-gray-200" />
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Payment Method</span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {selectedPaymentMethod === 'bitcoin' ? 'Bitcoin' : 
-                             selectedPaymentMethod === 'card1' ? 'Mastercard **** 0740' :
-                             selectedPaymentMethod === 'card2' ? 'Visa **** 5234' :
-                             selectedPaymentMethod === 'card3' ? 'American Express **** 1234' : selectedPaymentMethod}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                    
-                    {/* Stepper Progress Card */}
-                    <Card className="bg-white border border-gray-200 shadow-sm">
-                      <CardContent className="p-4">
-                        <div className="relative">
-                          <div className="flex items-start justify-between px-1">
-                            {/* Started Step */}
-                            <div className="flex flex-col items-center flex-1 min-w-0">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                                depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
-                              }`}>
-                                {stepLoading.started ? (
-                                  <IconLoader2 className="w-4 h-4 text-white animate-spin" />
-                                ) : depositStep === 'started' || depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete' ? (
-                                  <IconCheck className="w-5 h-5 text-white" />
-                                ) : null}
-                              </div>
-                              <span className="text-gray-900 text-xs font-medium whitespace-nowrap">Started</span>
-                            </div>
-                            
-                            {/* Connector Line */}
-                            <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                              depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
-                            }`} />
-                            
-                            {/* Processing Step */}
-                            <div className="flex flex-col items-center flex-1 min-w-0">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                                depositStep === 'processing'
-                                  ? 'bg-white border-2 border-gray-300 shadow-sm' 
-                                  : depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm'
-                                  : 'bg-gray-200 border-2 border-gray-300'
-                              }`}>
-                                {stepLoading.processing ? (
-                                  <IconLoader2 className="w-4 h-4 text-gray-900 animate-spin" />
-                                ) : depositStep === 'processing' ? (
-                                  <IconLoader2 className="w-4 h-4 text-gray-900 animate-spin" />
-                                ) : depositStep === 'almost' || depositStep === 'complete' ? (
-                                  <IconCheck className="w-5 h-5 text-white" />
-                                ) : (
-                                  <span className="text-gray-400 text-xs font-bold">B</span>
-                                )}
-                              </div>
-                              <span className={`text-xs font-medium whitespace-nowrap ${
-                                depositStep === 'processing' || depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'text-gray-900' : 'text-gray-500'
-                              }`}>Processing</span>
-                            </div>
-                            
-                            {/* Connector Line */}
-                            <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                              depositStep === 'almost' || depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
-                            }`} />
-                            
-                            {/* Almost Done Step */}
-                            <div className="flex flex-col items-center flex-1 min-w-0">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                                depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
-                              }`}>
-                                {stepLoading.almost ? (
-                                  <IconLoader2 className="w-4 h-4 text-white animate-spin" />
-                                ) : depositStep === 'almost' || depositStep === 'complete' ? (
-                                  <IconCheck className="w-5 h-5 text-white" />
-                                ) : null}
-                              </div>
-                              <span className={`text-xs font-medium whitespace-nowrap ${
-                                depositStep === 'almost' || depositStep === 'complete'
-                                  ? 'text-gray-900' : 'text-gray-500'
-                              }`}>Almost Done</span>
-                            </div>
-                            
-                            {/* Connector Line */}
-                            <div className={`flex-1 h-1 mt-5 mx-2 transition-all rounded-full ${
-                              depositStep === 'complete'
-                                ? 'bg-[#8BC34A]' : 'bg-gray-200'
-                            }`} />
-                            
-                            {/* Complete Step */}
-                            <div className="flex flex-col items-center flex-1 min-w-0">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                                depositStep === 'complete'
-                                  ? 'bg-[#8BC34A] shadow-sm' : 'bg-gray-200 border-2 border-gray-300'
-                              }`}>
-                                {stepLoading.complete ? (
-                                  <IconLoader2 className="w-4 h-4 text-white animate-spin" />
-                                ) : depositStep === 'complete' ? (
-                                  <IconCheck className="w-5 h-5 text-white" />
-                                ) : null}
-                              </div>
-                              <span className={`text-xs font-medium whitespace-nowrap ${
-                                depositStep === 'complete'
-                                  ? 'text-gray-900' : 'text-gray-500'
-                              }`}>Complete</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Play Now Button */}
-                    {depositStep === 'complete' && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          // Close drawer first
-                          setShowDepositConfirmation(false)
-                          setDepositDrawerOpen(false)
-                          setDepositStep('started')
-                          setStepLoading({started: false, processing: false, almost: false, complete: false})
-                          
-                          // Wait for drawer to close, then animate balance
-                          setTimeout(() => {
-                            // Update balance and animate roll-up
-                            const newBalance = balance + depositAmount
-                            setBalance(newBalance)
-                            
-                            // Animate the balance roll-up
-                            const startBalance = displayBalance
-                            const endBalance = newBalance
-                            const duration = 1000 // 1 second
-                            const startTime = Date.now()
-                            
-                            const animate = () => {
-                              const elapsed = Date.now() - startTime
-                              const progress = Math.min(elapsed / duration, 1)
-                              // Easing function for smooth animation
-                              const easeOutCubic = 1 - Math.pow(1 - progress, 3)
-                              const currentBalance = Math.round(startBalance + (endBalance - startBalance) * easeOutCubic)
-                              setDisplayBalance(currentBalance)
-                              
-                              if (progress < 1) {
-                                requestAnimationFrame(animate)
-                              } else {
-                                // Show toast after animation completes
-                                const message = `Deposit of ${currentBrand.symbol}${depositAmount.toFixed(2)} was successful`
-                                console.log('Showing toast:', message)
-                                setToastMessage(message)
-                                setShowToast(true)
-                                setTimeout(() => {
-                                  console.log('Hiding toast')
-                                  setShowToast(false)
-                                }, 3000)
-                              }
-                            }
-                            requestAnimationFrame(animate)
-                          }, 300) // Small delay to ensure drawer is closed
-                        }}
-                        className="w-full h-11 mt-4 border-2 border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 rounded-md font-semibold transition-colors"
-                      >
-                        Play Now
-                      </Button>
-                    )}
-                </div>
-              )}
-            </div>
-          </DrawerContent>
-        </Drawer>
+        <QuickDepositDrawer
+          open={depositDrawerOpen}
+          onOpenChange={handleDepositDrawerOpenChange}
+          isMobile={isMobile}
+          currencySymbol={currentBrand.symbol}
+          walletAvailableBalance={displayBalance}
+          walletFreeBet={500}
+          depositAmount={depositAmount}
+          setDepositAmount={setDepositAmount}
+          selectedPaymentMethod={selectedPaymentMethod}
+          setSelectedPaymentMethod={setSelectedPaymentMethod}
+          useManualAmount={useManualAmount}
+          setUseManualAmount={setUseManualAmount}
+          showDepositConfirmation={showDepositConfirmation}
+          setShowDepositConfirmation={setShowDepositConfirmation}
+          depositStep={depositStep}
+          setDepositStep={setDepositStep}
+          stepLoading={stepLoading}
+          setStepLoading={setStepLoading}
+          transactionId={transactionId}
+          setTransactionId={setTransactionId}
+          isDepositLoading={isDepositLoading}
+          setIsDepositLoading={setIsDepositLoading}
+          onPlayNow={() => {
+            setShowDepositConfirmation(false)
+            setDepositDrawerOpen(false)
+            setDepositStep('started')
+            setStepLoading({started: false, processing: false, almost: false, complete: false})
+            setTimeout(() => {
+              const newBalance = balance + depositAmount
+              setBalance(newBalance)
+              const startBalance = displayBalance
+              const endBalance = newBalance
+              const duration = 1000
+              const startTime = Date.now()
+              const animate = () => {
+                const elapsed = Date.now() - startTime
+                const progress = Math.min(elapsed / duration, 1)
+                const easeOutCubic = 1 - Math.pow(1 - progress, 3)
+                const currentBalance = Math.round(startBalance + (endBalance - startBalance) * easeOutCubic)
+                setDisplayBalance(currentBalance)
+                if (progress < 1) {
+                  requestAnimationFrame(animate)
+                } else {
+                  const message = `Deposit of ${currentBrand.symbol}${depositAmount.toFixed(2)} was successful`
+                  console.log('Showing toast:', message)
+                  setToastMessage(message)
+                  setShowToast(true)
+                  setTimeout(() => {
+                    console.log('Hiding toast')
+                    setShowToast(false)
+                  }, 3000)
+                }
+              }
+              requestAnimationFrame(animate)
+            }, 300)
+          }}
+        />
 
         {/* Content area with sidebar and main content - starts below header */}
         <div className="flex relative" style={{ marginTop: '64px' }}>
@@ -10520,7 +10057,7 @@ function NavTestPageContent() {
                           <CardContent className="p-4 relative z-10">
                             <CardTitle className="text-sm text-white/70 dark:text-white/70 text-gray-800 dark:text-white/70 mb-4 transition-colors duration-300">VIP Rewards</CardTitle>
                             <div className="text-xs text-gray-600 dark:text-white/50 mb-2 transition-colors duration-300">Gold To Platinum I</div>
-                            <VIPProgressBar value={45} />
+                            <VipTierProgressBar value={45} variant="compact" showOriginalsNote={false} />
                           </CardContent>
                           {/* Sweep effect */}
                           <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out z-0" />
@@ -12702,7 +12239,7 @@ function NavTestPageContent() {
                             {/* VIP Progress Bar */}
                             <div className="px-4 py-3 border-t border-white/10 bg-white/5">
                               <div className="text-xs text-white/70 mb-2">Gold To Platinum I</div>
-                              <VIPProgressBar value={45} />
+                              <VipTierProgressBar value={45} variant="compact" showOriginalsNote={false} />
                             </div>
                           </motion.div>
                         )}
@@ -13027,7 +12564,7 @@ function NavTestPageContent() {
                 maxWidth: '384px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
                 <div style={{ 
                   width: '20px', 
                   height: '20px', 
@@ -13054,6 +12591,17 @@ function NavTestPageContent() {
                   </Button>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowToast(false)
+                  setToastAction(null)
+                }}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/15 bg-white/[0.06] text-white/55 transition-colors hover:bg-white/[0.12] hover:text-white"
+                aria-label="Dismiss notification"
+              >
+                <IconX className="h-4 w-4" strokeWidth={2} />
+              </button>
             </motion.div>
           )}
         </AnimatePresence>,

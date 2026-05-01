@@ -19,6 +19,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      closeButton
       offset={20}
       gap={12}
       icons={{
@@ -36,14 +37,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "!bg-[#0e0e11]/95 !backdrop-blur-xl",
             "!border !border-white/10",
             "!rounded-xl !shadow-[0_18px_40px_-12px_rgba(0,0,0,0.6),0_4px_12px_rgba(0,0,0,0.35)]",
-            // size & layout
-            "!w-[360px] !p-4 !pl-4 !gap-3",
-            // text
+            // layout: full-width action row; close pinned top-right (not beside CTA)
+            "!relative !flex !flex-wrap !items-start !gap-x-3 !gap-y-0 !pb-2",
+            "!w-[360px] !p-4 !pl-4",
             "!text-white !font-medium",
-            // left accent: inset shadow (stays solid during slide/transform; ::before can tear)
             "!shadow-[inset_3px_0_0_0_var(--toast-accent,rgba(255,255,255,0.25)),0_18px_40px_-12px_rgba(0,0,0,0.6),0_4px_12px_rgba(0,0,0,0.35)]",
-            // smooth entrance
             "data-[mounted=true]:!animate-in data-[mounted=true]:fade-in-0 data-[mounted=true]:slide-in-from-left-2",
+            "[&_[data-content]]:!min-w-0 [&_[data-content]]:!flex-1 [&_[data-content]]:!pr-11",
+            "[&_[data-button]]:!mt-3 [&_[data-button]]:!h-9 [&_[data-button]]:!basis-full [&_[data-button]]:!grow-0 [&_[data-button]]:!shrink-0 [&_[data-button]]:!justify-center [&_[data-button]]:!ml-0 [&_[data-button]]:!mr-0",
+            "[&_[data-cancel]]:!mt-3 [&_[data-cancel]]:!h-9 [&_[data-cancel]]:!basis-full [&_[data-cancel]]:!grow-0 [&_[data-cancel]]:!shrink-0 [&_[data-cancel]]:!justify-center [&_[data-cancel]]:!ml-0 [&_[data-cancel]]:!mr-0",
           ].join(" "),
           title: "!text-white !font-semibold !text-[14px] !leading-tight !tracking-tight",
           description: "!text-white/60 !text-[12.5px] !leading-snug !mt-0.5",
@@ -82,8 +84,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "hover:!bg-white/[0.12] hover:!text-white",
           ].join(" "),
           closeButton: [
-            "!left-auto !right-2 !top-2 !translate-x-0 !translate-y-0",
-            "!h-6 !w-6 !rounded-md",
+            "!absolute !left-auto !right-3 !top-3 !translate-x-0 !translate-y-0",
+            "!h-8 !w-8 !rounded-md",
             "!bg-white/[0.06] !border !border-white/10 !text-white/55",
             "hover:!bg-white/[0.12] hover:!text-white",
           ].join(" "),

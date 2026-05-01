@@ -647,10 +647,10 @@ function MainNavPreview() {
             </div>
             <span className="text-xs font-medium text-white tabular-nums">$10.00</span>
           </button>
-          {/* DEPOSIT */}
+          {/* Wallet */}
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-small bg-white/5 hover:bg-white/10 transition-colors cursor-pointer text-xs font-semibold text-white">
             <IconWallet className="w-3.5 h-3.5 text-white" />
-            DEPOSIT
+            Wallet
           </button>
           {/* Chat toggle */}
           <button className="h-8 w-8 rounded-small bg-white/5 flex items-center justify-center border border-transparent hover:bg-white/10 transition-colors cursor-pointer relative">
@@ -1899,7 +1899,7 @@ function BalanceAnimationPreview() {
         </div>
         <div className="bg-[#ee3536] rounded-small px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5">
           <IconWallet className="w-3.5 h-3.5" />
-          DEPOSIT
+          Wallet
         </div>
       </div>
 
@@ -2733,12 +2733,12 @@ import { IconCrown, IconWallet, IconChevronDown } from '@tabler/icons-react'
       </span>
     </Button>
 
-    {/* DEPOSIT — desktop only */}
+    {/* Wallet — desktop only */}
     {!isMobile && (
       <Button variant="ghost" onClick={openDepositDrawer}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-small bg-white/5 hover:bg-white/10 text-xs font-semibold text-white">
         <IconWallet className="w-3.5 h-3.5 text-white" />
-        DEPOSIT
+        Wallet
       </Button>
     )}
 

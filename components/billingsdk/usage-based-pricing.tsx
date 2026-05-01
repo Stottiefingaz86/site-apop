@@ -26,6 +26,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export type UsageBasedPricingProps = {
   className?: string;
+  /** Light card (default) or transparent / hub-dark controls */
+  variant?: "default" | "dark";
   min?: number;
   max?: number;
   step?: number;
@@ -53,6 +55,7 @@ function formatNumber(n: number) {
 
 export function UsageBasedPricing({
   className,
+  variant = "default",
   min = 4000,
   max = 25001,
   step = 1,
@@ -67,6 +70,7 @@ export function UsageBasedPricing({
   title = "Pay as you use pricing",
   subtitle = "Start with a flat monthly rate that includes 4,000 credits.",
 }: UsageBasedPricingProps) {
+  const isDark = variant === "dark";
   const isMobile = useIsMobile()
   const isControlled = typeof valueProp === "number";
   const [uncontrolled, setUncontrolled] = useState(
@@ -320,13 +324,36 @@ export function UsageBasedPricing({
   };
 
   return (
-    <Card className={cn("mx-auto w-full max-w-3xl min-w-lg bg-gray-50 border-gray-200", className)}>
+    <Card
+      className={cn(
+        isDark
+          ? "mx-0 min-w-0 w-full max-w-none border-0 bg-transparent shadow-none"
+          : "mx-auto min-w-lg w-full max-w-3xl border-gray-200 bg-gray-50",
+        className,
+      )}
+    >
       <CardContent className={cn(isMobile ? "p-3" : "p-4")}>
         <div className="flex flex-col items-center">
           <div className={cn("flex flex-col items-center", isMobile ? "mb-3" : "mb-6")}>
-            <p className={cn("text-gray-600 font-medium", isMobile ? "text-xs mb-1" : "text-sm mb-2")}>Deposit Amount</p>
+            <p
+              className={cn(
+                "font-medium",
+                isDark
+                  ? cn("text-white/65", isMobile ? "mb-1 text-xs" : "mb-2 text-sm")
+                  : cn("text-gray-600", isMobile ? "mb-1 text-xs" : "mb-2 text-sm"),
+              )}
+            >
+              Deposit Amount
+            </p>
             <div className="flex items-baseline gap-1">
-              <span className={cn("font-bold tabular-nums text-gray-900", isMobile ? "text-3xl" : "text-5xl")}>
+              <span
+                className={cn(
+                  "tabular-nums font-bold",
+                  isDark
+                    ? cn("text-white", isMobile ? "text-3xl" : "text-5xl")
+                    : cn("text-gray-900", isMobile ? "text-3xl" : "text-5xl"),
+                )}
+              >
                 {currency}
                 {valueText}
               </span>
@@ -376,10 +403,12 @@ export function UsageBasedPricing({
                 const spread = 2;
                 const factor = Math.max(0, 1 - distFloat / spread);
                 const height = base + peak * factor;
-                let color = "bg-gray-400";
-                if (distFloat < 0.5) color = "bg-gray-900";
-                else if (distFloat < 1.5) color = "bg-gray-700";
-                else if (distFloat < 2.5) color = "bg-gray-500";
+                let color = isDark ? "bg-white/25" : "bg-gray-400";
+                if (distFloat < 0.5) color = isDark ? "bg-white" : "bg-gray-900";
+                else if (distFloat < 1.5)
+                  color = isDark ? "bg-white/80" : "bg-gray-700";
+                else if (distFloat < 2.5)
+                  color = isDark ? "bg-white/50" : "bg-gray-500";
                 const widthClass =
                   distFloat < 0.5
                     ? "w-[3px]"
@@ -403,7 +432,20 @@ export function UsageBasedPricing({
               className="absolute top-full -mt-1 -translate-x-1/2 z-10"
               style={{ left: `${pct}%` }}
             >
-              <div className={cn("bg-gray-900 text-white rounded-md shadow-sm whitespace-nowrap font-medium", isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm")}>
+              <div
+                className={cn(
+                  "whitespace-nowrap rounded-md font-medium shadow-sm",
+                  isDark
+                    ? cn(
+                        "bg-emerald-600 text-white",
+                        isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm",
+                      )
+                    : cn(
+                        "bg-gray-900 text-white",
+                        isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm",
+                      ),
+                )}
+              >
                 {formatNumber(value)}
               </div>
               <div
@@ -419,7 +461,14 @@ export function UsageBasedPricing({
             </div>
           </div>
 
-            <div className={cn("text-gray-600 flex justify-between px-1", isMobile ? "text-[10px] mt-2" : "text-xs mt-8")}>
+            <div
+              className={cn(
+                "flex justify-between px-1",
+                isDark
+                  ? cn("text-white/50", isMobile ? "mt-2 text-[10px]" : "mt-8 text-xs")
+                  : cn("text-gray-600", isMobile ? "mt-2 text-[10px]" : "mt-8 text-xs"),
+              )}
+            >
               <span>{startLabel}</span>
               <span>{endLabel}</span>
             </div>
