@@ -138,6 +138,7 @@ import {
 , IconBrandTelegram, IconBrandApple, IconBrandWindows, IconBrandAndroid, IconDeviceDesktop} from '@tabler/icons-react'
 import { colorTokenMap } from '@/lib/agent/designSystem'
 import { JackpotOverlay } from '@/components/casino/jackpot-overlay'
+import { WorldCupGamesCarousel } from '@/components/casino/world-cup-games-carousel'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -11282,6 +11283,9 @@ function NavTestPageContent() {
                       >
                         {/* Game Category Carousels */}
                         <div className="space-y-8 relative" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', minWidth: 0, overflow: 'visible' }}>
+
+                        {/* World Cup Games Carousel */}
+                        <WorldCupGamesCarousel />
 
                         {/* New Games Section - Square Tiles */}
                         <div>
